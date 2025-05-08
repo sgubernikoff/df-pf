@@ -5,6 +5,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import PropTypes from "prop-types";
+import App from "../components/App.js";
 
 const Hello = (props) => <div>Hello {props.name}!</div>;
 
@@ -19,6 +20,6 @@ Hello.propTypes = {
 document.addEventListener("DOMContentLoaded", () => {
   const container = document.getElementById("root");
   if (container) {
-    createRoot(container).render(<Hello name="React" />);
+    createRoot(container).render(<App />);
   }
 });
