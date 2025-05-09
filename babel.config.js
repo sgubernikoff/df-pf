@@ -46,8 +46,6 @@ module.exports = function (api) {
       ],
     ].filter(Boolean),
     plugins: [
-      "@babel/plugin-proposal-logical-assignment-operators",
-      "@babel/plugin-proposal-nullish-coalescing-operator",
       "babel-plugin-macros",
       "@babel/plugin-syntax-dynamic-import",
       isTestEnv && "babel-plugin-dynamic-import-node",
