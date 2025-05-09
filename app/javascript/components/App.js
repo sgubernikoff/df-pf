@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Document, Page } from "react-pdf";
 
 const Visits = () => {
   const [visits, setVisits] = useState([]);
@@ -178,28 +177,58 @@ const VisitsForm = () => {
 };
 
 function VisitPdf({ visitId }) {
-  const [pdfData, setPdfData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch visit data if needed for other reasons, but do not try to parse the PDF
     fetch(`/visits/${visitId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.pdf) {
-          setPdfData(data.pdf);
-        }
+        // If you need to handle other data here
+        setLoading(false);
       })
-      .catch((err) => console.error("Error fetching PDF:", err));
+      .catch((err) => {
+        console.error("Error fetching visit data:", err);
+        setLoading(false);
+      });
   }, [visitId]);
 
-  if (!pdfData) {
-    return <div>Loading PDF...</div>;
+  const handleDownload = () => {
+    // Fetch the visit PDF as a binary response
+    fetch(`/visits/${visitId}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/pdf",
+      },
+    })
+      .then((res) => {
+        if (res.ok) {
+          // Get the response as a blob
+          return res.blob();
+        } else {
+          throw new Error("Failed to fetch PDF");
+        }
+      })
+      .then((blob) => {
+        // Create a URL for the blob and initiate a download
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `visit_${visitId}.pdf`; // Set the filename
+        link.click();
+        // Clean up the URL object
+        URL.revokeObjectURL(url);
+      })
+      .catch((err) => console.error("Error downloading PDF:", err));
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <div>
-      <Document file={`data:application/pdf;base64,${pdfData}`}>
-        <Page pageNumber={1} />
-      </Document>
+      <button onClick={handleDownload}>Download PDF</button>
     </div>
   );
 }

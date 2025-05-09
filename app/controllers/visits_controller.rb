@@ -18,15 +18,29 @@ class VisitsController < ApplicationController
     #     format.json { render json: @visit.to_json(include: :dresses) }
     #   end
     # end
+    # def show
+    #   @visit = Visit.find(params[:id])
+  
+    #   # Check if the visit PDF exists and encode it as base64
+    #   if @visit.visit_pdf.attached?
+    #     pdf_data = @visit.visit_pdf.download
+    #     base64_pdf = Base64.encode64(pdf_data)
+  
+    #     render json: { pdf: base64_pdf }
+    #   else
+    #     render :show
+    #   end
+    # end
     def show
       @visit = Visit.find(params[:id])
-  
-      # Check if the visit PDF exists and encode it as base64
+    
+      # Check if the visit PDF exists
       if @visit.visit_pdf.attached?
-        pdf_data = @visit.visit_pdf.download
-        base64_pdf = Base64.encode64(pdf_data)
-  
-        render json: { pdf: base64_pdf }
+        # Set the appropriate headers to trigger the download
+        send_data @visit.visit_pdf.download, 
+                  filename: "visit_#{params[:id]}.pdf", 
+                  type: "application/pdf", 
+                  disposition: 'attachment'
       else
         render :show
       end
