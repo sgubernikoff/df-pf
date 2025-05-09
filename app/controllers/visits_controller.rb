@@ -10,42 +10,23 @@ class VisitsController < ApplicationController
     end
   
     # GET /visits/:id
-    # def show
-    #   @visit = Visit.find(params[:id])
-  
-    #   respond_to do |format|
-    #     format.html
-    #     format.json { render json: @visit.to_json(include: :dresses) }
-    #   end
-    # end
-    # def show
-    #   @visit = Visit.find(params[:id])
-  
-    #   # Check if the visit PDF exists and encode it as base64
-    #   if @visit.visit_pdf.attached?
-    #     pdf_data = @visit.visit_pdf.download
-    #     base64_pdf = Base64.encode64(pdf_data)
-  
-    #     render json: { pdf: base64_pdf }
-    #   else
-    #     render :show
-    #   end
-    # end
     def show
       @visit = Visit.find(params[:id])
-    
-      # Check if the visit PDF exists
+  
       if @visit.visit_pdf.attached?
-        # Set the appropriate headers to trigger the download
-        send_data @visit.visit_pdf.download, 
-                  filename: "visit_#{params[:id]}.pdf", 
-                  type: "application/pdf", 
+        # Send the PDF file for download
+        send_data @visit.visit_pdf.download,
+                  filename: "visit_#{params[:id]}.pdf",
+                  type: "application/pdf",
                   disposition: 'attachment'
       else
-        render :show
+        # PDF not found; return a clean JSON error or message
+        respond_to do |format|
+          format.html { redirect_to visits_path, alert: "PDF not available yet." }
+          format.json { render json: { error: "PDF not available yet." }, status: :not_found }
+        end
       end
     end
-    
   
     # GET /visits/new
     def new
@@ -110,7 +91,7 @@ class VisitsController < ApplicationController
         :customer_email,
         :notes,
         dress_ids: [],
-        images: [] # <-- allow multiple file uploads
+        images: []
       )
     end
   end
