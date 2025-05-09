@@ -10,14 +10,28 @@ class VisitsController < ApplicationController
     end
   
     # GET /visits/:id
+    # def show
+    #   @visit = Visit.find(params[:id])
+  
+    #   respond_to do |format|
+    #     format.html
+    #     format.json { render json: @visit.to_json(include: :dresses) }
+    #   end
+    # end
     def show
       @visit = Visit.find(params[:id])
   
-      respond_to do |format|
-        format.html
-        format.json { render json: @visit.to_json(include: :dresses) }
+      # Check if the visit PDF exists and encode it as base64
+      if @visit.visit_pdf.attached?
+        pdf_data = @visit.visit_pdf.download
+        base64_pdf = Base64.encode64(pdf_data)
+  
+        render json: { pdf: base64_pdf }
+      else
+        render :show
       end
     end
+    
   
     # GET /visits/new
     def new

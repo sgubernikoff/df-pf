@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Document, Page } from "react-pdf";
 
 const Visits = () => {
   const [visits, setVisits] = useState([]);
@@ -42,6 +43,7 @@ const Visits = () => {
         <p>No visits found.</p>
       )}
       <VisitsForm />
+      <VisitPdf visitId={11} />
     </div>
   );
 };
@@ -174,5 +176,32 @@ const VisitsForm = () => {
     </form>
   );
 };
+
+function VisitPdf({ visitId }) {
+  const [pdfData, setPdfData] = useState(null);
+
+  useEffect(() => {
+    fetch(`/visits/${visitId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.pdf) {
+          setPdfData(data.pdf);
+        }
+      })
+      .catch((err) => console.error("Error fetching PDF:", err));
+  }, [visitId]);
+
+  if (!pdfData) {
+    return <div>Loading PDF...</div>;
+  }
+
+  return (
+    <div>
+      <Document file={`data:application/pdf;base64,${pdfData}`}>
+        <Page pageNumber={1} />
+      </Document>
+    </div>
+  );
+}
 
 export default Visits;
