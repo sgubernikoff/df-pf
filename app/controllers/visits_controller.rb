@@ -77,7 +77,13 @@ class VisitsController < ApplicationController
     private
   
     def visit_params
-      params.require(:visit).permit(:customer_name, :customer_email, :notes, dress_ids: [])
+      params.require(:visit).permit(
+        :customer_name,
+        :customer_email,
+        :notes,
+        dress_ids: [],
+        images: [] # <-- allow multiple file uploads
+      )
     end
   end
   

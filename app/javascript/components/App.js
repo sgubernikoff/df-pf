@@ -21,6 +21,7 @@ const Visits = () => {
         console.error("There was an error fetching the visits:", error);
       });
   }, []);
+  console.log(visits);
 
   return (
     <div>
@@ -40,7 +41,137 @@ const Visits = () => {
       ) : (
         <p>No visits found.</p>
       )}
+      <VisitsForm />
     </div>
+  );
+};
+
+const VisitsForm = () => {
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [notes, setNotes] = useState("");
+  const [dressIds, setDressIds] = useState([]);
+  const [images, setImages] = useState([]);
+  const [allDresses, setAllDresses] = useState([]);
+
+  useEffect(() => {
+    // Fetch all dresses to populate the form
+    fetch("/dresses")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setAllDresses(data);
+      })
+      .catch((err) => console.error("Error fetching dresses:", err));
+  }, []);
+
+  const handleImageChange = (e) => {
+    setImages(e.target.files);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append("visit[customer_name]", customerName);
+    formData.append("visit[customer_email]", customerEmail);
+    formData.append("visit[notes]", notes);
+
+    dressIds.forEach((id) => {
+      formData.append("visit[dress_ids][]", id);
+    });
+
+    Array.from(images).forEach((file) => {
+      formData.append("visit[images][]", file);
+    });
+
+    fetch("/visits", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to create visit");
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Visit created:", data);
+        alert("Visit submitted successfully!");
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("There was an error submitting the form.");
+      });
+  };
+
+  const handleDressSelection = (e) => {
+    const value = e.target.value;
+    setDressIds((prev) =>
+      prev.includes(value)
+        ? prev.filter((id) => id !== value)
+        : [...prev, value]
+    );
+  };
+
+  return (
+    <form onSubmit={handleSubmit} encType="multipart/form-data">
+      <h2>New Visit</h2>
+
+      <label>
+        Customer Name:
+        <input
+          type="text"
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          required
+        />
+      </label>
+
+      <br />
+
+      <label>
+        Customer Email:
+        <input
+          type="email"
+          value={customerEmail}
+          onChange={(e) => setCustomerEmail(e.target.value)}
+        />
+      </label>
+
+      <br />
+
+      <label>
+        Notes:
+        <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
+      </label>
+
+      <br />
+
+      <fieldset>
+        <legend>Select Dresses</legend>
+        {allDresses.map((dress) => (
+          <label key={dress.id}>
+            <input
+              type="checkbox"
+              value={dress.id}
+              checked={dressIds.includes(String(dress.id))}
+              onChange={handleDressSelection}
+            />
+            {dress.name}
+          </label>
+        ))}
+      </fieldset>
+
+      <br />
+
+      <label>
+        Upload Images:
+        <input type="file" multiple onChange={handleImageChange} />
+      </label>
+
+      <br />
+
+      <button type="submit">Submit Visit</button>
+    </form>
   );
 };
 

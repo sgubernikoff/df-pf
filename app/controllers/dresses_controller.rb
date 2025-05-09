@@ -1,57 +1,78 @@
 class DressesController < ApplicationController
-    # This action will display all the dresses
-    def index
-      @dresses = Dress.all
-    end
-  
-    # This action will show a specific dress by its ID
-    def show
-      @dress = Dress.find(params[:id])
-    end
-  
-    # This action will render the form to create a new dress
-    def new
-      @dress = Dress.new
-    end
-  
-    # This action will create a new dress
-    def create
-      @dress = Dress.new(dress_params)
-  
-      if @dress.save
-        redirect_to @dress, notice: 'Dress was successfully created.'
-      else
-        render :new
-      end
-    end
-  
-    # This action will render the form to edit an existing dress
-    def edit
-      @dress = Dress.find(params[:id])
-    end
-  
-    # This action will update the dress's information
-    def update
-      @dress = Dress.find(params[:id])
-  
-      if @dress.update(dress_params)
-        redirect_to @dress, notice: 'Dress was successfully updated.'
-      else
-        render :edit
-      end
-    end
-  
-    # This action will delete the dress
-    def destroy
-      @dress = Dress.find(params[:id])
-      @dress.destroy
-      redirect_to dresses_url, notice: 'Dress was successfully destroyed.'
-    end
-  
-    private
-  
-    # Strong parameters to allow specific fields for Dress
-    def dress_params
-      params.require(:dress).permit(:name, :description, :price, :images)
+  # before_action :set_dress, only: [:show, :edit, :update, :destroy]
+
+  # GET /dresses
+  def index
+    @dresses = Dress.all
+
+    render json: @dresses
+  end
+
+  # GET /dresses/:id
+  def show
+    respond_to do |format|
+      format.html
+      format.json { render json: @dress }
     end
   end
+
+  # GET /dresses/new
+  def new
+    @dress = Dress.new
+  end
+
+  # POST /dresses
+  def create
+    @dress = Dress.new(dress_params)
+
+    if @dress.save
+      respond_to do |format|
+        format.html { redirect_to @dress, notice: 'Dress was successfully created.' }
+        format.json { render json: @dress, status: :created }
+      end
+    else
+      respond_to do |format|
+        format.html { render :new }
+        format.json { render json: @dress.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # GET /dresses/:id/edit
+  def edit
+  end
+
+  # PATCH/PUT /dresses/:id
+  def update
+    if @dress.update(dress_params)
+      respond_to do |format|
+        format.html { redirect_to @dress, notice: 'Dress was successfully updated.' }
+        format.json { render json: @dress }
+      end
+    else
+      respond_to do |format|
+        format.html { render :edit }
+        format.json { render json: @dress.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /dresses/:id
+  def destroy
+    @dress.destroy
+    respond_to do |format|
+      format.html { redirect_to dresses_url, notice: 'Dress was successfully destroyed.' }
+      format.json { head :no_content }
+    end
+  end
+
+  private
+
+  def set_dress
+    @dress = Dress.find(params[:id])
+  end
+
+  def dress_params
+    params.require(:dress).permit(:name, :description, :price, images: [])
+  end
+end

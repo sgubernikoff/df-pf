@@ -47,3 +47,8 @@ end
 
 
 gem "webpacker", "~> 5.4"
+
+gem 'devise'           # Optional, for user authentication
+gem 'mini_magick'      # For image watermarking
+gem 'prawn'            # For generating PDFs
+gem 'image_processing' # For image processing with mini_magick
