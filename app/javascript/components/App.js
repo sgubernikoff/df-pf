@@ -25,6 +25,8 @@ const Visits = () => {
 
   return (
     <div>
+      <VisitsForm />
+      <VisitPdf visitId={86} />
       <h1>Visits</h1>
       {visits.length > 0 ? (
         visits.map((visit) => (
@@ -41,8 +43,6 @@ const Visits = () => {
       ) : (
         <p>No visits found.</p>
       )}
-      <VisitsForm />
-      <VisitPdf visitId={22} />
     </div>
   );
 };
