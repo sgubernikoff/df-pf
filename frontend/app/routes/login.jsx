@@ -1,8 +1,8 @@
-// app/routes/login.tsx
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigate, Link } from "@remix-run/react";
-import { getUserSession, sessionStorage } from "../utils/session.server";
+import { Form, useActionData, Link } from "@remix-run/react";
 import { useState } from "react";
+import { getUserSession, sessionStorage } from "../utils/session.server";
+import "../styles/app.css"; // Link to the CSS file
 
 export async function action({ request }) {
   const form = await request.formData();
@@ -36,34 +36,34 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   return (
-    <>
-      <Form method="post">
-        <label>
-          Email
-          <input type="text" name="email" />
-        </label>
-        <label>
-          Password
-          <input type="password" name="password" />
-        </label>
-        <button type="submit" onClick={() => setIsLoading(true)}>
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
-        {actionData?.errors?.map((e) => (
-          <p key={e} style={{ color: "red" }}>
-            {e}
-          </p>
-        ))}
-      </Form>
-      <p style={{ marginTop: "1rem" }}>
-        Don't have an account?{" "}
-        <Link
-          to="/signup"
-          style={{ color: "blue", textDecoration: "underline" }}
-        >
-          Sign up here
-        </Link>
-      </p>
-    </>
+    <div className="container">
+      <div className="content">
+        <p>Log In</p>
+        <Form method="post">
+          <label>
+            Email
+            <input type="text" name="email" />
+          </label>
+          <label>
+            Password
+            <input type="password" name="password" />
+          </label>
+          <button type="submit" onClick={() => setIsLoading(true)}>
+            {isLoading ? "LOGGING IN..." : "LOG IN"}
+          </button>
+          {actionData?.errors?.map((e) => (
+            <p key={e} style={{ color: "red" }}>
+              {e}
+            </p>
+          ))}
+        </Form>
+        <p style={{ marginTop: "1rem" }}>
+          Don't have an account?{" "}
+          <Link to="/signup" style={{ textDecoration: "underline" }}>
+            Sign up here
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }

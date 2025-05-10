@@ -1,4 +1,3 @@
-// app/routes/signup.tsx
 import { Form, useActionData } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 
@@ -25,21 +24,26 @@ export default function Signup() {
   const data = useActionData();
 
   return (
-    <Form method="post">
-      <label>
-        Email
-        <input name="email" />
-      </label>
-      <label>
-        Password
-        <input name="password" type="password" />
-      </label>
-      <button type="submit">Sign up</button>
-      {data?.errors?.map((e) => (
-        <p key={e} style={{ color: "red" }}>
-          {e}
-        </p>
-      ))}
-    </Form>
+    <div className="container">
+      <div className="content">
+        <h1>Sign Up</h1>
+        <Form method="post">
+          <label>
+            Email
+            <input name="email" className="sign-up-email-input" />
+          </label>
+          <label>
+            Password
+            <input name="password" type="password" />
+          </label>
+          <button type="submit">SIGN UP</button>
+          {data?.errors?.map((e) => (
+            <p key={e} style={{ color: "red" }}>
+              {e}
+            </p>
+          ))}
+        </Form>
+      </div>
+    </div>
   );
 }

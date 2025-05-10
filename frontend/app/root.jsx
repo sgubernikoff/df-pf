@@ -6,7 +6,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-import "./tailwind.css";
+import Header from "./components/Header";
 
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
@@ -51,5 +51,13 @@ export function Layout({ children }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const data = useLoaderData();
+  return (
+    <>
+      <Header user={data.user} />
+      <main>
+        <Outlet />
+      </main>
+    </>
+  );
 }

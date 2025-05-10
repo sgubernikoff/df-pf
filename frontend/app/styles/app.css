@@ -1,0 +1,121 @@
+@font-face {
+  font-family: "regular";
+  src: url("../assets/regular.woff2") format("woff2");
+}
+
+* {
+  font-family: "regular";
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Ensure container takes full width */
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-size: 14px;
+}
+
+form {
+  width: 100%;
+}
+
+input[type="text"],
+input[type="password"],
+.sign-up-email-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid black;
+  background-color: transparent;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid black;
+  background-color: black;
+  color: white;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+p[style="color: red"] {
+  color: red;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 60px;
+  padding: 2.5rem;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: white;
+  z-index: 10;
+  border-bottom: 1px solid #e9e9e9;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+}
+
+.logo-img {
+  max-height: 50px;
+}
+
+.auth {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button.login-btn {
+  color: black;
+  background-color: transparent;
+}
+
+button.logout-btn {
+  background-color: transparent;
+  color: black;
+  border: none !important;
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  padding-top: 80px; /* Prevent content from being hidden behind the fixed header */
+}
