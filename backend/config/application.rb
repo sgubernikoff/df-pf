@@ -8,6 +8,14 @@ Bundler.require(*Rails.groups)
 
 module DfPf
   class Application < Rails::Application
+    # Adding cookies and session middleware
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore
+
+    # Use SameSite=Strict for all cookies to help protect against CSRF
+    # https://owasp.org/www-community/SameSite
+    config.action_dispatch.cookies_same_site_protection = :none
+    config.session_store :cookie_store, key: "_df_pdf_session", secure: true
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.1
 

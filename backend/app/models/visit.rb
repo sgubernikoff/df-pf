@@ -1,6 +1,8 @@
 class Visit < ApplicationRecord
   has_many_attached :images
   has_and_belongs_to_many :dresses
+  belongs_to :user
+
 
   has_one_attached :visit_pdf # This will store the generated PDF
 
