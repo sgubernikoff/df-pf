@@ -7,17 +7,28 @@ import {
 } from "@remix-run/react";
 
 import Header from "./components/Header";
-
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { getUserId } from "./utils/session.server";
 
+// Loader function to get user data based on session
 export async function loader({ request }) {
   const userId = await getUserId(request);
-  console.log(userId);
-  return json({ userId });
+
+  // If the user is logged in (i.e., there's a userId), fetch the user's data
+  if (userId) {
+    const res = await fetch(`http://localhost:3000/users/${userId}`);
+    const user = await res.json();
+
+    // Return the user data as part of the loader's response
+    return json({ user });
+  }
+
+  // If there's no userId, return null for the user data
+  return json({ user: null });
 }
 
+// Links function to preconnect to external resources and load styles
 export function links() {
   return [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -32,6 +43,8 @@ export function links() {
     },
   ];
 }
+
+// Layout component to wrap the page's HTML structure
 export function Layout({ children }) {
   return (
     <html lang="en">
@@ -50,13 +63,16 @@ export function Layout({ children }) {
   );
 }
 
+// Main App component that renders the header and page content
 export default function App() {
-  const data = useLoaderData();
+  const data = useLoaderData(); // Get user data from the loader
+
   return (
     <>
-      <Header user={data.user} />
+      <Header user={data.user} />{" "}
+      {/* Pass the user data to the Header component */}
       <main>
-        <Outlet />
+        <Outlet /> {/* Render the child routes/content */}
       </main>
     </>
   );

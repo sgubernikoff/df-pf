@@ -1,3 +1,4 @@
+// app/components/Header.tsx
 import { Form, useLoaderData } from "@remix-run/react";
 import logo from "../styles/DanielleFrankelMainLogo.jpg";
 import "../styles/app.css";
@@ -18,11 +19,13 @@ export default function Header() {
       </div>
       <div className="auth">
         {user ? (
-          <Form method="post">
+          <Form method="post" action="/logout">
+            {" "}
+            {/* Submit to /logout */}
             <button
               type="submit"
               className="logout-btn"
-              style={{ border: "none" }}
+              style={{ border: "none", padding: "0" }}
             >
               Log Out
             </button>

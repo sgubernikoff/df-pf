@@ -31,5 +31,6 @@ export async function requireUser(request) {
 
 export async function logout(request) {
   const session = await getUserSession(request);
-  return sessionStorage.destroySession(session);
+  const cookie = await sessionStorage.destroySession(session);
+  return cookie;
 }
