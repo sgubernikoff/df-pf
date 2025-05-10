@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   rescue_from ActiveRecord::RecordInvalid,with: :render_unprocessable_entity
   rescue_from ActiveRecord::RecordNotFound,with: :render_not_found
-  skip_before_action :is_logged_in?,only: [:index,:create,:show,:leadersW,:leadersB,:leadersA]
+  skip_before_action :is_logged_in?,only: [:index,:create,:show]
     
   before_action :set_user, only: %i[ show update destroy ]
 
