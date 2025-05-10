@@ -16,6 +16,7 @@ export async function loader({ params }) {
   // Here, you'll dynamically generate the URL to the PDF based on the visit ID.
   const res = await fetch(`http://localhost:3000/visits/${params.id}`);
   if (!res.ok) {
+    res.json().then((d) => console.log(d));
     throw new Response("Failed to fetch PDF", { status: res.status });
   }
   const json = await res.json();

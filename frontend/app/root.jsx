@@ -8,6 +8,16 @@ import {
 
 import "./tailwind.css";
 
+import { json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { getUserId } from "./utils/session.server";
+
+export async function loader({ request }) {
+  const userId = await getUserId(request);
+  console.log(userId);
+  return json({ userId });
+}
+
 export function links() {
   return [
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
