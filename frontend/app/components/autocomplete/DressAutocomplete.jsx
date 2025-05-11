@@ -40,7 +40,7 @@ export default function DressAutocomplete({
         <>
           <input
             type="hidden"
-            name="selected_dress"
+            name="visit[selected_dress]"
             value={JSON.stringify(selectedDress)}
           />
           <div style={{ marginTop: 8 }}>

@@ -47,7 +47,7 @@ export default function UserAutocomplete({
 
       {selectedUser && (
         <>
-          <input type="hidden" name="user_id" value={selectedUser.id} />
+          <input type="hidden" name="visit[user_id]" value={selectedUser.id} />
           <p>
             <strong>Selected User:</strong> {selectedUser.name} (
             {selectedUser.email})

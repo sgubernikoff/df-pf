@@ -12,9 +12,25 @@ const options = {
   cMapUrl: "/cmaps/",
 };
 // frontend/app/routes/visit.jsx
-export async function loader({ params }) {
+export async function loader({ params, request }) {
+  const cookieHeader = request.headers.get("cookie");
+  const cookies = Object.fromEntries(
+    cookieHeader?.split("; ").map((c) => c.split("=")) ?? []
+  );
+
+  const token = decodeURIComponent(cookies.token);
+  const isAdmin = cookies.isAdmin;
+
+  if (!token.includes("Bearer")) {
+    // redirect to login or return null
+    return redirect("/login");
+  }
   // Here, you'll dynamically generate the URL to the PDF based on the visit ID.
-  const res = await fetch(`http://localhost:3000/visits/${params.id}`);
+  const res = await fetch(`http://localhost:3000/visits/${params.id}`, {
+    headers: {
+      Authorization: token,
+    },
+  });
   if (!res.ok) {
     res.json().then((d) => console.log(d));
     throw new Response("Failed to fetch PDF", { status: res.status });

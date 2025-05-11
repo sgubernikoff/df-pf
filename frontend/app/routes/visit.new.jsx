@@ -41,11 +41,18 @@ export async function loader({ request }) {
 
 // --- 2. Action: Handle form submission ---
 export async function action({ request }) {
+  const cookieHeader = request.headers.get("cookie");
+  const cookies = Object.fromEntries(
+    cookieHeader?.split("; ").map((c) => c.split("=")) ?? []
+  );
+
+  const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
   console.log(formData.get("selected_dress"));
   const res = await fetch("http://localhost:3000/visits", {
     method: "POST",
     body: formData,
+    headers: { Authorization: token },
   });
 
   if (!res.ok) {
@@ -82,7 +89,7 @@ export default function NewVisit() {
             Customer Name:
             <input
               type="text"
-              name="customer_name"
+              name="visit[customer_name]"
               value={selectedUser?.name || userQuery}
               onChange={(e) => setUserQuery(e.target.value)}
               required
@@ -94,7 +101,7 @@ export default function NewVisit() {
             Customer Email:
             <input
               type="email"
-              name="customer_email"
+              name="visit[customer_email]"
               value={selectedUser?.email || ""}
               readOnly={!!selectedUser}
               onChange={() => {}}
@@ -113,7 +120,7 @@ export default function NewVisit() {
 
       <label>
         Notes:
-        <textarea name="notes" />
+        <textarea name="visit[notes]" />
       </label>
       <br />
 

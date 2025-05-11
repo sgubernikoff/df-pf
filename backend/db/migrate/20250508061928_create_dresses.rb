@@ -4,6 +4,7 @@ class CreateDresses < ActiveRecord::Migration[7.1]
       t.string :name
       t.text :description
       t.decimal :price
+      t.string :image_urls, array: true, default: []
 
       t.timestamps
     end

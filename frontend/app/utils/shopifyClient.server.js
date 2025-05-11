@@ -67,8 +67,13 @@ export async function fetchAllProductsFromCollection(handle) {
         return {
           id: product.id,
           title: product.title,
-          price: variant?.price?.amount || null,
-          currency: variant?.price?.currencyCode || null,
+          price: variant?.price?.amount
+            ? new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: variant.price.currencyCode || "USD",
+                maximumFractionDigits: 0,
+              }).format(variant.price.amount)
+            : null,
           images: product.images.nodes.map((img) => img.url).slice(0, 3),
         };
       })
@@ -77,6 +82,6 @@ export async function fetchAllProductsFromCollection(handle) {
     hasNextPage = json.data.collection.products.pageInfo.hasNextPage;
     cursor = edges.at(-1)?.cursor;
   }
-
+  console.log(products);
   return products;
 }

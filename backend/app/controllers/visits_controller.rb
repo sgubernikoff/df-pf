@@ -33,17 +33,36 @@ class VisitsController < ApplicationController
   
     # POST /visits
     def create
-      @visit = Visit.new(visit_params)
-  
-      if @visit.save
-        respond_to do |format|
-          format.html { redirect_to @visit, notice: 'Visit was successfully created.' }
-          format.json { render json: @visit, status: :created }
+      dress_data = JSON.parse(visit_params[:selected_dress])
+    
+      @dress = Dress.new(
+        name: dress_data["title"],
+        price: dress_data["price"],
+        description: dress_data["description"],
+        image_urls: dress_data["images"]
+      )
+      puts @dress
+    
+      if @dress.save
+        puts @dress
+        @visit = Visit.new(visit_params.except(:selected_dress)) # remove JSON string
+        @visit.dress_id = @dress.id if @visit.respond_to?(:dress_id)
+    
+        if @visit.save
+          respond_to do |format|
+            format.html { redirect_to @visit, notice: 'Visit was successfully created.' }
+            format.json { render json: @visit, status: :created }
+          end
+        else
+          respond_to do |format|
+            format.html { render :new }
+            format.json { render json: @visit.errors, status: :unprocessable_entity }
+          end
         end
       else
         respond_to do |format|
           format.html { render :new }
-          format.json { render json: @visit.errors, status: :unprocessable_entity }
+          format.json { render json: @dress.errors, status: :unprocessable_entity }
         end
       end
     end
@@ -85,10 +104,11 @@ class VisitsController < ApplicationController
   
     def visit_params
       params.require(:visit).permit(
+        :user_id,
         :customer_name,
         :customer_email,
         :notes,
-        dress_ids: [],
+        :selected_dress,
         images: []
       )
     end
