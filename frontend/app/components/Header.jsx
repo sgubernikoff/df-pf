@@ -22,11 +22,11 @@ export default function Header() {
       <div className="auth">
         {user && (
           <a
-            href="/visits"
+            href="/users"
             className="visits-link"
             style={{ color: "black", textDecoration: "none" }}
           >
-            Visits
+            Users
           </a>
         )}
         {user ? (
