@@ -77,78 +77,78 @@ export default function NewVisit() {
   const [showManualEntry, setShowManualEntry] = useState(false);
 
   return (
-    <fetcher.Form method="post" encType="multipart/form-data">
-      <h2>New Visit</h2>
+    <div className="form-create-page">
+      <fetcher.Form method="post" encType="multipart/form-data">
+        <h2>New Visit</h2>
 
-      <button type="button" onClick={() => setShowManualEntry((prev) => !prev)}>
-        {showManualEntry ? "Search For User" : "Create New User"}
-      </button>
+        <button
+          type="button"
+          onClick={() => setShowManualEntry((prev) => !prev)}
+        >
+          {showManualEntry ? "Search For User" : "Create New User"}
+        </button>
 
-      {showManualEntry ? (
-        <>
-          <label>
-            Customer Name:
-            <input
-              type="text"
-              name="visit[customer_name]"
-              value={selectedUser?.name || userQuery}
-              onChange={(e) => setUserQuery(e.target.value)}
-              required
-            />
-          </label>
-          <br />
+        {showManualEntry ? (
+          <>
+            <label>
+              Customer Name:
+              <input
+                type="text"
+                name="visit[customer_name]"
+                value={selectedUser?.name || userQuery}
+                onChange={(e) => setUserQuery(e.target.value)}
+                required
+              />
+            </label>
 
-          <label>
-            Customer Email:
-            <input
-              type="email"
-              name="visit[customer_email]"
-              value={selectedUser?.email || email}
-              readOnly={selectedUser}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            />
-          </label>
-        </>
-      ) : (
-        <UserAutocomplete
-          userQuery={userQuery}
-          setUserQuery={setUserQuery}
-          selectedUser={selectedUser}
-          setSelectedUser={setSelectedUser}
+            <label>
+              Customer Email:
+              <input
+                type="email"
+                name="visit[customer_email]"
+                value={selectedUser?.email || email}
+                readOnly={selectedUser}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+              />
+            </label>
+          </>
+        ) : (
+          <UserAutocomplete
+            userQuery={userQuery}
+            setUserQuery={setUserQuery}
+            selectedUser={selectedUser}
+            setSelectedUser={setSelectedUser}
+          />
+        )}
+
+        <label>
+          Notes:
+          <textarea name="visit[notes]" />
+        </label>
+
+        <DressAutocomplete
+          shopifyData={shopifyData}
+          selectedDress={selectedDress}
+          setSelectedDress={setSelectedDress}
         />
-      )}
-      <br />
 
-      <label>
-        Notes:
-        <textarea name="visit[notes]" />
-      </label>
-      <br />
+        <label>
+          Upload Images:
+          <input type="file" name="visit[images][]" multiple />
+        </label>
 
-      <DressAutocomplete
-        shopifyData={shopifyData}
-        selectedDress={selectedDress}
-        setSelectedDress={setSelectedDress}
-      />
-      <br />
+        <button type="submit">Submit Visit</button>
 
-      <label>
-        Upload Images:
-        <input type="file" name="visit[images][]" multiple />
-      </label>
-      <br />
-
-      <button type="submit">Submit Visit</button>
-
-      {fetcher.data?.success && (
-        <p>
-          ✅ Visit created successfully!{" "}
-          <a href={`/visit/${fetcher.data.visit.id}`}>View Visit</a>
-        </p>
-      )}
-      {fetcher.data?.error && <p>❌ {fetcher.data.error}</p>}
-    </fetcher.Form>
+        {fetcher.data?.success && (
+          <p>
+            ✅ Visit created successfully!{" "}
+            <a href={`/visit/${fetcher.data.visit.id}`}>View Visit</a>
+          </p>
+        )}
+        {fetcher.data?.error && <p>❌ {fetcher.data.error}</p>}
+      </fetcher.Form>
+    </div>
   );
 }

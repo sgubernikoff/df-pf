@@ -95,13 +95,14 @@ p[style="color: red"] {
   width: 60% !important;
 }
 .header-left {
-  width: 10%;
+  width: 150px;
 }
 .auth {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 20px;
+  width: 150px;
 }
 
 .auth > form {
@@ -124,10 +125,96 @@ button.logout-btn {
   background-color: transparent;
   color: black;
   border: none !important;
+  width: auto !important;
 }
 
 main {
   flex: 1;
   width: 100%;
   padding-top: 5rem; /* Prevent content from being hidden behind the fixed header */
+}
+
+.form-create-page {
+  width: 50%;
+  margin: auto;
+  margin-top: 5rem;
+}
+.form-create-page h2 {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.form-create-page > form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-create-page > form > label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+.form-create-page > form > label > input {
+  padding: 0.5rem;
+}
+
+.form-create-page > form > fieldset > legend {
+  display: none;
+}
+
+.form-create-page > form > fieldset {
+  border: none;
+  margin-bottom: 1rem;
+}
+
+.form-create-page > form > fieldset > label > ul > li::marker {
+  color: white;
+}
+
+.form-create-page > form > label:first-of-type {
+  margin-bottom: 0;
+}
+
+.form-create-page > form > button:first-of-type {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  width: 20%;
+  background-color: white;
+  margin: auto;
+  border: 1px solid black;
+}
+
+.form-create-page > form > button:first-of-type:hover {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  width: 20%;
+  background-color: black;
+  margin: auto;
+  color: white;
+  border: 1px solid white;
+}
+
+.login-page {
+  margin-top: 5rem !important;
+  width: 50%;
+  margin: auto;
+}
+.login-page > h1 {
+  width: 25%;
+  margin: auto;
+  text-align: center;
+}
+.login-page > form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.login-page > form > div > input {
+  padding: 0.5rem;
+  background-color: white;
+  margin-bottom: 0.75rem;
+}
+
+.login-page > form > button {
+  margin-top: 0.75rem;
 }
