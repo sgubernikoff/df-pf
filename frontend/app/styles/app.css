@@ -85,16 +85,28 @@ p[style="color: red"] {
   flex: 1;
 }
 
+.logo-link {
+  width: 40%;
+  text-align: center;
+}
+
 .logo-img {
   max-height: 50px;
+  width: 100%;
 }
-
+.header-left {
+  width: 10%;
+}
 .auth {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
+  gap: 20px;
 }
 
+.auth > form {
+  width: auto;
+}
 button {
   border-radius: 0;
   font-family: inherit;

@@ -8,16 +8,27 @@ export default function Header() {
 
   return (
     <header className="header">
-      <div>{""}</div>
+      <div className="header-left"></div>
       <div className="logo">
-        <img
-          src={logo}
-          alt="Logo"
-          className="logo-img"
-          style={{ width: "20%" }}
-        />
+        <a href="/" className="logo-link">
+          <img
+            src={logo}
+            alt="Logo"
+            className="logo-img"
+            style={{ width: "20%" }}
+          />
+        </a>
       </div>
       <div className="auth">
+        {user && (
+          <a
+            href="/visits"
+            className="visits-link"
+            style={{ color: "black", textDecoration: "none" }}
+          >
+            Visits
+          </a>
+        )}
         {user ? (
           <Form method="post" action="/logout">
             {" "}
