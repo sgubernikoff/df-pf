@@ -61,6 +61,12 @@ export default function Visit() {
                 justifyContent: "center",
                 alignItems: "center",
                 border: "1px solid pink",
+                position: "relative",
+                cursor: !v.attributes?.isPdfReady ? "not-allowed" : "",
+                pointerEvents: !v.attributes?.isPdfReady ? "none" : "",
+              }}
+              onClick={(e) => {
+                if (!v.attributes?.isPdfReady) e.preventDefault();
               }}
             >
               {v.attributes?.product?.imageUrl ? (
@@ -74,6 +80,29 @@ export default function Visit() {
               <span>
                 {v.attributes?.product?.title || "missing shopify data"}
               </span>
+              {!v?.attributes?.isPdfReady && (
+                <div
+                  style={{
+                    position: "absolute",
+                    background: "black",
+                    opacity: 0.25,
+                    inset: 0,
+                    zIndex: 2,
+                  }}
+                >
+                  <p
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%,-50%) rotate(45deg)",
+                      fontSize: "24px",
+                    }}
+                  >
+                    PROCESSING
+                  </p>
+                </div>
+              )}
             </Link>
           );
         })}
