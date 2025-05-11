@@ -33,36 +33,51 @@ class VisitsController < ApplicationController
   
     # POST /visits
     def create
-      dress_data = JSON.parse(visit_params[:selected_dress])
+      # Step 1: Handle user association
+      if visit_params[:user_id].present?
+        user = User.find_by(id: visit_params[:user_id])
+      else
+        customer_name = visit_params[:customer_name]
+        customer_email = visit_params[:customer_email]
+        password = SecureRandom.urlsafe_base64(16) # 22 characters, safe for URLs
+
+        user = User.create(
+          name: customer_name,
+          email: customer_email,
+          password: password,
+          password_confirmation: password
+        )
+      end
     
+      unless user&.persisted?
+        puts user.errors.full_messages
+        return render json: { error: "User could not be created or found" }, status: :unprocessable_entity
+      end
+    
+      # Step 2: Build the Visit (do not save yet)
+      @visit = Visit.new(visit_params.except(:selected_dress, :customer_name, :customer_email))
+      @visit.user = user
+    
+      # Step 3: Parse and build Dress object (do not save yet)
+      dress_data = JSON.parse(visit_params[:selected_dress])
       @dress = Dress.new(
         name: dress_data["title"],
         price: dress_data["price"],
         description: dress_data["description"],
         image_urls: dress_data["images"]
       )
-      puts @dress
     
-      if @dress.save
-        puts @dress
-        @visit = Visit.new(visit_params.except(:selected_dress)) # remove JSON string
-        @visit.dress_id = @dress.id if @visit.respond_to?(:dress_id)
-    
-        if @visit.save
-          respond_to do |format|
-            format.html { redirect_to @visit, notice: 'Visit was successfully created.' }
-            format.json { render json: @visit, status: :created }
-          end
-        else
-          respond_to do |format|
-            format.html { render :new }
-            format.json { render json: @visit.errors, status: :unprocessable_entity }
-          end
+      # Step 4: Save Visit and then Dress (if visit succeeds)
+      if @visit.save
+        @visit.update(dress_id: @dress.id) if @dress.save
+        respond_to do |format|
+          format.html { redirect_to @visit, notice: 'Visit was successfully created.' }
+          format.json { render json: @visit, status: :created }
         end
       else
         respond_to do |format|
           format.html { render :new }
-          format.json { render json: @dress.errors, status: :unprocessable_entity }
+          format.json { render json: @visit.errors, status: :unprocessable_entity }
         end
       end
     end

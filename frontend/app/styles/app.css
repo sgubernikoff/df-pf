@@ -129,5 +129,5 @@ button.logout-btn {
 main {
   flex: 1;
   width: 100%;
-  padding-top: 80px; /* Prevent content from being hidden behind the fixed header */
+  padding-top: 5rem; /* Prevent content from being hidden behind the fixed header */
 }

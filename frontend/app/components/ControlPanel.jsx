@@ -51,7 +51,7 @@ const ControlPanel = (props) => {
     flexWrap: "wrap",
     backgroundColor: "#000",
     position: "fixed",
-    top: "1rem",
+    top: "5rem",
     zIndex: 2,
   };
 

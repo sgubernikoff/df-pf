@@ -74,6 +74,7 @@ export default function Visit() {
         overflow: "hidden",
         flexDirection: "column",
         paddingBlock: "6.5rem 4rem",
+        background: "#d4e5e9",
       }}
     >
       <Document

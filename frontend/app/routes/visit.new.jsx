@@ -70,6 +70,7 @@ export default function NewVisit() {
   const fetcher = useFetcher();
 
   const [userQuery, setUserQuery] = useState("");
+  const [email, setEmail] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedDress, setSelectedDress] = useState(null);
 
@@ -102,9 +103,11 @@ export default function NewVisit() {
             <input
               type="email"
               name="visit[customer_email]"
-              value={selectedUser?.email || ""}
-              readOnly={!!selectedUser}
-              onChange={() => {}}
+              value={selectedUser?.email || email}
+              readOnly={selectedUser}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
             />
           </label>
         </>

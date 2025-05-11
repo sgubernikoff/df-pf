@@ -75,6 +75,7 @@ export async function fetchAllProductsFromCollection(handle) {
               }).format(variant.price.amount)
             : null,
           images: product.images.nodes.map((img) => img.url).slice(0, 3),
+          description: product.description,
         };
       })
     );
