@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common["Authorization"] = token;
       axios.defaults.headers.common["Content-Type"] = `application/json`;
       const response = await axios.get("http://localhost:3000/current_user");
-      console.log(response);
       setUser(response.data.data);
     } catch (error) {
       Cookies.remove("token");
@@ -38,14 +37,11 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post("http://localhost:3000/login", {
         user: { email, password },
       });
-      console.log(response);
 
       const { authorization } = response.headers;
-      console.log(authorization, response.data, response.headers.authorization);
       Cookies.set("token", authorization, { expires: 7 });
       axios.defaults.headers.common["Authorization"] = authorization;
       setUser(response.data.data);
-      console.log(Cookies.get("token"));
       return true;
     } catch (error) {
       return false;
