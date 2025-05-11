@@ -92,7 +92,7 @@ p[style="color: red"] {
 
 .logo-img {
   max-height: 50px;
-  width: 100%;
+  width: 60% !important;
 }
 .header-left {
   width: 10%;
