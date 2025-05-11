@@ -1,6 +1,6 @@
-import { useLoaderData, useFetcher, redirect } from "@remix-run/react";
-import { json } from "@remix-run/node";
-import { useState } from "react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
+import { useEffect, useState } from "react";
+import { json, redirect } from "@remix-run/node";
 import { fetchAllProductsFromCollection } from "../utils/shopifyClient.server";
 
 // --- 1. Loader: Fetch dresses ---
@@ -55,13 +55,35 @@ export async function action({ request }) {
 }
 
 // --- 3. Component ---
+
 export default function NewVisit() {
   const { dresses, shopifyData } = useLoaderData();
-  const [selectedDress, setSelectedDress] = useState(null);
-  const [dressQuery, setDressQuery] = useState("");
   const fetcher = useFetcher();
 
+  const [selectedDress, setSelectedDress] = useState(null);
+  const [dressQuery, setDressQuery] = useState("");
   const [dressIds, setDressIds] = useState([]);
+
+  const [userQuery, setUserQuery] = useState("");
+  const [userResults, setUserResults] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  useEffect(() => {
+    if (userQuery.length < 2 || selectedUser) return;
+
+    const fetchUsers = async () => {
+      const res = await fetch(
+        `/user-search?query=${encodeURIComponent(userQuery)}`
+      );
+      if (res.ok) {
+        const { data } = await res.json();
+        setUserResults(data.map((d) => d.attributes));
+      }
+    };
+
+    const timeout = setTimeout(fetchUsers, 200); // debounce
+    return () => clearTimeout(timeout);
+  }, [userQuery, selectedUser]);
 
   const handleDressSelection = (e) => {
     const value = e.target.value;
@@ -78,19 +100,74 @@ export default function NewVisit() {
           d.title.toLowerCase().includes(dressQuery.toLowerCase())
         )
       : [];
+
   return (
     <fetcher.Form method="post" encType="multipart/form-data">
       <h2>New Visit</h2>
 
       <label>
+        Search for User:
+        <input
+          type="text"
+          value={userQuery}
+          onChange={(e) => {
+            setUserQuery(e.target.value);
+            setSelectedUser(null);
+          }}
+          placeholder="Start typing a name..."
+          autoComplete="off"
+        />
+      </label>
+      <br />
+
+      {userResults.length > 0 && !selectedUser && (
+        <ul style={{ border: "1px solid #ccc", marginTop: 4, padding: 4 }}>
+          {userResults.map((user) => (
+            <li
+              key={user.id}
+              style={{ cursor: "pointer", padding: 4 }}
+              onClick={() => {
+                setSelectedUser(user);
+                setUserQuery(user.name);
+              }}
+            >
+              {user.name} — {user.email}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {selectedUser && (
+        <>
+          <input type="hidden" name="visit[user_id]" value={selectedUser.id} />
+          <p>
+            <strong>Selected User:</strong> {selectedUser.name} (
+            {selectedUser.email})
+          </p>
+        </>
+      )}
+
+      <label>
         Customer Name:
-        <input type="text" name="visit[customer_name]" required />
+        <input
+          type="text"
+          name="visit[customer_name]"
+          value={selectedUser?.name || userQuery}
+          onChange={(e) => setUserQuery(e.target.value)}
+          required
+        />
       </label>
       <br />
 
       <label>
         Customer Email:
-        <input type="email" name="visit[customer_email]" />
+        <input
+          type="email"
+          name="visit[customer_email]"
+          value={selectedUser?.email || ""}
+          onChange={() => {}}
+          readOnly={!!selectedUser}
+        />
       </label>
       <br />
 

@@ -8,12 +8,26 @@ class UsersController < ApplicationController
   def index
     @users = User.all
 
-    render json: @users
+    render json: UserSerializer.new(@users).serializable_hash
   end
+
+  # GET /users/search?:query
+  def search
+    query = params[:query].to_s.strip
+
+    if query.blank?
+      return render json: []
+    end
+
+    @users = User.where("name ILIKE ?", "%#{query}%").limit(10)
+
+    render json: UserSerializer.new(@users).serializable_hash
+  end
+
 
   # GET /users/1
   def show
-    render json: @user
+    render json: UserSerializer.new(@user).serializable_hash
   end
 
   def show_me
