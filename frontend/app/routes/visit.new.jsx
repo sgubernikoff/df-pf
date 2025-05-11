@@ -1,11 +1,36 @@
-import { useLoaderData, useFetcher } from "@remix-run/react";
+import { useLoaderData, useFetcher, redirect } from "@remix-run/react";
 import { json } from "@remix-run/node";
 import { useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 // --- 1. Loader: Fetch dresses ---
-export async function loader() {
-  const res = await fetch("http://localhost:3000/dresses");
-  if (!res.ok) throw new Error("Failed to load dresses");
+export async function loader({ request }) {
+  const cookieHeader = request.headers.get("cookie");
+  const cookies = Object.fromEntries(
+    cookieHeader?.split("; ").map((c) => c.split("=")) ?? []
+  );
+
+  const token = decodeURIComponent(cookies.token);
+  const isAdmin = cookies.isAdmin;
+  console.log("xxxx", token, cookies);
+  if (!token.includes("Bearer")) {
+    // redirect to login or return null
+    return redirect("/login");
+  }
+
+  if (isAdmin !== "true") {
+    return redirect("/");
+  }
+
+  const res = await fetch("http://localhost:3000/dresses", {
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) redirect("/login");
   const dresses = await res.json();
   return json({ dresses });
 }

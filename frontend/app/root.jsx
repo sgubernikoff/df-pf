@@ -10,6 +10,7 @@ import Header from "./components/Header";
 // import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { AuthProvider } from "./context/auth";
+import ProtectedRoutes from "./components/ProtectedRoutes";
 
 // Loader function to get user data based on session
 // export async function loader({ request }) {
@@ -69,7 +70,9 @@ export default function App() {
     <AuthProvider>
       <Header /> {/* Pass the user data to the Header component */}
       <main>
-        <Outlet /> {/* Render the child routes/content */}
+        <ProtectedRoutes>
+          <Outlet /> {/* Render the child routes/content */}
+        </ProtectedRoutes>
       </main>
     </AuthProvider>
   );

@@ -15,9 +15,10 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    const success = await login(email, password);
-    if (success) {
-      navigate("/");
+    const user = await login(email, password);
+    if (user?.id) {
+      if (user?.is_admin) navigate("/visit/new");
+      else navigate("/");
     } else {
       setError("Invalid credentials");
     }

@@ -2,6 +2,7 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useNavigate } from "@remix-run/react";
 
 export const AuthContext = createContext();
 
@@ -25,8 +26,10 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common["Content-Type"] = `application/json`;
       const response = await axios.get("http://localhost:3000/current_user");
       setUser(response.data.data);
+      Cookies.set("isAdmin", response.data.data.is_admin);
     } catch (error) {
       Cookies.remove("token");
+      Cookies.remove("isAdmin");
     } finally {
       setLoading(false);
     }
@@ -42,7 +45,8 @@ export const AuthProvider = ({ children }) => {
       Cookies.set("token", authorization, { expires: 7 });
       axios.defaults.headers.common["Authorization"] = authorization;
       setUser(response.data.data);
-      return true;
+      Cookies.set("isAdmin", response.data.data.is_admin);
+      return response.data.data;
     } catch (error) {
       return false;
     }
@@ -57,6 +61,7 @@ export const AuthProvider = ({ children }) => {
 
       if (response.status === 200) {
         Cookies.remove("token");
+        Cookies.remove("isAdmin");
         delete axios.defaults.headers.common["Authorization"];
         setUser(null);
       }
