@@ -7,26 +7,26 @@ import {
 } from "@remix-run/react";
 
 import Header from "./components/Header";
-import { json } from "@remix-run/node";
+// import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { getUserId } from "./utils/session.server";
+import { AuthProvider } from "./context/auth";
 
 // Loader function to get user data based on session
-export async function loader({ request }) {
-  const userId = await getUserId(request);
+// export async function loader({ request }) {
+//   const userId = await getUserId(request);
 
-  // If the user is logged in (i.e., there's a userId), fetch the user's data
-  if (userId) {
-    const res = await fetch(`http://localhost:3000/users/${userId}`);
-    const user = await res.json();
+//   // If the user is logged in (i.e., there's a userId), fetch the user's data
+//   if (userId) {
+//     const res = await fetch(`http://localhost:3000/users/${userId}`);
+//     const user = await res.json();
 
-    // Return the user data as part of the loader's response
-    return json({ user });
-  }
+//     // Return the user data as part of the loader's response
+//     return json({ user });
+//   }
 
-  // If there's no userId, return null for the user data
-  return json({ user: null });
-}
+//   // If there's no userId, return null for the user data
+//   return json({ user: null });
+// }
 
 // Links function to preconnect to external resources and load styles
 export function links() {
@@ -65,15 +65,12 @@ export function Layout({ children }) {
 
 // Main App component that renders the header and page content
 export default function App() {
-  const data = useLoaderData(); // Get user data from the loader
-
   return (
-    <>
-      <Header user={data.user} />{" "}
-      {/* Pass the user data to the Header component */}
+    <AuthProvider>
+      <Header /> {/* Pass the user data to the Header component */}
       <main>
         <Outlet /> {/* Render the child routes/content */}
       </main>
-    </>
+    </AuthProvider>
   );
 }

@@ -3,6 +3,7 @@ import { useLoaderData, Form } from "@remix-run/react";
 import { getUserId, logout } from "../utils/session.server";
 import "../styles/app.css"; // Import your styles
 import logo from "../styles/DanielleFrankelMainLogo.jpg";
+import axios from "axios";
 
 export function meta() {
   return [
@@ -19,6 +20,9 @@ export async function loader({ request }) {
 
   const res = await fetch(`http://localhost:3000/users/${userId}`);
   const user = await res.json();
+
+  const response = await axios.post("http://localhost:3000/users");
+  console.log(response);
   return json({ user });
 }
 

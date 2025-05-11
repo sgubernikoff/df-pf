@@ -1,10 +1,13 @@
 // app/components/Header.tsx
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form } from "@remix-run/react";
 import logo from "../styles/DanielleFrankelMainLogo.jpg";
 import "../styles/app.css";
+import { useContext } from "react";
+import { AuthContext } from "../context/auth";
 
 export default function Header() {
-  const { user } = useLoaderData();
+  const { user, logout } = useContext(AuthContext);
+  console.log(user);
 
   return (
     <header className="header">
@@ -20,7 +23,7 @@ export default function Header() {
         </a>
       </div>
       <div className="auth">
-        {user && (
+        {user?.is_admin && (
           <a
             href="/users"
             className="visits-link"
@@ -30,17 +33,14 @@ export default function Header() {
           </a>
         )}
         {user ? (
-          <Form method="post" action="/logout">
-            {" "}
-            {/* Submit to /logout */}
-            <button
-              type="submit"
-              className="logout-btn"
-              style={{ border: "none", padding: "0" }}
-            >
-              Log Out
-            </button>
-          </Form>
+          <button
+            type="submit"
+            className="logout-btn"
+            style={{ border: "none", padding: "0" }}
+            onClick={logout}
+          >
+            Log Out
+          </button>
         ) : (
           <a href="/login">
             <button className="login-btn" style={{ border: "none" }}>
