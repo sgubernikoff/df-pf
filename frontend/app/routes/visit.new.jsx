@@ -1,7 +1,9 @@
 import { useFetcher, useLoaderData } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { fetchAllProductsFromCollection } from "../utils/shopifyClient.server";
+import DressAutocomplete from "../components/autocomplete/DressAutocomplete";
+import UserAutocomplete from "../components/autocomplete/UserAutocomplete";
 
 // --- 1. Loader: Fetch dresses ---
 export async function loader({ request }) {
@@ -23,7 +25,7 @@ export async function loader({ request }) {
   }
 
   const shopifyData = await fetchAllProductsFromCollection("new-arrivals");
-  console.log(shopifyData);
+  // console.log(shopifyData);
 
   const res = await fetch("http://localhost:3000/dresses", {
     headers: {
@@ -40,7 +42,7 @@ export async function loader({ request }) {
 // --- 2. Action: Handle form submission ---
 export async function action({ request }) {
   const formData = await request.formData();
-
+  console.log(formData.get("selected_dress"));
   const res = await fetch("http://localhost:3000/visits", {
     method: "POST",
     body: formData,
@@ -60,177 +62,66 @@ export default function NewVisit() {
   const { dresses, shopifyData } = useLoaderData();
   const fetcher = useFetcher();
 
-  const [selectedDress, setSelectedDress] = useState(null);
-  const [dressQuery, setDressQuery] = useState("");
-  const [dressIds, setDressIds] = useState([]);
-
   const [userQuery, setUserQuery] = useState("");
-  const [userResults, setUserResults] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedDress, setSelectedDress] = useState(null);
 
-  useEffect(() => {
-    if (userQuery.length < 2 || selectedUser) return;
-
-    const fetchUsers = async () => {
-      const res = await fetch(
-        `/user-search?query=${encodeURIComponent(userQuery)}`
-      );
-      if (res.ok) {
-        const { data } = await res.json();
-        setUserResults(data.map((d) => d.attributes));
-      }
-    };
-
-    const timeout = setTimeout(fetchUsers, 200); // debounce
-    return () => clearTimeout(timeout);
-  }, [userQuery, selectedUser]);
-
-  const handleDressSelection = (e) => {
-    const value = e.target.value;
-    setDressIds((prev) =>
-      prev.includes(value)
-        ? prev.filter((id) => id !== value)
-        : [...prev, value]
-    );
-  };
-
-  const filtered =
-    dressQuery.length > 0
-      ? shopifyData.filter((d) =>
-          d.title.toLowerCase().includes(dressQuery.toLowerCase())
-        )
-      : [];
+  const [showManualEntry, setShowManualEntry] = useState(false);
 
   return (
     <fetcher.Form method="post" encType="multipart/form-data">
       <h2>New Visit</h2>
 
-      <label>
-        Search for User:
-        <input
-          type="text"
-          value={userQuery}
-          onChange={(e) => {
-            setUserQuery(e.target.value);
-            setSelectedUser(null);
-          }}
-          placeholder="Start typing a name..."
-          autoComplete="off"
-        />
-      </label>
-      <br />
+      <button type="button" onClick={() => setShowManualEntry((prev) => !prev)}>
+        {showManualEntry ? "Search For User" : "Create New User"}
+      </button>
 
-      {userResults.length > 0 && !selectedUser && (
-        <ul style={{ border: "1px solid #ccc", marginTop: 4, padding: 4 }}>
-          {userResults.map((user) => (
-            <li
-              key={user.id}
-              style={{ cursor: "pointer", padding: 4 }}
-              onClick={() => {
-                setSelectedUser(user);
-                setUserQuery(user.name);
-              }}
-            >
-              {user.name} — {user.email}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {selectedUser && (
+      {showManualEntry ? (
         <>
-          <input type="hidden" name="visit[user_id]" value={selectedUser.id} />
-          <p>
-            <strong>Selected User:</strong> {selectedUser.name} (
-            {selectedUser.email})
-          </p>
+          <label>
+            Customer Name:
+            <input
+              type="text"
+              name="customer_name"
+              value={selectedUser?.name || userQuery}
+              onChange={(e) => setUserQuery(e.target.value)}
+              required
+            />
+          </label>
+          <br />
+
+          <label>
+            Customer Email:
+            <input
+              type="email"
+              name="customer_email"
+              value={selectedUser?.email || ""}
+              readOnly={!!selectedUser}
+              onChange={() => {}}
+            />
+          </label>
         </>
+      ) : (
+        <UserAutocomplete
+          userQuery={userQuery}
+          setUserQuery={setUserQuery}
+          selectedUser={selectedUser}
+          setSelectedUser={setSelectedUser}
+        />
       )}
-
-      <label>
-        Customer Name:
-        <input
-          type="text"
-          name="visit[customer_name]"
-          value={selectedUser?.name || userQuery}
-          onChange={(e) => setUserQuery(e.target.value)}
-          required
-        />
-      </label>
-      <br />
-
-      <label>
-        Customer Email:
-        <input
-          type="email"
-          name="visit[customer_email]"
-          value={selectedUser?.email || ""}
-          onChange={() => {}}
-          readOnly={!!selectedUser}
-        />
-      </label>
       <br />
 
       <label>
         Notes:
-        <textarea name="visit[notes]" />
+        <textarea name="notes" />
       </label>
       <br />
 
-      <fieldset>
-        <legend>Select A Dress</legend>
-        <div>
-          <label htmlFor="dress">Select a dress:</label>
-          <input
-            id="dress"
-            type="text"
-            value={dressQuery}
-            onChange={(e) => {
-              setDressQuery(e.target.value);
-              setSelectedDress(null);
-            }}
-            placeholder="Start typing..."
-            autoComplete="off"
-          />
-
-          {filtered.length > 0 && !selectedDress && (
-            <ul style={{ border: "1px solid #ccc", marginTop: 4, padding: 4 }}>
-              {filtered.map((dress) => (
-                <li
-                  key={dress.id}
-                  style={{ cursor: "pointer", padding: 4 }}
-                  onClick={() => {
-                    setSelectedDress(dress);
-                    setDressQuery(dress.title);
-                  }}
-                >
-                  {dress.title} — ${Number(dress.price).toFixed(2)}{" "}
-                  {dress.currency}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {selectedDress && (
-            <>
-              <input
-                type="hidden"
-                name="visit[selected_dress]"
-                value={JSON.stringify(selectedDress)}
-              />
-              <div style={{ marginTop: 8 }}>
-                <strong>Selected:</strong> {selectedDress?.title}
-                <br />
-                <img
-                  src={selectedDress?.images?.[0]}
-                  alt={selectedDress?.title}
-                  width={100}
-                />
-              </div>
-            </>
-          )}
-        </div>
-      </fieldset>
+      <DressAutocomplete
+        shopifyData={shopifyData}
+        selectedDress={selectedDress}
+        setSelectedDress={setSelectedDress}
+      />
       <br />
 
       <label>
