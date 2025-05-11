@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.delete("http://localhost:3000/logout", {
         Method: "DELETE",
       });
-      console.log(response);
 
       if (response.status === 200) {
         Cookies.remove("token");
