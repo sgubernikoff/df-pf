@@ -18,7 +18,7 @@ export default function Login() {
     const user = await login(email, password);
     if (user?.id) {
       if (user?.is_admin) navigate("/visit/new");
-      else navigate("/");
+      else navigate(`/user/${user.id}`);
     } else {
       setError("Invalid credentials");
     }

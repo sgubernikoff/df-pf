@@ -1,4 +1,10 @@
-class UserSerializer 
-include JSONAPI::Serializer
-  attributes :id, :email, :name, :is_admin
+# app/serializers/user_serializer.rb
+class UserSerializer
+  include JSONAPI::Serializer
+
+  attributes :id, :email, :name, :is_admin, :visits
+
+  attribute :visits do |user|
+    VisitSerializer.new(user.visits.all).serializable_hash
+  end
 end

@@ -15,14 +15,18 @@ class VisitsController < ApplicationController
     def show
       @visit = Visit.find(params[:id])
     
+      unless current_user.is_admin || @visit.user_id == current_user.id
+        return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
+      end
+    
       if @visit.visit_pdf.attached?
         base64_pdf = Base64.strict_encode64(@visit.visit_pdf.download)
-        puts base64_pdf
         render json: {
-          pdf_base64: "data:application/pdf;base64,#{base64_pdf}"
+          pdf_base64: "data:application/pdf;base64,#{base64_pdf}",
+          user_id: @visit.user_id
         }
       else
-        render json: { error: "PDF not available yet." }, status: :not_found
+        render json: { error: "PDF not available yet.", user_id: @visit.user_id }, status: :not_found
       end
     end
   
@@ -69,7 +73,7 @@ class VisitsController < ApplicationController
     
       # Step 4: Save Visit and then Dress (if visit succeeds)
       if @visit.save
-        @visit.update(dress_id: @dress.id) if @dress.save
+        @visit.update(dress_id: @dress.id,shopify_dress_id: dress_data["id"]) if @dress.save
         respond_to do |format|
           format.html { redirect_to @visit, notice: 'Visit was successfully created.' }
           format.json { render json: @visit, status: :created }

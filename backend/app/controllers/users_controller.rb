@@ -27,6 +27,11 @@ class UsersController < ApplicationController
 
   # GET /users/1
   def show
+    if current_user.is_admin
+      @user = User.find_by(id: params[:id])
+      return render_not_found unless @user
+    end
+  
     render json: UserSerializer.new(@user).serializable_hash
   end
 
@@ -65,7 +70,7 @@ class UsersController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_user
-      @user = User.find(params[:id])
+      @user = current_user
     end
 
     # Only allow a list of trusted parameters through.

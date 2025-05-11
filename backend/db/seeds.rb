@@ -86,35 +86,35 @@ puts "\e[34mCreating Visits and associating dresses with users...\e[0m"
 
 visit1 = Visit.create!(
   notes: "Really liked the red dress.",
-  dresses: [dress1],
+  dress: dress1,
   user: user1
 )
 puts "\e[32m✔ Created Visit for #{user1.name} with Dress: #{dress1.name}\e[0m"
 
 visit2 = Visit.create!(
   notes: "Torn between the blue and green dresses.",
-  dresses: [dress2, dress3],
+  dress: dress2,
   user: user2
 )
 puts "\e[32m✔ Created Visit for #{user2.name} with Dresses: #{dress2.name}, #{dress3.name}\e[0m"
 
 visit3 = Visit.create!(
   notes: "Loved the green dress, but went with the blue.",
-  dresses: [dress2],
+  dress: dress2,
   user: user3
 )
 puts "\e[32m✔ Created Visit for #{user3.name} with Dress: #{dress2.name}\e[0m"
 
 visit4 = Visit.create!(
   notes: "The red dress was just perfect for the occasion!",
-  dresses: [dress1],
+  dress: dress1,
   user: user4
 )
 puts "\e[32m✔ Created Visit for #{user4.name} with Dress: #{dress1.name}\e[0m"
 
 visit5 = Visit.create!(
   notes: "Can't decide between the blue and green dresses. Both are beautiful!",
-  dresses: [dress2, dress3],
+  dress: dress2,
   user: user5
 )
 puts "\e[32m✔ Created Visit for #{user5.name} with Dresses: #{dress2.name}, #{dress3.name}\e[0m"

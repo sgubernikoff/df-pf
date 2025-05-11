@@ -1,5 +1,5 @@
 import { pdfjs, Document, Page, Outline } from "react-pdf";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, redirect } from "@remix-run/react";
 import { useRef, useState, useEffect } from "react";
 import { useSize } from "ahooks";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -22,21 +22,34 @@ export async function loader({ params, request }) {
   const isAdmin = cookies.isAdmin;
 
   if (!token.includes("Bearer")) {
-    // redirect to login or return null
     return redirect("/login");
   }
-  // Here, you'll dynamically generate the URL to the PDF based on the visit ID.
+
   const res = await fetch(`http://localhost:3000/visits/${params.id}`, {
     headers: {
       Authorization: token,
     },
   });
+
   if (!res.ok) {
-    res.json().then((d) => console.log(d));
+    const json = await res.json().catch(() => ({}));
+
+    // If unauthorized, redirect to current user's page
+    if (res.status === 401 || res.status === 403) {
+      const currentUserId = json.user_id || "current"; // fallback just in case
+      return redirect(`/user/${currentUserId}`);
+    }
+
+    // If other error and we know the visit's user, redirect there
+    if (json.user_id) {
+      return redirect(`/user/${json.user_id}`);
+    }
+
+    // Generic fallback
     throw new Response("Failed to fetch PDF", { status: res.status });
   }
-  const json = await res.json();
-  return json;
+
+  return await res.json();
 }
 
 export default function Visit() {
