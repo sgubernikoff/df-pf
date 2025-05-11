@@ -1,8 +1,12 @@
 class ApplicationController < ActionController::API
-    include ActionController::Cookies
-    before_action :is_logged_in?
+    include ActionController::MimeResponds
+    respond_to :json
   
-    def is_logged_in?
-      render json: {error: 'UNAUTHORIZED: PLEASE LOGIN.'}, status: :unauthorized unless session.include? :user_id
+    before_action :configure_permitted_parameters, if: :devise_controller?
+
+    protected
+
+    def configure_permitted_parameters
+      devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
     end
   end

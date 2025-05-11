@@ -1,7 +1,6 @@
 class UsersController < ApplicationController
   rescue_from ActiveRecord::RecordInvalid,with: :render_unprocessable_entity
   rescue_from ActiveRecord::RecordNotFound,with: :render_not_found
-  skip_before_action :is_logged_in?,only: [:index,:create,:show]
     
   before_action :set_user, only: %i[ show update destroy ]
 
@@ -18,8 +17,10 @@ class UsersController < ApplicationController
   end
 
   def show_me
-    user = User.find(session[:user_id])
-    render json: user
+    render json: {
+      status: { code: 200 },
+      data: UserSerializer.new(current_user).serializable_hash[:data][:attributes]
+    }
   end
 
   # POST /users
@@ -55,6 +56,6 @@ class UsersController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def user_params
-      params.require(:user).permit(:name, :email, :password_digest)
+      params.require(:user).permit(:name, :email, :password, :password_confirmation)
     end
 end

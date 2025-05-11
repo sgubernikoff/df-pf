@@ -1,8 +1,18 @@
 Rails.application.routes.draw do
+  devise_for :users, path: '', path_names: {
+    sign_in: 'login',
+    sign_out: 'logout',
+    registration: 'signup'
+  },
+  controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations'
+  }
 
-  post "/login", to: 'sessions#create'
-  delete '/logout', to: 'sessions#destroy'
-  get "/me", to: 'users#show_me'
+  resources :protected_resources, only: [:index]
+
+  get 'current_user', to: 'users#show_me'
+
   resources :users
 
   resources :visits, defaults: { format: :json }
