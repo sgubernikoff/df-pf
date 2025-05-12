@@ -6,7 +6,7 @@ export async function action({ request }) {
   const email = form.get("email");
   const password = form.get("password");
 
-  const res = await fetch("http://localhost:3000/users", {
+  const res = await fetch("${process.env.RAILS_API_URL}/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),

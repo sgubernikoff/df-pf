@@ -24,7 +24,9 @@ export const AuthProvider = ({ children }) => {
       // Set default Authorization header for all requests
       axios.defaults.headers.common["Authorization"] = token;
       axios.defaults.headers.common["Content-Type"] = `application/json`;
-      const response = await axios.get("http://localhost:3000/current_user");
+      const response = await axios.get(
+        "${process.env.RAILS_API_URL}/current_user"
+      );
       setUser(response.data.data);
       Cookies.set("isAdmin", response.data.data.is_admin);
     } catch (error) {
@@ -37,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post("http://localhost:3000/login", {
+      const response = await axios.post("${process.env.RAILS_API_URL}/login", {
         user: { email, password },
       });
 
@@ -54,9 +56,12 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const response = await axios.delete("http://localhost:3000/logout", {
-        Method: "DELETE",
-      });
+      const response = await axios.delete(
+        "${process.env.RAILS_API_URL}/logout",
+        {
+          Method: "DELETE",
+        }
+      );
 
       if (response.status === 200) {
         Cookies.remove("token");

@@ -23,7 +23,7 @@ export async function loader({ request }) {
     return redirect("/login");
   }
 
-  const res = await fetch("http://localhost:3000/current_user", {
+  const res = await fetch("${process.env.RAILS_API_URL}/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
