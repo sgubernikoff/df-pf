@@ -15,7 +15,7 @@ export async function loader({ params, request }) {
     return redirect("/login");
   }
   // Here, you'll dynamically generate the URL to the PDF based on the visit ID.
-  const res = await fetch(`https://localhost:3000/users/${params.id}`, {
+  const res = await fetch(`http://localhost:3000/users/${params.id}`, {
     headers: {
       Authorization: token,
     },
