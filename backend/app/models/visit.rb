@@ -123,7 +123,7 @@ class Visit < ApplicationRecord
           if File.exist?(watermark_path)
             Rails.logger.info("Applying watermark to image at #{watermark_path}")
             watermark = MiniMagick::Image.open(watermark_path)
-            watermark = watermark.resize("#{img.width}x#{img.height}")
+            # watermark = watermark.resize("#{img.width}x#{img.height}")
             img = img.composite(watermark) do |c|
               c.gravity "Center"
               c.compose "Over"
