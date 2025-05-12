@@ -2,11 +2,11 @@ require 'open-uri'
 require 'mini_magick'
 
 class Visit < ApplicationRecord
-  has_many_attached :images
+  has_many_attached :images, dependent: :purge_later
   belongs_to :dress, optional: true
   belongs_to :user
 
-  has_one_attached :visit_pdf # This will store the generated PDF
+  has_one_attached :visit_pdf, dependent: :purge_later
 
   after_commit :generate_pdf_later, on: :create
 

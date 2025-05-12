@@ -50,6 +50,7 @@ class VisitsController < ApplicationController
           email: customer_email,
           password: password,
           password_confirmation: password
+          is_admin: false
         )
       end
     
