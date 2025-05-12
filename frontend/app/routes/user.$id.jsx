@@ -35,17 +35,18 @@ export default function Visit() {
   const { attributes } = useLoaderData();
 
   return (
-    <div>
-      <p style={{ fontSize: "36px" }}>{attributes.name}</p>
-      <p style={{ fontSize: "24px" }}>{attributes.email}</p>
-      <p style={{ fontSize: "18px" }}>Documents</p>
+    <div className="user-page">
+      <div className="client-name-container">
+        <p>{attributes.name}</p>
+        <p>{attributes.email}</p>
+      </div>
+      <p>Dresses</p>
       <div
+        className="user-visits-container"
         style={{
           display: "grid",
-          flexDirection: "row",
-          flexWrap: "wrap",
-          gap: "5vw",
-          gridTemplateColumns: "repeat(3,1fr)",
+          gap: "1vw",
+          gridTemplateColumns: "repeat(4,1fr)",
           gridTemplateRows: "min-content",
         }}
       >
@@ -59,14 +60,16 @@ export default function Visit() {
                 flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
-                border: "1px solid pink",
+                border: "1px solid #e9e9e9",
                 position: "relative",
                 cursor: !v.attributes?.isPdfReady ? "not-allowed" : "",
                 pointerEvents: !v.attributes?.isPdfReady ? "none" : "",
+                padding: "1rem",
               }}
               onClick={(e) => {
                 if (!v.attributes?.isPdfReady) e.preventDefault();
               }}
+              className="user-dress-container"
             >
               {v.attributes?.product?.imageUrl ? (
                 <img

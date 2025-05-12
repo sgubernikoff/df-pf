@@ -10,6 +10,7 @@ export default function Header() {
 
   return (
     <header className="header">
+      <div className="header-left"></div>
       <div className="logo">
         <a href="/" className="logo-link">
           <img src={logo} alt="Logo" className="logo-img" />

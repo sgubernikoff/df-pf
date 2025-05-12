@@ -132,14 +132,19 @@ export default function NewVisit() {
 
         <label>
           Upload Images:
-          <input type="file" name="visit[images][]" multiple />
+          <input
+            style={{ padding: "0", marginTop: "1rem", marginBottom: ".5rem" }}
+            type="file"
+            name="visit[images][]"
+            multiple
+          />
         </label>
 
         <button type="submit">Submit Visit</button>
 
         {fetcher.data?.success && (
           <p>
-            ✅ Visit created successfully!{" "}
+            Visit created. {""}
             <a href={`/visit/${fetcher.data.visit.id}`}>View Visit</a>
           </p>
         )}

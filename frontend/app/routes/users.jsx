@@ -118,8 +118,20 @@ export default function AdminUsersPage() {
   }, [hasMore, page, fetcher]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      <p style={{ fontSize: "36px", fontWeight: "bold" }}>Users</p>
+    <div
+      className="users-page"
+      style={{ display: "flex", flexDirection: "column", gap: "16px" }}
+    >
+      <p
+        style={{
+          fontSize: "12px",
+          fontWeight: "bold",
+          width: "100%",
+          textAlign: "center",
+        }}
+      >
+        Users
+      </p>
 
       {/* Search input */}
       <input
@@ -130,7 +142,7 @@ export default function AdminUsersPage() {
         style={{
           padding: "8px",
           border: "1px solid #ddd",
-          borderRadius: "4px",
+          borderRadius: "0px",
           width: "100%",
           marginBottom: "16px",
         }}
@@ -147,20 +159,14 @@ export default function AdminUsersPage() {
                 style={{
                   padding: "16px",
                   border: "1px solid #ddd",
-                  borderRadius: "8px",
+                  borderRadius: "0px",
                   textDecoration: "none",
                   color: "inherit",
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  transition: "background-color 0.2s ease",
+                  alignItems: "flex-start",
                 }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f9f9f9")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "white")
-                }
+                className="user-page-link"
               >
                 <div>
                   <p style={{ fontWeight: "600", marginBottom: "4px" }}>
@@ -194,20 +200,14 @@ export default function AdminUsersPage() {
                 style={{
                   padding: "16px",
                   border: "1px solid #ddd",
-                  borderRadius: "8px",
+                  borderRadius: "0px",
                   textDecoration: "none",
                   color: "inherit",
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
-                  transition: "background-color 0.2s ease",
+                  alignItems: "flex-start",
                 }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#f9f9f9")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "white")
-                }
+                className="user-page-link"
               >
                 <div>
                   <p style={{ fontWeight: "600", marginBottom: "4px" }}>
@@ -246,9 +246,7 @@ export default function AdminUsersPage() {
       )}
 
       {!isSearching && !hasMore && users.length !== 0 && (
-        <div style={{ fontStyle: "italic", color: "grey" }}>
-          You've reached the end of the list.
-        </div>
+        <div style={{ fontStyle: "italic", color: "grey" }}></div>
       )}
     </div>
   );
