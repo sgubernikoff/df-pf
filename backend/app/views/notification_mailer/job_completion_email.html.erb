@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Hello, <%= @user.name || "there" %>!</h1>
+    <p>
+      Your visit PDF has been generated and is ready for you to view.
+    </p>
+    <% if @visit.dress %>
+      <p>Visit details for: <%= @visit.dress.name %></p>
+    <% end %>
+    <p>
+      To view your visit details, just follow this link: <%= link_to "View Visit", @url %>
+    </p>
+    <p>Thank you for shopping with Danielle Frankel!</p>
+  </body>
+</html>

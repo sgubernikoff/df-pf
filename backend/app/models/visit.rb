@@ -169,8 +169,12 @@ class Visit < ApplicationRecord
     )
 
     Rails.logger.info("PDF successfully generated and attached for Visit #{id}")
+    
+    return true if visit_pdf.attached?
   rescue => e
     Rails.logger.error("Error generating PDF for Visit #{id}: #{e.class} - #{e.message}")
     Rails.logger.error(e.backtrace.join("\n"))
+    
+    return false
   end
 end
