@@ -7,7 +7,7 @@ class Visit < ApplicationRecord
   belongs_to :user
 
   validates :user_id, presence: true
-  validates :images, presence: true
+  # validates :images, presence: true
 
   has_one_attached :visit_pdf, dependent: :purge_later
 
