@@ -126,13 +126,16 @@ class Visit < ApplicationRecord
             Rails.logger.info("Watermark image found at #{watermark_path}")
             watermark = MiniMagick::Image.open(watermark_path)
 
-            # Composite using MiniMagick DSL
-            result = original_img.composite(watermark) do |c|
-              c.gravity "Center"
-              c.compose "Over"
-              c.dissolve "30"
+            begin
+              result = original_img.composite(watermark) do |c|
+               c.gravity "Center"
+                c.compose "Over"
+               c.dissolve "30"
+              end
+            rescue MiniMagick::Error => e
+              Rails.logger.error("Watermarking failed: #{e.message}")
+              result = original_img
             end
-
             temp_file = Tempfile.new(["gallery_image_#{index}", ".jpg"])
             result.write(temp_file.path)
             Rails.logger.info("Watermarked image written to #{temp_file.path}")
