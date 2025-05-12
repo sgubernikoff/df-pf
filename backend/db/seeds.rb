@@ -63,21 +63,24 @@ puts "\e[34mCreating Dresses...\e[0m"
 dress1 = Dress.create!(
   name: "Red Dress",
   description: "A stunning red evening gown",
-  price: 149.99
+  price: 149.99,
+  image: "https://via.placeholder.com/500x750/ff0000/ffffff?text=Red+Dress"
 )
 puts "\e[32m✔ Created Dress: #{dress1.name}\e[0m"
 
 dress2 = Dress.create!(
   name: "Blue Dress",
   description: "A classy blue cocktail dress",
-  price: 129.99
+  price: 129.99,
+  image: "https://via.placeholder.com/500x750/ff0000/ffffff?text=Red+Dress" 
 )
 puts "\e[32m✔ Created Dress: #{dress2.name}\e[0m"
 
 dress3 = Dress.create!(
   name: "Green Dress",
   description: "A refreshing green summer dress",
-  price: 99.99
+  price: 99.99,
+  image: "https://via.placeholder.com/500x750/ff0000/ffffff?text=Red+Dress" 
 )
 puts "\e[32m✔ Created Dress: #{dress3.name}\e[0m"
 
