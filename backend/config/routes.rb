@@ -10,18 +10,14 @@ Rails.application.routes.draw do
   }
 
   resources :protected_resources, only: [:index]
-
   get 'current_user', to: 'users#show_me'
-
   get "users/search", to: "users#search"
-
   resources :users
-
   resources :visits, defaults: { format: :json }
   resources :dresses
 
-  root 'home#index'
+  # ✅ Custom working health check route
+  get '/up', to: proc { [200, { 'Content-Type' => 'application/json' }, ['{"status":"ok"}']] }
 
-  # Health check route for monitoring
-  get "up" => "rails/health#show", as: :rails_health_check
+  root 'home#index'
 end
