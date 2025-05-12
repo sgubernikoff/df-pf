@@ -6,7 +6,7 @@ export async function action({ request }) {
   const email = form.get("email");
   const password = form.get("password");
 
-  const res = await fetch("https://df-pf.onrender.com/users", {
+  const res = await fetch("http://localhost:3000/users", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
