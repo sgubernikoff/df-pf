@@ -1,5 +1,5 @@
 require 'open-uri'
-require 'mini_magick'
+require 'vips'
 
 class Visit < ApplicationRecord
   has_many_attached :images, dependent: :purge_later
@@ -57,11 +57,7 @@ class Visit < ApplicationRecord
           image_file.write(image_data)
           image_file.rewind
 
-          Rails.logger.info("Dress image tempfile created at #{image_file.path} (#{image_data.bytesize} bytes)")
-
-          image = MiniMagick::Image.open(image_file.path)
-          Rails.logger.info("Image format: #{image.type}, width: #{image.width}, height: #{image.height}")
-
+          image = Vips::Image.new_from_file(image_file.path)
           aspect_ratio = image.width.to_f / image.height.to_f
           image_height = image_width / aspect_ratio
           x = i * (image_width + image_gap)
@@ -114,8 +110,7 @@ class Visit < ApplicationRecord
         image.blob.open do |file|
           begin
             Rails.logger.info("Opened gallery image blob: #{file.path}")
-            original_img = MiniMagick::Image.open(file.path)
-            Rails.logger.info("Gallery image format: #{original_img.type}, dimensions: #{original_img.width}x#{original_img.height}")
+            original_img = Vips::Image.new_from_file(file.path, access: :sequential)
 
             watermark_path = Rails.root.join("app", "assets", "images", "watermark.png")
             unless File.exist?(watermark_path)
@@ -124,21 +119,27 @@ class Visit < ApplicationRecord
             end
 
             Rails.logger.info("Watermark image found at #{watermark_path}")
-            watermark = MiniMagick::Image.open(watermark_path)
+            watermark_img = Vips::Image.new_from_file(watermark_path, access: :sequential)
 
-            begin
-              result = original_img.composite(watermark) do |c|
-               c.gravity "Center"
-                c.compose "Over"
-               c.dissolve "30"
-              end
-            rescue MiniMagick::Error => e
-              Rails.logger.error("Watermarking failed: #{e.message}")
-              result = original_img
+            # Resize watermark if needed to match the original image width
+            if watermark_img.width > original_img.width
+              scale = original_img.width.to_f / watermark_img.width
+              watermark_img = watermark_img.resize(scale)
             end
+
+            # Add alpha blending for watermark transparency (30% opacity)
+            if !watermark_img.has_alpha?
+              watermark_img = watermark_img.bandjoin(255)
+            end
+            watermark_img = watermark_img * [1, 1, 1, 0.3] # apply transparency
+
+            # Composite watermark onto the center of the original image
+            x_offset = (original_img.width - watermark_img.width) / 2
+            y_offset = (original_img.height - watermark_img.height) / 2
+            result = original_img.composite2(watermark_img, :over, x: x_offset, y: y_offset)
+
             temp_file = Tempfile.new(["gallery_image_#{index}", ".jpg"])
-            result.write(temp_file.path)
-            Rails.logger.info("Watermarked image written to #{temp_file.path}")
+            result.write_to_file(temp_file.path)
 
             pdf.bounding_box([x, y], width: image_width, height: image_height) do
               pdf.image temp_file.path, fit: [image_width, image_height], position: :center, vposition: :center
