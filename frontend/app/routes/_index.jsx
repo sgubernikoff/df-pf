@@ -1,9 +1,7 @@
 import { json, redirect } from "@remix-run/node";
-import { useLoaderData, Form } from "@remix-run/react";
-import { getUserId, logout } from "../utils/session.server";
+import { useLoaderData } from "@remix-run/react";
+import { logout } from "../utils/session.server";
 import "../styles/app.css"; // Import your styles
-import logo from "../styles/DanielleFrankelMainLogo.jpg";
-import axios from "axios";
 
 export function meta() {
   return [

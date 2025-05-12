@@ -96,6 +96,7 @@ export default function Visit() {
                       left: "50%",
                       transform: "translate(-50%,-50%) rotate(45deg)",
                       fontSize: "24px",
+                      color: "white",
                     }}
                   >
                     PROCESSING
