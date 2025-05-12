@@ -24,8 +24,7 @@ class Visit < ApplicationRecord
     pdf = Prawn::Document.new
     pdf.font "Helvetica"
 
-    # -- PAGE 1: COVER PAGE with CLIENT NAME --
-    Rails.logger.info("Creating cover page for Visit #{id}")
+    # Cover Page
     pdf.move_down(pdf.bounds.height / 2 - 50)
     image_path = Rails.root.join("public", "images", "DanielleFrankelMainLogo.jpg")
     if File.exist?(image_path)
@@ -40,45 +39,45 @@ class Visit < ApplicationRecord
     Rails.logger.info("Adding client name: #{client_name}")
     pdf.font_size(24) { pdf.text client_name, align: :center, style: :bold }
 
-    # -- PAGE 2: HERO PAGE (Dress Images from Shopify) --
+    # Dress Image Page
     if dress && dress.image_urls.present?
-      Rails.logger.info("Adding dress images to PDF for Visit #{id}")
       pdf.start_new_page
       page_width = pdf.bounds.width
       image_gap = 10
       image_width = (page_width - image_gap * 2) / 3
       top_y = pdf.bounds.height - 20
-
-      images_to_show = dress.image_urls[0..2]
-
       image_heights = []
 
-      images_to_show.each_with_index do |image_url, i|
-        Rails.logger.info("Processing image #{i + 1} at URL: #{image_url}")
+      dress.image_urls[0..2].each_with_index do |image_url, i|
+        Rails.logger.info("Fetching dress image #{i + 1} from URL: #{image_url}")
         begin
           image_file = Tempfile.new(["dress_image_#{i}", ".jpg"])
           image_file.binmode
-          image_file.write(URI.open(image_url).read)
+          image_data = URI.open(image_url).read
+          image_file.write(image_data)
           image_file.rewind
 
-          image = MiniMagick::Image.read(image_file)
+          Rails.logger.info("Dress image tempfile created at #{image_file.path} (#{image_data.bytesize} bytes)")
+
+          image = MiniMagick::Image.open(image_file.path)
+          Rails.logger.info("Image format: #{image.type}, width: #{image.width}, height: #{image.height}")
+
           aspect_ratio = image.width.to_f / image.height.to_f
           image_height = image_width / aspect_ratio
           x = i * (image_width + image_gap)
           y = top_y
 
-          Rails.logger.info("Inserting image #{i + 1} into PDF at coordinates (#{x}, #{y}) with width #{image_width} and height #{image_height}")
           pdf.image image_file.path, at: [x, y], width: image_width, height: image_height
           image_heights << image_height
 
           image_file.close
           image_file.unlink
         rescue => e
-          Rails.logger.error("Error processing image at #{image_url}: #{e.message}")
+          Rails.logger.error("Error processing dress image at #{image_url}: #{e.class} - #{e.message}")
+          Rails.logger.error(e.backtrace.join("\n"))
         end
       end
 
-      # Calculate lowest point reached by the tallest image
       max_image_height = image_heights.max || 0
       bottom_of_images = top_y - max_image_height - 10
 
@@ -95,13 +94,11 @@ class Visit < ApplicationRecord
       Rails.logger.warn("No dress or image URLs available for Visit #{id}")
     end
 
-    # -- PAGE 3+: GALLERY PAGES (Uploaded Images with Watermarks) --
+    # Gallery Pages
     gallery_images = images || []
     notes_added = false
-    Rails.logger.info("Processing gallery images for Visit #{id}")
 
     gallery_images.each_slice(9).with_index do |page_images, idx|
-      Rails.logger.info("Processing page #{idx + 1} of gallery images")
       pdf.start_new_page
       image_width = 160
       image_height = 210
@@ -114,40 +111,46 @@ class Visit < ApplicationRecord
         x = col * (image_width + gap_x)
         y = pdf.bounds.top - row * (image_height + gap_y)
 
-        Rails.logger.info("Processing image #{index + 1} for page #{idx + 1} at coordinates (#{x}, #{y})")
         image.blob.open do |file|
-          img = MiniMagick::Image.open(file.path)
-          img.format("jpeg") unless ["jpg", "jpeg", "png", "gif"].include?(img.type.downcase)
+          begin
+            Rails.logger.info("Opened gallery image blob: #{file.path}")
+            original_img = MiniMagick::Image.open(file.path)
+            Rails.logger.info("Gallery image format: #{original_img.type}, dimensions: #{original_img.width}x#{original_img.height}")
 
-          watermark_path = Rails.root.join("app", "assets", "images", "watermark.png")
-          if File.exist?(watermark_path)
-            Rails.logger.info("Applying watermark to image at #{watermark_path}")
+            watermark_path = Rails.root.join("app", "assets", "images", "watermark.png")
+            unless File.exist?(watermark_path)
+              Rails.logger.warn("Watermark image not found at #{watermark_path}")
+              next
+            end
+
+            Rails.logger.info("Watermark image found at #{watermark_path}")
             watermark = MiniMagick::Image.open(watermark_path)
-            # watermark = watermark.resize("#{img.width}x#{img.height}")
-            img = img.composite(watermark) do |c|
+
+            result = original_img.composite(watermark) do |c|
               c.gravity "Center"
               c.compose "Over"
               c.dissolve 30
             end
-          else
-            Rails.logger.warn("Watermark not found at #{watermark_path}")
+
+            temp_file = Tempfile.new(["gallery_image_#{index}", ".jpg"])
+            result.write(temp_file.path)
+            Rails.logger.info("Watermarked image written to #{temp_file.path}")
+
+            pdf.bounding_box([x, y], width: image_width, height: image_height) do
+              pdf.image temp_file.path, fit: [image_width, image_height], position: :center, vposition: :center
+            end
+
+            temp_file.close
+            temp_file.unlink
+          rescue => e
+            Rails.logger.error("Failed to process gallery image #{index + 1} on page #{idx + 1}: #{e.class} - #{e.message}")
+            Rails.logger.error(e.backtrace.join("\n"))
           end
-
-          temp_file = Tempfile.new(["gallery_image_#{index}", ".jpg"])
-          img.write(temp_file.path)
-
-          pdf.bounding_box([x, y], width: image_width, height: image_height) do
-            pdf.image temp_file.path, fit: [image_width, image_height], position: :center, vposition: :center
-          end
-
-          temp_file.close
-          temp_file.unlink
         end
       end
 
       if idx == (gallery_images.size - 1) / 9 && !notes_added
         if pdf.cursor > 100
-          Rails.logger.info("Adding notes to page #{idx + 1}")
           pdf.move_down 20
           pdf.font_size(10) { pdf.text "Notes:", style: :bold }
           pdf.move_down 5
@@ -157,8 +160,8 @@ class Visit < ApplicationRecord
       end
     end
 
+    # Notes (Final Page)
     if notes.present? && !notes_added
-      Rails.logger.info("Adding final notes page")
       pdf.start_new_page
       pdf.move_down 50
       pdf.font_size(10) { pdf.text "Notes:", style: :bold }
@@ -178,5 +181,8 @@ class Visit < ApplicationRecord
     )
 
     Rails.logger.info("PDF successfully generated and attached for Visit #{id}")
+  rescue => e
+    Rails.logger.error("Error during PDF generation for Visit #{id}: #{e.class} - #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
   end
 end
