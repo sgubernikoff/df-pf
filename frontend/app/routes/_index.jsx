@@ -23,10 +23,11 @@ export async function loader({ request }) {
     return redirect("/login");
   }
 
-  const res = await fetch("http://df-pf.onrender.com/current_user", {
+  const res = await fetch("https://df-pf.onrender.com/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
+      credentials: "include",
     },
   });
 
@@ -35,7 +36,7 @@ export async function loader({ request }) {
   if (!current_user.data.is_admin)
     return redirect(`/user/${current_user.data.id}`);
 
-  return json({ user });
+  return json({ user: current_user });
 }
 
 export async function action({ request }) {
@@ -51,17 +52,7 @@ export default function Index() {
 
   return (
     <div className="container">
-      <main>
-        {user ? (
-          <form>
-            <label>
-              Example Field:
-              <input type="text" name="example" />
-            </label>
-            <button type="submit">Submit</button>
-          </form>
-        ) : null}
-      </main>
+      <main>{user ? <div>{""}</div> : null}</main>
     </div>
   );
 }
