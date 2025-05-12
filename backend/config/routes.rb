@@ -16,8 +16,7 @@ Rails.application.routes.draw do
   resources :visits, defaults: { format: :json }
   resources :dresses
 
-  # ✅ Custom working health check route
-  get '/up', to: proc { [200, { 'Content-Type' => 'application/json' }, ['{"status":"ok"}']] }
+  get "up" => "rails/health#show", as: :rails_health_check
 
   root 'home#index'
 end
