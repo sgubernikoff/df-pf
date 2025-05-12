@@ -79,6 +79,4 @@ test:
 #
 production:
   <<: *default
-  database: df_pf_production
-  username: df_pf
-  password: <%= ENV["DF_PF_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>
