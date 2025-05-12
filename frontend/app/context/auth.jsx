@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
       axios.defaults.headers.common["Authorization"] = token;
       axios.defaults.headers.common["Content-Type"] = `application/json`;
       const response = await axios.get(
-        "${process.env.RAILS_API_URL}/current_user"
+        "https://df-pf.onrender.com/current_user"
       );
       setUser(response.data.data);
       Cookies.set("isAdmin", response.data.data.is_admin);
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post("${process.env.RAILS_API_URL}/login", {
+      const response = await axios.post("https://df-pf.onrender.com/login", {
         user: { email, password },
       });
 
@@ -56,12 +56,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const response = await axios.delete(
-        "${process.env.RAILS_API_URL}/logout",
-        {
-          Method: "DELETE",
-        }
-      );
+      const response = await axios.delete("https://df-pf.onrender.com/logout", {
+        Method: "DELETE",
+      });
 
       if (response.status === 200) {
         Cookies.remove("token");
