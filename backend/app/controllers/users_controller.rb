@@ -5,11 +5,27 @@ class UsersController < ApplicationController
   before_action :set_user, only: %i[ show update destroy ]
 
   # GET /users
-  def index
-    @users = User.all
-
-    render json: UserSerializer.new(@users).serializable_hash
+  # GET /users
+def index
+  unless current_user.is_admin
+    return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
   end
+
+  page = params[:page].to_i > 0 ? params[:page].to_i : 1
+  per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 20
+
+  @users = User.where(is_admin: false).order(created_at: :desc).page(page).per(per_page)
+
+  render json: {
+    users: UserSerializer.new(@users).serializable_hash,
+    meta: {
+      current_page: @users.current_page,
+      total_pages: @users.total_pages,
+      total_count: @users.total_count
+    }
+  }
+end
+
 
   # GET /users/search?:query
   def search
@@ -19,7 +35,8 @@ class UsersController < ApplicationController
       return render json: []
     end
 
-    @users = User.where("name ILIKE ?", "%#{query}%").limit(10)
+    @users = User.where("name ILIKE ? AND is_admin = ?", "%#{query}%", false).limit(10)
+
 
     render json: UserSerializer.new(@users).serializable_hash
   end

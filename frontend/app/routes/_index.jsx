@@ -22,7 +22,6 @@ export async function loader({ request }) {
   const user = await res.json();
 
   const response = await axios.post("http://localhost:3000/users");
-  console.log(response);
   return json({ user });
 }
 

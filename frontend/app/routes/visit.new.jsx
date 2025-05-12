@@ -25,7 +25,6 @@ export async function loader({ request }) {
   }
 
   const shopifyData = await fetchAllProductsFromCollection("new-arrivals");
-  // console.log(shopifyData);
 
   const res = await fetch("http://localhost:3000/dresses", {
     headers: {
@@ -48,7 +47,7 @@ export async function action({ request }) {
 
   const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
-  console.log(formData.get("selected_dress"));
+
   const res = await fetch("http://localhost:3000/visits", {
     method: "POST",
     body: formData,

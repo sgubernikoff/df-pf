@@ -7,30 +7,32 @@ import { AuthContext } from "../context/auth";
 
 export default function Header() {
   const { user, logout } = useContext(AuthContext);
-  console.log(user);
 
   return (
     <header className="header">
-      <div className="header-left"></div>
       <div className="logo">
         <a href="/" className="logo-link">
-          <img
-            src={logo}
-            alt="Logo"
-            className="logo-img"
-            style={{ width: "20%" }}
-          />
+          <img src={logo} alt="Logo" className="logo-img" />
         </a>
       </div>
       <div className="auth">
         {user?.is_admin && (
-          <a
-            href="/users"
-            className="visits-link"
-            style={{ color: "black", textDecoration: "none" }}
-          >
-            Users
-          </a>
+          <>
+            <a
+              href="/visit/new"
+              className="visits-link"
+              style={{ color: "black", textDecoration: "none" }}
+            >
+              New Visit
+            </a>
+            <a
+              href="/users"
+              className="visits-link"
+              style={{ color: "black", textDecoration: "none" }}
+            >
+              Users
+            </a>
+          </>
         )}
         {user ? (
           <button

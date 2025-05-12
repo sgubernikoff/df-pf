@@ -83,7 +83,7 @@ export async function fetchAllProductsFromCollection(handle) {
     hasNextPage = json.data.collection.products.pageInfo.hasNextPage;
     cursor = edges.at(-1)?.cursor;
   }
-  console.log(products);
+
   return products;
 }
 
@@ -96,7 +96,6 @@ export async function enrichUserWithShopifyVisitProducts(user) {
     ),
   ];
   if (productIds.length === 0) return user;
-  console.log(".....", productIds);
 
   const query = `
     query getProductsByIds($ids: [ID!]!) {
@@ -140,7 +139,6 @@ export async function enrichUserWithShopifyVisitProducts(user) {
       };
     }
   }
-  console.log("??", productMap);
 
   const enrichedVisits = visits.map((visit) => {
     const id = visit?.attributes?.shopify_dress_id;
@@ -154,7 +152,6 @@ export async function enrichUserWithShopifyVisitProducts(user) {
       },
     };
   });
-  console.log(user, enrichedVisits);
 
   return {
     ...user,

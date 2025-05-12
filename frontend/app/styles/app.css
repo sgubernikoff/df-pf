@@ -69,7 +69,7 @@ p[style="color: red"] {
   align-items: center;
   width: 100%;
   height: 60px;
-  padding: 2.5rem;
+  padding: 2.5rem 1rem;
   box-sizing: border-box;
   position: fixed;
   top: 0;
@@ -80,29 +80,19 @@ p[style="color: red"] {
 }
 
 .logo {
-  display: flex;
-  justify-content: center;
-  flex: 1;
+  /* display: flex;
+  justify-content: center; */
+  /* flex: 1; */
+  max-width: 7vw;
 }
-
-.logo-link {
-  width: 40%;
-  text-align: center;
-}
-
-.logo-img {
-  max-height: 50px;
-  width: 60% !important;
-}
-.header-left {
-  width: 150px;
+.logo img {
+  max-width: 20vw;
 }
 .auth {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 20px;
-  width: 150px;
 }
 
 .auth > form {

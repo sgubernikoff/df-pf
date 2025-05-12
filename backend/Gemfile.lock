@@ -145,6 +145,18 @@ GEM
       activesupport (>= 4.2)
     jwt (2.10.1)
       base64
+    kaminari (1.2.2)
+      activesupport (>= 4.1.0)
+      kaminari-actionview (= 1.2.2)
+      kaminari-activerecord (= 1.2.2)
+      kaminari-core (= 1.2.2)
+    kaminari-actionview (1.2.2)
+      actionview
+      kaminari-core (= 1.2.2)
+    kaminari-activerecord (1.2.2)
+      activerecord
+      kaminari-core (= 1.2.2)
+    kaminari-core (1.2.2)
     logger (1.7.0)
     loofah (2.24.0)
       crass (~> 1.0.2)
@@ -304,6 +316,7 @@ DEPENDENCIES
   devise-jwt (~> 0.12.1)
   image_processing
   jsonapi-serializer (~> 2.2)
+  kaminari (~> 1.2)
   mini_magick
   pg (~> 1.1)
   prawn

@@ -34,7 +34,6 @@ export async function loader({ params, request }) {
 export default function Visit() {
   const { attributes } = useLoaderData();
 
-  console.log(attributes);
   return (
     <div>
       <p style={{ fontSize: "36px" }}>{attributes.name}</p>

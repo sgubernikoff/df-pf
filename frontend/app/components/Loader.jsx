@@ -38,7 +38,7 @@ function Loader({ isLoading }) {
   );
 }
 
-function Loading() {
+export function Loading() {
   const [index, setIndex] = useState(13);
   const loading = "...Loading...";
   const loadingArray = loading.split("");
