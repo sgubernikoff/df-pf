@@ -13,20 +13,15 @@ export async function loader({ request }) {
   );
 
   const token = decodeURIComponent(cookies.token);
-  const isAdmin = cookies.isAdmin;
 
   if (!token.includes("Bearer")) {
     // redirect to login or return null
     return redirect("/login");
   }
 
-  if (isAdmin !== "true") {
-    return redirect("/");
-  }
-
   const shopifyData = await fetchAllProductsFromCollection("new-arrivals");
 
-  const res = await fetch("http://localhost:3000/dresses", {
+  const res = await fetch("http://localhost:3000/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -34,8 +29,10 @@ export async function loader({ request }) {
   });
 
   if (!res.ok) redirect("/login");
-  const dresses = await res.json();
-  return json({ dresses, shopifyData });
+  const current_user = await res.json();
+  if (!current_user.data.is_admin)
+    return redirect(`/user/${current_user.data.id}`);
+  return json({ shopifyData });
 }
 
 // --- 2. Action: Handle form submission ---
@@ -65,7 +62,7 @@ export async function action({ request }) {
 // --- 3. Component ---
 
 export default function NewVisit() {
-  const { dresses, shopifyData } = useLoaderData();
+  const { shopifyData } = useLoaderData();
   const fetcher = useFetcher();
 
   const [userQuery, setUserQuery] = useState("");
