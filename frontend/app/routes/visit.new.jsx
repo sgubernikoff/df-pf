@@ -56,6 +56,7 @@ export async function action({ request }) {
   }
 
   const data = await res.json();
+
   return json({ success: true, visit: data });
 }
 
@@ -145,7 +146,7 @@ export default function NewVisit() {
         {fetcher.data?.success && (
           <p>
             Visit created. {""}
-            <a href={`/visit/${fetcher.data.visit.id}`}>View Visit</a>
+            <a href={`/visit/${fetcher.data.visit.user_id}`}>View Visit</a>
           </p>
         )}
         {fetcher.data?.error && <p>❌ {fetcher.data.error}</p>}

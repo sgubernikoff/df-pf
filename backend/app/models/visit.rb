@@ -6,6 +6,9 @@ class Visit < ApplicationRecord
   belongs_to :dress, optional: true
   belongs_to :user
 
+  validates :user_id, presence: true
+  validates :images, presence: true
+
   has_one_attached :visit_pdf, dependent: :purge_later
 
   after_commit :generate_pdf_later, on: :create
