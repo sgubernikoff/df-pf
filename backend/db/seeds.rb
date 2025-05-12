@@ -90,35 +90,70 @@ puts "\e[34mCreating Visits and associating dresses with users...\e[0m"
 visit1 = Visit.create!(
   notes: "Really liked the red dress.",
   dress: dress1,
-  user: user1
+  user: user1,
+  images: [
+    {
+      io: File.open(Rails.root.join('public/images/DanielleFrankelMainLogo.jpg')),
+      filename: 'DanielleFrankelMainLogo.jpg',
+      content_type: 'image/jpeg'
+    }
+  ]
 )
 puts "\e[32m✔ Created Visit for #{user1.name} with Dress: #{dress1.name}\e[0m"
 
 visit2 = Visit.create!(
   notes: "Torn between the blue and green dresses.",
   dress: dress2,
-  user: user2
+  user: user2,
+  images: [
+    {
+      io: File.open(Rails.root.join('public/images/DanielleFrankelMainLogo.jpg')),
+      filename: 'DanielleFrankelMainLogo.jpg',
+      content_type: 'image/jpeg'
+    }
+  ]
 )
 puts "\e[32m✔ Created Visit for #{user2.name} with Dresses: #{dress2.name}, #{dress3.name}\e[0m"
 
 visit3 = Visit.create!(
   notes: "Loved the green dress, but went with the blue.",
   dress: dress2,
-  user: user3
+  user: user3,
+  images: [
+    {
+      io: File.open(Rails.root.join('public/images/DanielleFrankelMainLogo.jpg')),
+      filename: 'DanielleFrankelMainLogo.jpg',
+      content_type: 'image/jpeg'
+    }
+  ]
 )
 puts "\e[32m✔ Created Visit for #{user3.name} with Dress: #{dress2.name}\e[0m"
 
 visit4 = Visit.create!(
   notes: "The red dress was just perfect for the occasion!",
   dress: dress1,
-  user: user4
+  user: user4,
+  images: [
+    {
+      io: File.open(Rails.root.join('public/images/DanielleFrankelMainLogo.jpg')),
+      filename: 'DanielleFrankelMainLogo.jpg',
+      content_type: 'image/jpeg'
+    }
+  ]
 )
 puts "\e[32m✔ Created Visit for #{user4.name} with Dress: #{dress1.name}\e[0m"
 
 visit5 = Visit.create!(
   notes: "Can't decide between the blue and green dresses. Both are beautiful!",
   dress: dress2,
-  user: user5
+  user: user5,
+  images: [
+    {
+      io: File.open(Rails.root.join('public/images/DanielleFrankelMainLogo.jpg')),
+      filename: 'DanielleFrankelMainLogo.jpg',
+      content_type: 'image/jpeg'
+    }
+  ]
 )
 puts "\e[32m✔ Created Visit for #{user5.name} with Dresses: #{dress2.name}, #{dress3.name}\e[0m"
 
