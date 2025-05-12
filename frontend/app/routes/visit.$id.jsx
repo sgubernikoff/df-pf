@@ -25,7 +25,7 @@ export async function loader({ params, request }) {
     return redirect("/login");
   }
 
-  const res = await fetch(`http://localhost:3000/visits/${params.id}`, {
+  const res = await fetch(`https://df-pf.vercel.app/visits/${params.id}`, {
     headers: {
       Authorization: token,
     },
