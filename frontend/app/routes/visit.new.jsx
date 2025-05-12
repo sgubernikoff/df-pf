@@ -147,7 +147,7 @@ export default function NewVisit() {
         {fetcher.data?.success && (
           <p>
             Visit created. {""}
-            <a href={`/visit/${fetcher.data.visit.user_id}`}>View Visit</a>
+            <a href={`/user/${fetcher.data.visit.user_id}`}>View User</a>
           </p>
         )}
         {fetcher.data?.error && <p>❌ {fetcher.data.error}</p>}
