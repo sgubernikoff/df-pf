@@ -49,7 +49,7 @@ class VisitsController < ApplicationController
           name: customer_name,
           email: customer_email,
           password: password,
-          password_confirmation: password
+          password_confirmation: password,
           is_admin: false
         )
       end
