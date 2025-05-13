@@ -41,7 +41,7 @@ const Visits = () => {
           </div>
         ))
       ) : (
-        <p>No visits found.</p>
+        <p>No visits found</p>
       )}
     </div>
   );
