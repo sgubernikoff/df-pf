@@ -240,6 +240,7 @@ main {
 
 .user-page > p:last-of-type {
   margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 .user-page > div > a > div {
   color: black;
