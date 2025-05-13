@@ -31,9 +31,7 @@ export default function DressAutocomplete({
           setSelectedDress(dress);
           setDressQuery(dress.title);
         }}
-        renderItem={(d) =>
-          `${d.title} — $${Number(d.price).toFixed(2)} ${d.currency}`
-        }
+        renderItem={(d) => `${d.title}`}
       />
 
       {selectedDress && (
