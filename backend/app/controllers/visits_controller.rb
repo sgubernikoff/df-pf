@@ -72,7 +72,7 @@ class VisitsController < ApplicationController
         description: dress_data["description"],
         image_urls: dress_data["images"]
       )
-    
+
       # Step 4: Save Visit and then Dress (if visit succeeds)
       if @visit.save
         @visit.update(dress_id: @dress.id,shopify_dress_id: dress_data["id"]) if @dress.save
