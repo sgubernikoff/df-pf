@@ -19,7 +19,7 @@ export async function loader({ request }) {
   }
 
   const res = await fetch(
-    `http://localhost:3000//users?page=${page}&per_page=${perPage}`,
+    `https://df-pf.onrender.comusers?page=${page}&per_page=${perPage}`,
     {
       headers: {
         Authorization: token,

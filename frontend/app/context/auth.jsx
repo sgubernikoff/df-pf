@@ -24,7 +24,9 @@ export const AuthProvider = ({ children }) => {
       // Set default Authorization header for all requests
       axios.defaults.headers.common["Authorization"] = token;
       axios.defaults.headers.common["Content-Type"] = `application/json`;
-      const response = await axios.get("http://localhost:3000//current_user");
+      const response = await axios.get(
+        "https://df-pf.onrender.comcurrent_user"
+      );
       setUser(response.data.data);
       Cookies.set("isAdmin", response.data.data.is_admin);
     } catch (error) {
@@ -37,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post("http://localhost:3000//login", {
+      const response = await axios.post("https://df-pf.onrender.comlogin", {
         user: { email, password },
       });
 
@@ -54,7 +56,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const response = await axios.delete("http://localhost:3000//logout", {
+      const response = await axios.delete("https://df-pf.onrender.comlogout", {
         Method: "DELETE",
       });
 

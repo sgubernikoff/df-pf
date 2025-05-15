@@ -21,7 +21,7 @@ export async function loader({ request }) {
   const query = url.searchParams.get("query") || "";
 
   const res = await fetch(
-    `http://localhost:3000//users/search?query=${query}`,
+    `https://df-pf.onrender.comusers/search?query=${query}`,
     {
       headers: {
         Authorization: token,
