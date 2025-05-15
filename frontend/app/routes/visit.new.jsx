@@ -46,13 +46,6 @@ export async function action({ request }) {
   const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
 
-  // Ensure price starts with $
-  let price = formData.get("visit[price]");
-  if (price && !price.startsWith("$")) {
-    price = "$" + price.replace(/^\$*/, "");
-    formData.set("visit[price]", price);
-  }
-
   const res = await fetch("https://df-pf.onrender.com/visits", {
     method: "POST",
     body: formData,
@@ -69,6 +62,7 @@ export async function action({ request }) {
 }
 
 // --- 3. Component ---
+
 export default function NewVisit() {
   const { shopifyData } = useLoaderData();
   const fetcher = useFetcher();
@@ -77,7 +71,6 @@ export default function NewVisit() {
   const [email, setEmail] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedDress, setSelectedDress] = useState(null);
-  const [customPrice, setCustomPrice] = useState("");
 
   const [showManualEntry, setShowManualEntry] = useState(false);
 
@@ -112,7 +105,7 @@ export default function NewVisit() {
                 type="email"
                 name="visit[customer_email]"
                 value={selectedUser?.email || email}
-                readOnly={!!selectedUser}
+                readOnly={selectedUser}
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
@@ -140,25 +133,6 @@ export default function NewVisit() {
         />
 
         <label>
-          Custom Price:
-          <input
-            type="text"
-            name="visit[price]"
-            value={customPrice}
-            onChange={(e) => {
-              let val = e.target.value.trim();
-              if (val && !val.startsWith("$")) {
-                val = "$" + val.replace(/^\$*/, "");
-              }
-              setCustomPrice(val);
-            }}
-            placeholder="e.g. $200.00"
-            pattern="^\$\d+(\.\d{2})?$"
-            title="Must be a valid price, e.g. $200.00"
-          />
-        </label>
-
-        <label>
           Upload Images:
           <input
             style={{ padding: "0", marginTop: "1rem", marginBottom: ".5rem" }}
@@ -172,7 +146,7 @@ export default function NewVisit() {
 
         {fetcher.data?.success && (
           <p>
-            Visit created.{" "}
+            Visit created. {""}
             <a href={`/user/${fetcher.data.visit.user_id}`}>View User</a>
           </p>
         )}
