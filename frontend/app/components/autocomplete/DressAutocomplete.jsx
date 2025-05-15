@@ -28,7 +28,6 @@ export default function DressAutocomplete({
         placeholder="Start typing..."
         results={!selectedDress ? filtered : []}
         onSelect={(dress) => {
-          console.log("Selected dress raw:", dress);
           setSelectedDress(dress);
           setDressQuery(dress.title);
         }}

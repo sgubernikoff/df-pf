@@ -70,7 +70,6 @@ export async function action({ request }) {
   for (const [key, val] of formData.entries()) {
     debugPayload[key] = val;
   }
-  console.log("🚀 Submitting visit form data:", debugPayload);
 
   const res = await fetch("https://df-pf.onrender.com/visits", {
     method: "POST",
