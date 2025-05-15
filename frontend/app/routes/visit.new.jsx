@@ -156,11 +156,11 @@ export default function NewVisit() {
         />
 
         <label>
-          Dress Price Override:
+          Dress Price Override (OPTIONAL):
           <input
             name="price-override"
             type="number"
-            placeholder="use to manually enter dress price, default: from shopify"
+            placeholder="Optional — uses Shopify price if left blank"
             step="any"
           />
         </label>
