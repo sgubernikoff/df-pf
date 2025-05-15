@@ -28,7 +28,11 @@ export default function DressAutocomplete({
         placeholder="Start typing..."
         results={!selectedDress ? filtered : []}
         onSelect={(dress) => {
-          setSelectedDress(dress);
+          const enrichedDress = {
+            ...dress,
+            price: `$${parseFloat(dress.variants?.[0]?.price || 0).toFixed(2)}`,
+          };
+          setSelectedDress(enrichedDress);
           setDressQuery(dress.title);
         }}
         renderItem={(d) => `${d.title}`}

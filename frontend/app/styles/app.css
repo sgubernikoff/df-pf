@@ -170,7 +170,7 @@ main {
 
 .form-create-page > form > fieldset {
   border: none;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .form-create-page > form > fieldset > label > ul > li::marker {
