@@ -77,8 +77,9 @@ class Visit < ApplicationRecord
         pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
         pdf.font_size(10) do
           pdf.move_down 1
-          puts "PRICE VALUE: #{dress.price.inspect}"
-          pdf.text("#{dress.price}", align: :center) if dress.price.present?
+          Rails.logger.info("PRICE VALUE: #{dress.price.inspect}")
+          price_text = dress.price.to_s.encode("UTF-8", invalid: :replace, undef: :replace, replace: '')
+          pdf.text(price_text, align: :center) if dress.price.present?
           pdf.move_down 1
           pdf.text(dress.description.to_s, align: :center)
         end
@@ -93,8 +94,6 @@ class Visit < ApplicationRecord
     image_height = 210
     gap_x = 15
     gap_y = 10
-
-    # Start gallery just below dress text if dress page exists
     gallery_top_y = pdf.cursor - 20
 
     images.each_slice(9).with_index do |batch, idx|
@@ -140,7 +139,6 @@ class Visit < ApplicationRecord
         end
       end
 
-      # Notes at end of last gallery page
       if idx == (images.count - 1) / 9 && notes.present? && !notes_added
         if pdf.cursor > 100
           pdf.move_down 20
