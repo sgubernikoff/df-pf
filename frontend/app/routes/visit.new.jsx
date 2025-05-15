@@ -46,7 +46,15 @@ export async function action({ request }) {
   const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
 
-  const res = await fetch("https://df-pf.onrender.com/visits", {
+  if (formData.get("price-override")) {
+    const parsedDress = JSON.parse(formData.get("visit[selected_dress]"));
+    parsedDress.price = `$${formatNumberInput(formData.get("price-override"))}`;
+    formData.set("visit[selected_dress]", JSON.stringify(parsedDress));
+  }
+
+  formData.delete("price-override");
+
+  const res = await fetch("http://localhost:3000//visits", {
     method: "POST",
     body: formData,
     headers: { Authorization: token },
@@ -131,6 +139,15 @@ export default function NewVisit() {
           selectedDress={selectedDress}
           setSelectedDress={setSelectedDress}
         />
+        <label>
+          Dress Price Override:
+          <input
+            name="price-override"
+            type="number"
+            placeholder="use to manually enter dress price, default: from shopify"
+            step="any"
+          />
+        </label>
 
         <label>
           Upload Images:
@@ -154,4 +171,19 @@ export default function NewVisit() {
       </fetcher.Form>
     </div>
   );
+}
+
+function formatNumberInput(value) {
+  if (value === "" || value === null || isNaN(value)) return "";
+
+  const num = parseFloat(value);
+  const hasDecimal = value.includes(".");
+
+  const rounded = hasDecimal ? num.toFixed(2) : Math.round(num).toString();
+
+  // Add commas
+  const [whole, decimal] = rounded.split(".");
+  const withCommas = Number(whole).toLocaleString();
+
+  return decimal ? `${withCommas}.${decimal}` : withCommas;
 }
