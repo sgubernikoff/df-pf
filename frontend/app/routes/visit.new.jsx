@@ -21,7 +21,7 @@ export async function loader({ request }) {
 
   const shopifyData = await fetchAllProductsFromCollection("new-arrivals");
 
-  const res = await fetch("https://df-pf.onrender.comcurrent_user", {
+  const res = await fetch("https://df-pf.onrender.com/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export async function action({ request }) {
 
   formData.delete("price-override");
 
-  const res = await fetch("https://df-pf.onrender.comvisits", {
+  const res = await fetch("https://df-pf.onrender.com/visits", {
     method: "POST",
     body: formData,
     headers: { Authorization: token },
