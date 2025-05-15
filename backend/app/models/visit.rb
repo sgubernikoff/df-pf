@@ -94,8 +94,9 @@ class Visit < ApplicationRecord
     gap_y = 10
 
     images.each_slice(9).with_index do |batch, idx|
-      pdf.start_new_page
-
+      if pdf.cursor < image_height + gap_y
+        pdf.start_new_page
+      end
       batch.each_with_index do |image, i|
         row, col = i.divmod(3)
         x = col * (image_width + gap_x)
