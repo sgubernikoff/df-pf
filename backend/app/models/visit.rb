@@ -93,10 +93,11 @@ class Visit < ApplicationRecord
     gap_x = 15
     gap_y = 10
 
-    images.each_slice(9).with_index do |batch, idx|
-      pdf.start_new_page if idx > 0
+    # Start gallery just below dress text if dress page exists
+    gallery_top_y = pdf.cursor - 20
 
-      top_y = pdf.bounds.top - 20  # fixed top position for row layout
+    images.each_slice(9).with_index do |batch, idx|
+      top_y = (idx == 0) ? gallery_top_y : pdf.bounds.top - 20
 
       batch.each_with_index do |image, i|
         row, col = i.divmod(3)
@@ -171,12 +172,10 @@ class Visit < ApplicationRecord
     )
 
     Rails.logger.info("PDF successfully generated and attached for Visit #{id}")
-    
     return true if visit_pdf.attached?
   rescue => e
     Rails.logger.error("Error generating PDF for Visit #{id}: #{e.class} - #{e.message}")
     Rails.logger.error(e.backtrace.join("\n"))
-    
     return false
   end
 end
