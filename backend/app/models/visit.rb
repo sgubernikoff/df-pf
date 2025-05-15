@@ -87,6 +87,9 @@ class Visit < ApplicationRecord
     end
 
     # Gallery Pages
+
+    pdf.move_cursor_to(bottom_of_images - 20) if    bottom_of_images
+    pdf.move_down(10)
     notes_added = false
     image_width = 160
     image_height = 210
@@ -98,7 +101,7 @@ class Visit < ApplicationRecord
       batch.each_with_index do |image, i|
         row, col = i.divmod(3)
         x = col * (image_width + gap_x)
-        y = pdf.bounds.top - row * (image_height + gap_y)
+        y = pdf.cursor - row * (image_height + gap_y)
 
         image.blob.open do |file|
           begin
