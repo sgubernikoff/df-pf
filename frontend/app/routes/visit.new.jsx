@@ -54,7 +54,7 @@ export async function action({ request }) {
 
   formData.delete("price-override");
 
-  const res = await fetch("http://localhost:3000//visits", {
+  const res = await fetch("https://df-pf.onrender.com/visits", {
     method: "POST",
     body: formData,
     headers: { Authorization: token },
