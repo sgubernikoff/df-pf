@@ -87,21 +87,21 @@ class Visit < ApplicationRecord
     end
 
     # Gallery Pages
-
     notes_added = false
     image_width = 160
     image_height = 210
     gap_x = 15
     gap_y = 10
 
-    # Add padding before starting gallery section
-    pdf.move_down 20
-
     images.each_slice(9).with_index do |batch, idx|
+      pdf.start_new_page if idx > 0
+
+      top_y = pdf.bounds.top - 20  # fixed top position for row layout
+
       batch.each_with_index do |image, i|
         row, col = i.divmod(3)
         x = col * (image_width + gap_x)
-        y = pdf.cursor - row * (image_height + gap_y)
+        y = top_y - row * (image_height + gap_y)
 
         image.blob.open do |file|
           begin
