@@ -15,7 +15,6 @@ export async function loader({ request }) {
   const token = decodeURIComponent(cookies.token);
 
   if (!token.includes("Bearer")) {
-    // redirect to login or return null
     return redirect("/login");
   }
 
@@ -46,6 +45,15 @@ export async function action({ request }) {
   const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
 
+  // Check for a custom price override and format it properly
+  const overridePrice = formData.get("visit[price]");
+  if (overridePrice?.trim()) {
+    const formattedPrice = overridePrice.trim().startsWith("$")
+      ? overridePrice.trim()
+      : `$${overridePrice.trim()}`;
+    formData.set("visit[price]", formattedPrice);
+  }
+
   const res = await fetch("https://df-pf.onrender.com/visits", {
     method: "POST",
     body: formData,
@@ -62,7 +70,6 @@ export async function action({ request }) {
 }
 
 // --- 3. Component ---
-
 export default function NewVisit() {
   const { shopifyData } = useLoaderData();
   const fetcher = useFetcher();
@@ -133,6 +140,17 @@ export default function NewVisit() {
         />
 
         <label>
+          Custom Price:
+          <input
+            type="text"
+            name="visit[price]"
+            placeholder="Leave blank if using Shopify price"
+            pattern="^\$?\d+(\.\d{2})?$"
+            title="Must be a valid price, e.g. $200.00"
+          />
+        </label>
+
+        <label>
           Upload Images:
           <input
             style={{ padding: "0", marginTop: "1rem", marginBottom: ".5rem" }}
@@ -146,7 +164,7 @@ export default function NewVisit() {
 
         {fetcher.data?.success && (
           <p>
-            Visit created. {""}
+            Visit created.{" "}
             <a href={`/user/${fetcher.data.visit.user_id}`}>View User</a>
           </p>
         )}
