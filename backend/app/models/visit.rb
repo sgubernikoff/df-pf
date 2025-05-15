@@ -88,16 +88,16 @@ class Visit < ApplicationRecord
 
     # Gallery Pages
 
-    pdf.move_cursor_to(bottom_of_images - 20) if    bottom_of_images
-    pdf.move_down(10)
     notes_added = false
     image_width = 160
     image_height = 210
     gap_x = 15
     gap_y = 10
 
-    images.each_slice(9).with_index do |batch, idx|
+    # Add padding before starting gallery section
+    pdf.move_down 20
 
+    images.each_slice(9).with_index do |batch, idx|
       batch.each_with_index do |image, i|
         row, col = i.divmod(3)
         x = col * (image_width + gap_x)
