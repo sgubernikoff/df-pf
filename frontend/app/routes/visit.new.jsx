@@ -15,6 +15,7 @@ export async function loader({ request }) {
   const token = decodeURIComponent(cookies.token);
 
   if (!token.includes("Bearer")) {
+    // redirect to login or return null
     return redirect("/login");
   }
 
@@ -45,13 +46,11 @@ export async function action({ request }) {
   const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
 
-  // Check for a custom price override and format it properly
-  const overridePrice = formData.get("visit[price]");
-  if (overridePrice?.trim()) {
-    const formattedPrice = overridePrice.trim().startsWith("$")
-      ? overridePrice.trim()
-      : `$${overridePrice.trim()}`;
-    formData.set("visit[price]", formattedPrice);
+  // Ensure price starts with $
+  let price = formData.get("visit[price]");
+  if (price && !price.startsWith("$")) {
+    price = "$" + price.replace(/^\$*/, "");
+    formData.set("visit[price]", price);
   }
 
   const res = await fetch("https://df-pf.onrender.com/visits", {
@@ -78,6 +77,7 @@ export default function NewVisit() {
   const [email, setEmail] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedDress, setSelectedDress] = useState(null);
+  const [customPrice, setCustomPrice] = useState("");
 
   const [showManualEntry, setShowManualEntry] = useState(false);
 
@@ -112,7 +112,7 @@ export default function NewVisit() {
                 type="email"
                 name="visit[customer_email]"
                 value={selectedUser?.email || email}
-                readOnly={selectedUser}
+                readOnly={!!selectedUser}
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
@@ -144,8 +144,16 @@ export default function NewVisit() {
           <input
             type="text"
             name="visit[price]"
-            placeholder="Leave blank if using Shopify price"
-            pattern="^\$?\d+(\.\d{2})?$"
+            value={customPrice}
+            onChange={(e) => {
+              let val = e.target.value.trim();
+              if (val && !val.startsWith("$")) {
+                val = "$" + val.replace(/^\$*/, "");
+              }
+              setCustomPrice(val);
+            }}
+            placeholder="e.g. $200.00"
+            pattern="^\$\d+(\.\d{2})?$"
             title="Must be a valid price, e.g. $200.00"
           />
         </label>
