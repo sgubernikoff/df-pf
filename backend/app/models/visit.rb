@@ -77,6 +77,7 @@ class Visit < ApplicationRecord
         pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
         pdf.font_size(10) do
           pdf.move_down 1
+          puts "PRICE VALUE: #{dress.price.inspect}"
           pdf.text("#{dress.price}", align: :center) if dress.price.present?
           pdf.move_down 1
           pdf.text(dress.description.to_s, align: :center)
