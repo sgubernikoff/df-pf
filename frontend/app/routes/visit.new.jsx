@@ -15,7 +15,6 @@ export async function loader({ request }) {
   const token = decodeURIComponent(cookies.token);
 
   if (!token.includes("Bearer")) {
-    // redirect to login or return null
     return redirect("/login");
   }
 
@@ -46,13 +45,32 @@ export async function action({ request }) {
   const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
 
-  if (formData.get("price-override")) {
-    const parsedDress = JSON.parse(formData.get("visit[selected_dress]"));
-    parsedDress.price = `$${formatNumberInput(formData.get("price-override"))}`;
-    formData.set("visit[selected_dress]", JSON.stringify(parsedDress));
+  let parsedDress = {};
+  const selectedDressStr = formData.get("visit[selected_dress]");
+
+  if (selectedDressStr) {
+    try {
+      parsedDress = JSON.parse(selectedDressStr);
+    } catch (e) {
+      console.error("⚠️ Invalid JSON in visit[selected_dress]", e);
+      parsedDress = {};
+    }
   }
 
+  if (formData.get("price-override")) {
+    parsedDress.price = `$${formatNumberInput(formData.get("price-override"))}`;
+  }
+
+  // Always set (updated or not)
+  formData.set("visit[selected_dress]", JSON.stringify(parsedDress));
   formData.delete("price-override");
+
+  // ✅ Debug log form data for backend
+  const debugPayload = {};
+  for (const [key, val] of formData.entries()) {
+    debugPayload[key] = val;
+  }
+  console.log("🚀 Submitting visit form data:", debugPayload);
 
   const res = await fetch("https://df-pf.onrender.com/visits", {
     method: "POST",
@@ -70,7 +88,6 @@ export async function action({ request }) {
 }
 
 // --- 3. Component ---
-
 export default function NewVisit() {
   const { shopifyData } = useLoaderData();
   const fetcher = useFetcher();
@@ -79,7 +96,6 @@ export default function NewVisit() {
   const [email, setEmail] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedDress, setSelectedDress] = useState(null);
-
   const [showManualEntry, setShowManualEntry] = useState(false);
 
   return (
@@ -139,6 +155,7 @@ export default function NewVisit() {
           selectedDress={selectedDress}
           setSelectedDress={setSelectedDress}
         />
+
         <label>
           Dress Price Override:
           <input
@@ -163,7 +180,7 @@ export default function NewVisit() {
 
         {fetcher.data?.success && (
           <p>
-            Visit created. {""}
+            Visit created.{" "}
             <a href={`/user/${fetcher.data.visit.user_id}`}>View User</a>
           </p>
         )}
@@ -173,15 +190,14 @@ export default function NewVisit() {
   );
 }
 
+// --- 4. Number Formatter ---
 function formatNumberInput(value) {
   if (value === "" || value === null || isNaN(value)) return "";
 
   const num = parseFloat(value);
-  const hasDecimal = value.includes(".");
-
+  const hasDecimal = value.toString().includes(".");
   const rounded = hasDecimal ? num.toFixed(2) : Math.round(num).toString();
 
-  // Add commas
   const [whole, decimal] = rounded.split(".");
   const withCommas = Number(whole).toLocaleString();
 

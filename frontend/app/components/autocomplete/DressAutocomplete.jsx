@@ -35,23 +35,22 @@ export default function DressAutocomplete({
         renderItem={(d) => `${d.title}`}
       />
 
+      <input
+        type="hidden"
+        name="visit[selected_dress]"
+        value={selectedDress ? JSON.stringify(selectedDress) : "{}"}
+      />
+
       {selectedDress && (
-        <>
-          <input
-            type="hidden"
-            name="visit[selected_dress]"
-            value={JSON.stringify(selectedDress)}
+        <div style={{ marginTop: 8 }}>
+          <strong>Selected:</strong> {selectedDress.title}
+          <br />
+          <img
+            src={selectedDress.images?.[0]}
+            alt={selectedDress.title}
+            width={100}
           />
-          <div style={{ marginTop: 8 }}>
-            <strong>Selected:</strong> {selectedDress.title}
-            <br />
-            <img
-              src={selectedDress.images?.[0]}
-              alt={selectedDress.title}
-              width={100}
-            />
-          </div>
-        </>
+        </div>
       )}
     </fieldset>
   );
