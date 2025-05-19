@@ -4,7 +4,16 @@ class NotificationMailer < ApplicationMailer
     def job_completion_email(user, visit_id)
       @user = user
       @visit = Visit.find(visit_id)
-      @url = "localhost:5173/visit/#{6}"
+      @url = "localhost:5173/visit/#{8}"
+
+      if @visit.visit_pdf.attached?
+        filename = "visit-#{@visit.id}-#{@user.name.parameterize}.pdf"
+  
+        attachments[filename] = {
+          mime_type: 'application/pdf',
+          content: @visit.visit_pdf.download
+        }
+      end
       
       mail(
         to: @user.email,

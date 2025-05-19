@@ -65,18 +65,19 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "df_pf_production"
 
   config.action_mailer.perform_caching = false
-  config.action_mailer.default_url_options = { host: 'yourdomain.com', protocol: 'https' }
-  # config/environments/production.rb
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address:              'smtp.sendgrid.net',
-    port:                 587,
-    domain:               'yourdomain.com',
-    user_name:            ENV['SENDGRID_USERNAME'],
-    password:             ENV['SENDGRID_PASSWORD'],
-    authentication:       'plain',
-    enable_starttls_auto: true
-  }
+
+config.action_mailer.default_url_options = { host: 'df-pf.onrender.com', protocol: 'https' }
+
+config.action_mailer.delivery_method = :smtp
+config.action_mailer.smtp_settings = {
+  address:              'smtp.gmail.com',
+  port:                 587,
+  domain:               'gmail.com', # You can also use 'your-backend-service.onrender.com' here
+  user_name:            ENV['GMAIL_USERNAME'],
+  password:             ENV['GMAIL_PASSWORD'],
+  authentication:       'plain',
+  enable_starttls_auto: true
+}
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
