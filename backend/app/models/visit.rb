@@ -109,7 +109,7 @@ class Visit < ApplicationRecord
             Rails.logger.info("Processing gallery image #{i + 1} on page #{idx + 1}")
             original = Vips::Image.new_from_file(file.path, access: :sequential)
 
-            watermark_path = Rails.root.join("app/assets/images/watermark.png")
+            watermark_path = Rails.root.join("app/assets/images/watermark2.png")
             unless File.exist?(watermark_path)
               Rails.logger.warn("Watermark not found at #{watermark_path}")
               next
