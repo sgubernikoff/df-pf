@@ -95,7 +95,7 @@ class VisitsController < ApplicationController
       unless current_user.is_admin
         return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
       end
-
+    
       @visit = Visit.find_by(id: params[:id])
     
       respond_to do |format|
@@ -104,11 +104,17 @@ class VisitsController < ApplicationController
         elsif !@visit.visit_pdf.attached?
           format.json { render json: { error: "PDF not attached" }, status: :unprocessable_entity }
         else
-          NotificationMailer.job_completion_email(@visit.user, @visit.id).deliver_now
-          format.json { render json: { message: "Email resent successfully" }, status: :ok }
+          begin
+            NotificationMailer.job_completion_email(@visit.user, @visit.id).deliver_later
+            format.json { render json: { message: "Email has been queued for delivery" }, status: :accepted }
+          rescue => e
+            Rails.logger.error("Email enqueue failed: #{e.message}")
+            format.json { render json: { error: "Failed to queue email" }, status: :internal_server_error }
+          end
         end
       end
     end
+      
     
   
     # GET /visits/:id/edit
