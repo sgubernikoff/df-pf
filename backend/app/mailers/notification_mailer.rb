@@ -7,7 +7,7 @@ class NotificationMailer < ApplicationMailer
       @url = "localhost:5173/visit/#{8}"
 
       if @visit.visit_pdf.attached?
-        filename = "visit-#{@visit.id}-#{@user.name.parameterize}.pdf"
+        filename = "#{@visit.dress.name}-#{@user.name.parameterize}-#{@visit.created_at.to_date}.pdf"
   
         attachments[filename] = {
           mime_type: 'application/pdf',
@@ -17,7 +17,7 @@ class NotificationMailer < ApplicationMailer
       
       mail(
         to: @user.email,
-        subject: "Your Visit PDF for #{@visit.user&.name || 'Danielle Frankel'} is Ready"
+        subject: "Your PDF for #{@visit.dress.name || 'Danielle Frankel'} is Ready"
       )
     end
   end
