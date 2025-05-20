@@ -7,7 +7,8 @@ li::marker {
   color: white;
 }
 
-input:focus {
+input:focus,
+textarea:focus {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -274,13 +275,23 @@ textarea {
 }
 
 @media (max-width: 600px) {
-  input {
+  input,
+  textarea {
     border-radius: 0 !important;
   }
 
-  input:focus {
+  input:focus,
+  textarea:focus {
     outline: none;
     box-shadow: none;
+  }
+
+  .form-create-page > label > input {
+    color: black !important;
+  }
+
+  button:first-of-type {
+    color: black !important;
   }
 
   .header-left {
