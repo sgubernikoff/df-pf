@@ -21,7 +21,8 @@ class Visit < ApplicationRecord
 
   def convert_heic_to_jpg(tempfile)
   image = MiniMagick::Image.open(tempfile.path)
-  image.auto_orient # ✅ This fixes the orientation using EXIF
+  image.auto_orient
+  image.strip
   jpg_file = Tempfile.new(['converted', '.jpg'], binmode: true)
   image.format("jpg")
   image.write(jpg_file.path)
