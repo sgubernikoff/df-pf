@@ -269,6 +269,10 @@ textarea {
 }
 
 @media (max-width: 600px) {
+  input {
+    border-radius: 0 !important;
+  }
+
   .header-left {
     display: none;
   }

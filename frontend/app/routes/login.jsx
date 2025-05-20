@@ -26,7 +26,7 @@ export default function Login() {
 
   return (
     <div className="login-page">
-      <h1>Login</h1>
+      <p>Login</p>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
