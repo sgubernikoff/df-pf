@@ -20,11 +20,12 @@ class Visit < ApplicationRecord
   end
 
   def convert_heic_to_jpg(tempfile)
-    image = MiniMagick::Image.open(tempfile.path)
-    jpg_file = Tempfile.new(['converted', '.jpg'], binmode: true)
-    image.format("jpg")
-    image.write(jpg_file.path)
-    jpg_file
+  image = MiniMagick::Image.open(tempfile.path)
+  image.auto_orient # ✅ This fixes the orientation using EXIF
+  jpg_file = Tempfile.new(['converted', '.jpg'], binmode: true)
+  image.format("jpg")
+  image.write(jpg_file.path)
+  jpg_file
   end
 
   def generate_pdf_and_store
