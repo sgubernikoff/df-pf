@@ -1,6 +1,6 @@
 import { json, redirect } from "@remix-run/node";
 
-export async function loader({ request }) {
+export async function action({ request }) {
   const cookieHeader = request.headers.get("cookie");
   const cookies = Object.fromEntries(
     cookieHeader?.split("; ").map((c) => c.split("=")) ?? []
@@ -17,12 +17,14 @@ export async function loader({ request }) {
   if (isAdmin !== "true") {
     return redirect("/");
   }
-  const url = new URL(request.url);
-  const query = url.searchParams.get("query") || "";
 
+  const formData = await request.formData();
+  const visitId = formData.get("visitId");
+  console.log(visitId);
   const res = await fetch(
-    `https://df-pf.onrender.com/users/search?query=${query}`,
+    `https://df-pf.onrender.com/visits/${visitId}/resend_email`,
     {
+      method: "POST",
       headers: {
         Authorization: token,
       },
@@ -30,9 +32,12 @@ export async function loader({ request }) {
   );
 
   if (!res.ok) {
-    return json([], { status: res.status });
+    const error = await res.json();
+    return json(
+      { error: error.error || "Unknown error" },
+      { status: res.status }
+    );
   }
 
-  const users = await res.json();
-  return json(users);
+  return json({ message: "Email has been queued" });
 }
