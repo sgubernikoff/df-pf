@@ -286,11 +286,11 @@ textarea {
     box-shadow: none;
   }
 
-  .form-create-page > label > input {
+  .form-create-page > form > label > input {
     color: black !important;
   }
 
-  button:first-of-type {
+  .form-create-page > button:first-of-type {
     color: black !important;
   }
 
