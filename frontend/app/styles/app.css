@@ -271,10 +271,6 @@ textarea {
   width: 50%;
 }
 
-.user-visits-container {
-  grid-template-columns: repeat(auto-fit, minimax(300px, 0fr));
-}
-
 .users-page {
   padding: 1rem;
   width: 50%;

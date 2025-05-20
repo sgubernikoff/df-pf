@@ -46,7 +46,7 @@ export default function Visit() {
         style={{
           display: "grid",
           gap: "1vw",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 0fr))",
           gridTemplateRows: "min-content",
         }}
       >
