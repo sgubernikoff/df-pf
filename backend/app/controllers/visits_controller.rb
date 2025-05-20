@@ -37,6 +37,9 @@ class VisitsController < ApplicationController
   
     # POST /visits
     def create
+      unless current_user.is_admin
+        return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
+      end
       # Step 1: Handle user association
       if visit_params[:user_id].present?
         user = User.find_by(id: visit_params[:user_id])
@@ -87,6 +90,26 @@ class VisitsController < ApplicationController
         end
       end
     end
+
+    def resend_email
+      unless current_user.is_admin
+        return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
+      end
+
+      @visit = Visit.find_by(id: params[:id])
+    
+      respond_to do |format|
+        if @visit.nil?
+          format.json { render json: { error: "Visit not found" }, status: :not_found }
+        elsif !@visit.visit_pdf.attached?
+          format.json { render json: { error: "PDF not attached" }, status: :unprocessable_entity }
+        else
+          NotificationMailer.job_completion_email(@visit.user, @visit.id).deliver_now
+          format.json { render json: { message: "Email resent successfully" }, status: :ok }
+        end
+      end
+    end
+    
   
     # GET /visits/:id/edit
     def edit

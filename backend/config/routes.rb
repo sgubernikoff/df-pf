@@ -13,7 +13,11 @@ Rails.application.routes.draw do
   get 'current_user', to: 'users#show_me'
   get "users/search", to: "users#search"
   resources :users
-  resources :visits, defaults: { format: :json }
+  resources :visits, defaults: { format: :json } do
+    member do
+      post :resend_email
+    end
+  end
   resources :dresses
 
   get "up" => "rails/health#show", as: :rails_health_check
