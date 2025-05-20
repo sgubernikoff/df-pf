@@ -287,11 +287,11 @@ textarea {
     box-shadow: none;
   }
 
-  .form-create-page > form > label > input {
+  .form-create-page > form > label > input#file-upload-button {
     color: black !important;
   }
 
-  .form-create-page > button:first-of-type {
+  .form-create-page > form > button:first-of-type {
     color: black !important;
   }
 
