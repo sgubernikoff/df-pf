@@ -20,7 +20,7 @@ export async function loader({ request }) {
 
   const shopifyData = await fetchAllProductsFromCollection("new-arrivals");
 
-  const res = await fetch("https://df-pf.onrender.com/current_user", {
+  const res = await fetch("http://localhost:3000/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -71,7 +71,7 @@ export async function action({ request }) {
     debugPayload[key] = val;
   }
 
-  const res = await fetch("https://df-pf.onrender.com/visits", {
+  const res = await fetch("http://localhost:3000/visits", {
     method: "POST",
     body: formData,
     headers: { Authorization: token },

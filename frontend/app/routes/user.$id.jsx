@@ -15,7 +15,7 @@ export async function loader({ params, request }) {
     return redirect("/login");
   }
   // Here, you'll dynamically generate the URL to the PDF based on the visit ID.
-  const res = await fetch(`https://df-pf.onrender.com/users/${params.id}`, {
+  const res = await fetch(`http://localhost:3000/users/${params.id}`, {
     headers: {
       Authorization: token,
     },
@@ -46,7 +46,7 @@ export default function Visit() {
         style={{
           display: "grid",
           gap: "1vw",
-          gridTemplateColumns: "repeat(4,1fr)",
+          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
           gridTemplateRows: "min-content",
         }}
       >
@@ -73,6 +73,7 @@ export default function Visit() {
             >
               {v.attributes?.product?.imageUrl ? (
                 <img
+                  style={{ width: "100%" }}
                   src={`${v?.attributes?.product?.imageUrl}&width=333`}
                   alt={v.attributes.product.title || "No title"}
                 />

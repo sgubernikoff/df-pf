@@ -20,14 +20,11 @@ export async function loader({ request }) {
   const url = new URL(request.url);
   const query = url.searchParams.get("query") || "";
 
-  const res = await fetch(
-    `https://df-pf.onrender.com/users/search?query=${query}`,
-    {
-      headers: {
-        Authorization: token,
-      },
-    }
-  );
+  const res = await fetch(`http://localhost:3000/users/search?query=${query}`, {
+    headers: {
+      Authorization: token,
+    },
+  });
 
   if (!res.ok) {
     return json([], { status: res.status });
