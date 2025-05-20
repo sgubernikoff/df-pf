@@ -278,6 +278,7 @@ textarea {
   input,
   textarea {
     border-radius: 0 !important;
+    border-color: black !important;
   }
 
   input:focus,
