@@ -1,5 +1,6 @@
 require 'open-uri'
 require 'vips'
+require 'mini_magick'
 
 class Visit < ApplicationRecord
   has_many_attached :images, dependent: :purge_later
@@ -16,6 +17,14 @@ class Visit < ApplicationRecord
   def generate_pdf_later
     Rails.logger.info("Generating PDF for Visit #{id}")
     GenerateVisitPdfJob.perform_later(id)
+  end
+
+  def convert_heic_to_jpg(tempfile)
+    image = MiniMagick::Image.open(tempfile.path)
+    jpg_file = Tempfile.new(['converted', '.jpg'], binmode: true)
+    image.format("jpg")
+    image.write(jpg_file.path)
+    jpg_file
   end
 
   def generate_pdf_and_store
@@ -105,9 +114,19 @@ class Visit < ApplicationRecord
         y = top_y - row * (image_height + gap_y)
 
         image.blob.open do |file|
+          temp_img = nil
           begin
             Rails.logger.info("Processing gallery image #{i + 1} on page #{idx + 1}")
-            original = Vips::Image.new_from_file(file.path, access: :sequential)
+
+            ext = File.extname(file.path).downcase
+            file_to_use = if ext == ".heic"
+              Rails.logger.info("Converting HEIC to JPEG")
+              convert_heic_to_jpg(file)
+            else
+              file
+            end
+
+            original = Vips::Image.new_from_file(file_to_use.path, access: :sequential)
 
             watermark_path = Rails.root.join("app/assets/images/watermark2.png")
             unless File.exist?(watermark_path)
@@ -135,6 +154,7 @@ class Visit < ApplicationRecord
           ensure
             temp_img&.close
             temp_img&.unlink
+            file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
           end
         end
       end
