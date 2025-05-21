@@ -111,8 +111,7 @@ class Visit < ApplicationRecord
     gap_y = 10
     page_width = pdf.bounds.width
     image_width = (page_width - gap_x * 2) / 3.0
-    pdf.start_new_page # ✅ Start gallery on new page
-    gallery_top_y = pdf.bounds.top - 20
+    gallery_top_y = pdf.cursor - 20
 
     images.each_slice(9).with_index do |batch, idx|
       top_y = (idx == 0) ? gallery_top_y : pdf.bounds.top - 20
@@ -120,7 +119,7 @@ class Visit < ApplicationRecord
       batch.each_with_index do |image, i|
         row, col = i.divmod(3)
         x = col * (image_width + gap_x)
-        y = top_y - row * ((image_width * 1.8) + gap_y)
+        y = top_y - row * ((image_width * 2) + gap_y)
 
         image.blob.open do |file|
           temp_img = nil
@@ -165,7 +164,7 @@ class Visit < ApplicationRecord
             composed.write_to_file(temp_img.path)
 
             pdf.bounding_box([x, y], width: image_width) do
-              pdf.image temp_img.path, fit: [image_width, image_width * 1.8], position: :center, vposition: :center
+              pdf.image temp_img.path, fit: [image_width, image_width * 2], position: :center, vposition: :center
             end
           rescue => e
             Rails.logger.error("Failed gallery image #{i + 1} on page #{idx + 1}: #{e.message}")
