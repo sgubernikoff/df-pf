@@ -113,7 +113,7 @@ class Visit < ApplicationRecord
     gap_y = 5 # ✅ Less vertical space between gallery rows
     page_width = pdf.bounds.width
     image_width = (page_width - gap_x * 2) / 3.0
-    gallery_top_y = pdf.bounds.top - 100
+    gallery_top_y = pdf.cursor - 30
 
     images.each_slice(9).with_index do |batch, idx|
       top_y = (idx == 0) ? gallery_top_y : pdf.bounds.top - 20
