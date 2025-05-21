@@ -101,6 +101,8 @@ class Visit < ApplicationRecord
           pdf.text(dress.description.to_s, align: :center)
         end
       end
+
+      pdf.move_down(30) # ✅ Add spacing before gallery starts
     else
       Rails.logger.warn("No dress or dress image URLs for Visit #{id}")
     end
@@ -108,10 +110,10 @@ class Visit < ApplicationRecord
     # Gallery Pages
     notes_added = false
     gap_x = 10
-    gap_y = 10
+    gap_y = 5 # ✅ Less vertical space between gallery rows
     page_width = pdf.bounds.width
     image_width = (page_width - gap_x * 2) / 3.0
-    gallery_top_y = pdf.cursor - 20
+    gallery_top_y = pdf.cursor - 10 # ✅ Start gallery lower
 
     images.each_slice(9).with_index do |batch, idx|
       top_y = (idx == 0) ? gallery_top_y : pdf.bounds.top - 20
@@ -177,10 +179,10 @@ class Visit < ApplicationRecord
       end
 
       if idx == (images.count - 1) / 9 && notes.present? && !notes_added
-        if pdf.cursor > 100
-          pdf.move_down 20
+        if pdf.cursor > 50 # ✅ Less vertical gap before notes
+          pdf.move_down 10
           pdf.font_size(10) { pdf.text "Notes:", style: :bold }
-          pdf.move_down 5
+          pdf.move_down 4
           pdf.font_size(8) { pdf.text notes.to_s }
           notes_added = true
         end
