@@ -32,8 +32,6 @@ class Visit < ApplicationRecord
   end
 
   def generate_pdf_and_store
-    Rails.logger.info("Starting PDF generation for Visit #{id}...")
-
     pdf = Prawn::Document.new
     pdf.font "Helvetica"
 
@@ -43,115 +41,121 @@ class Visit < ApplicationRecord
     pdf.image(logo_path, width: 200, position: :center) if File.exist?(logo_path)
 
     pdf.move_down(15)
-    client_name = user.name || "Client"
-    pdf.font_size(24) { pdf.text client_name, align: :center, style: :bold }
+    pdf.font_size(24) { pdf.text(user.name || "Client", align: :center, style: :bold) }
 
     # Dress Page
     if dress&.image_urls.present?
       pdf.start_new_page
-      page_width = pdf.bounds.width
       image_gap = 10
-      image_width = (page_width - image_gap * 2) / 3.0
-      top_y = pdf.bounds.height - 20
+      image_width = (pdf.bounds.width - image_gap * 2) / 3.0
+      top_y = pdf.cursor
       image_heights = []
 
       dress.image_urls.first(3).each_with_index do |url, i|
         begin
-          image_file = Tempfile.new(["dress_image_#{i}", ".jpg"])
-          image_file.binmode
-          image_file.write(URI.open(url).read)
-          image_file.rewind
+          img_file = Tempfile.new(["dress_#{i}", ".jpg"])
+          img_file.binmode
+          img_file.write URI.open(url).read
+          img_file.rewind
 
-          image = Vips::Image.new_from_file(image_file.path)
+          image = Vips::Image.new_from_file(img_file.path)
           aspect_ratio = image.width.to_f / image.height.to_f
           image_height = image_width / aspect_ratio
           x = i * (image_width + image_gap)
 
-          pdf.image image_file.path, at: [x, top_y], width: image_width, height: image_height
+          pdf.image img_file.path, at: [x, top_y], width: image_width, height: image_height
           image_heights << image_height
         rescue => e
-          Rails.logger.error("Error processing dress image #{url}: #{e.message}")
+          Rails.logger.error("Dress image error: #{e.message}")
         ensure
-          image_file.close
-          image_file.unlink
+          img_file.close
+          img_file.unlink
         end
       end
 
-      bottom_y = top_y - (image_heights.max || 0) - 10
-      pdf.bounding_box([0, bottom_y], width: page_width) do
-        pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
-        pdf.font_size(10) do
-          pdf.move_down 1
-          price_text = dress.price.to_s.encode("UTF-8", invalid: :replace, undef: :replace, replace: '')
-          pdf.text(price_text, align: :center) if dress.price.present?
-          pdf.move_down 1
-          pdf.text(dress.description.to_s, align: :center)
-        end
+      pdf.move_down((image_heights.max || 0) + 20)
+      pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
+      pdf.font_size(10) do
+        price_text = dress.price.to_s.encode("UTF-8", invalid: :replace, undef: :replace, replace: '')
+        pdf.text(price_text, align: :center) if dress.price.present?
+        pdf.move_down 1
+        pdf.text(dress.description.to_s, align: :center)
       end
     end
 
-    # Gallery Pages
+    # Gallery
     if images.attached?
-      gap_x = 10
-      gap_y = 20
-      image_width = (pdf.bounds.width - gap_x * 2) / 3.0
+      image_gap = 10
+      image_width = (pdf.bounds.width - image_gap * 2) / 3.0
       image_height = image_width * 1.5
+      vertical_gap = 20
+      left_margin = 0
 
-      images.each_slice(9).with_index do |batch, idx|
-        pdf.start_new_page unless idx == 0
-        batch.each_with_index do |image, i|
-          row, col = i.divmod(3)
-          x = col * (image_width + gap_x)
-          y = pdf.cursor - (row * (image_height + gap_y))
+      images.each_with_index do |img, idx|
+        col = idx % 3
+        row = (idx / 3)
 
-          image.blob.open do |file|
-            temp_img = nil
-            begin
-              ext = File.extname(file.path).downcase
-              file_to_use = if ext == ".heic"
-                convert_heic_to_jpg(file)
-              elsif ext == ".jpg" || ext == ".jpeg"
-                img = MiniMagick::Image.open(file.path)
-                img.auto_orient
-                img.strip
-                img.rotate(90) if img[:width] > img[:height]
-                jpg = Tempfile.new(['oriented', '.jpg'], binmode: true)
-                img.write(jpg.path)
-                jpg
-              else
-                file
-              end
+        # Check space before adding image
+        space_needed = (row == 0 ? 0 : vertical_gap) + image_height
+        pdf.start_new_page if pdf.cursor < space_needed + 30
 
-              original = Vips::Image.new_from_file(file_to_use.path, access: :sequential)
-              watermark_path = Rails.root.join("app/assets/images/watermark2.png")
-              next unless File.exist?(watermark_path)
+        x = col * (image_width + image_gap)
+        y = pdf.cursor - (row % 3) * (image_height + vertical_gap)
 
-              watermark = Vips::Image.new_from_file(watermark_path.to_s)
-              watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
-              watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-              watermark = watermark * [1, 1, 1, 0.3]
-              x_offset = (original.width - watermark.width) / 2
-              y_offset = (original.height - watermark.height) / 2
-              composed = original.composite2(watermark, :over, x: x_offset, y: y_offset)
-
-              temp_img = Tempfile.new(["gallery_#{i}", ".jpg"])
-              composed.write_to_file(temp_img.path)
-              pdf.bounding_box([x, y], width: image_width) do
-                pdf.image temp_img.path, fit: [image_width, image_height]
-              end
-            rescue => e
-              Rails.logger.error("Gallery image #{i + 1} failed: #{e.message}")
-            ensure
-              temp_img&.close
-              temp_img&.unlink
-              file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
+        img.blob.open do |file|
+          temp_img = nil
+          begin
+            ext = File.extname(file.path).downcase
+            file_to_use = if ext == ".heic"
+              convert_heic_to_jpg(file)
+            elsif ext == ".jpg" || ext == ".jpeg"
+              image = MiniMagick::Image.open(file.path)
+              image.auto_orient
+              image.strip
+              image.rotate(90) if image[:width] > image[:height]
+              jpg_file = Tempfile.new(['oriented', '.jpg'], binmode: true)
+              image.write(jpg_file.path)
+              jpg_file
+            else
+              file
             end
+
+            original = Vips::Image.new_from_file(file_to_use.path)
+            watermark_path = Rails.root.join("app/assets/images/watermark2.png")
+            next unless File.exist?(watermark_path)
+
+            watermark = Vips::Image.new_from_file(watermark_path.to_s)
+            watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
+            watermark = watermark.bandjoin(255) unless watermark.has_alpha?
+            watermark = watermark * [1, 1, 1, 0.3]
+            composed = original.composite2(watermark, :over,
+              x: (original.width - watermark.width) / 2,
+              y: (original.height - watermark.height) / 2
+            )
+
+            temp_img = Tempfile.new(["img_#{idx}", ".jpg"])
+            composed.write_to_file(temp_img.path)
+
+            pdf.bounding_box([x, y], width: image_width) do
+              pdf.image temp_img.path, fit: [image_width, image_height]
+            end
+          rescue => e
+            Rails.logger.error("Image #{idx + 1} failed: #{e.message}")
+          ensure
+            temp_img&.close
+            temp_img&.unlink
+            file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
           end
         end
+
+        # After every 3 images, move cursor
+        if col == 2
+          pdf.move_down(image_height + vertical_gap)
+        end
       end
     end
 
-    # Notes Page
+    # Notes
     if notes.present?
       pdf.start_new_page
       pdf.font_size(10) { pdf.text "Notes:", style: :bold }
@@ -159,7 +163,7 @@ class Visit < ApplicationRecord
       pdf.font_size(8) { pdf.text notes.to_s }
     end
 
-    # Save and Encrypt
+    # Save & Encrypt
     pdf_path = Rails.root.join("tmp", "visits", "visit_#{id}.pdf")
     FileUtils.mkdir_p(File.dirname(pdf_path))
     pdf.render_file(pdf_path)
@@ -177,10 +181,10 @@ class Visit < ApplicationRecord
       identify: false
     )
 
-    Rails.logger.info("Encrypted PDF generated for Visit #{id}")
+    Rails.logger.info("PDF done for Visit #{id}")
     password
   rescue => e
-    Rails.logger.error("PDF generation error for Visit #{id}: #{e.class} - #{e.message}")
+    Rails.logger.error("PDF generation error: #{e.class} - #{e.message}")
     false
   end
 end
