@@ -56,8 +56,16 @@ class VisitsController < ApplicationController
       return render json: { error: "User could not be created or found" }, status: :unprocessable_entity
     end
 
-    @visit = Visit.new(visit_params.except(:selected_dress, :customer_name, :customer_email))
+    # Exclude image_urls from Visit.new
+    @visit = Visit.new(visit_params.except(:selected_dress, :customer_name, :customer_email, :image_urls))
     @visit.user = user
+
+    # Append image URLs to notes (if present)
+    image_urls = Array(visit_params[:image_urls]).reject { |url| url == "undefined" }
+    if image_urls.any?
+      images_section = "Images:\n" + image_urls.join("\n")
+      @visit.notes = [@visit.notes, images_section].compact.join("\n\n").strip
+    end
 
     dress_data = JSON.parse(visit_params[:selected_dress])
     @dress = Dress.new(
@@ -69,11 +77,6 @@ class VisitsController < ApplicationController
 
     if @visit.save
       @visit.update(dress_id: @dress.id, shopify_dress_id: dress_data["id"]) if @dress.save
-
-      params[:visit][:image_urls]&.each do |url|
-        downloaded = URI.open(url)
-        @visit.images.attach(io: downloaded, filename: File.basename(URI.parse(url).path))
-      end
 
       respond_to do |format|
         format.html { redirect_to @visit, notice: 'Visit was successfully created.' }
