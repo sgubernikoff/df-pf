@@ -56,15 +56,18 @@ class VisitsController < ApplicationController
       return render json: { error: "User could not be created or found" }, status: :unprocessable_entity
     end
 
-    # Exclude image_urls from Visit.new
     @visit = Visit.new(visit_params.except(:selected_dress, :customer_name, :customer_email, :image_urls))
     @visit.user = user
 
-    # Append image URLs to notes (if present)
     image_urls = Array(visit_params[:image_urls]).reject { |url| url == "undefined" }
-    if image_urls.any?
-      images_section = "Images:\n" + image_urls.join("\n")
-      @visit.notes = [@visit.notes, images_section].compact.join("\n\n").strip
+    image_urls.each_with_index do |url, i|
+      begin
+        downloaded = URI.open(url)
+        filename = File.basename(URI.parse(url).path)
+        @visit.images.attach(io: downloaded, filename: filename)
+      rescue => e
+        Rails.logger.error("Failed to attach image #{i + 1} from URL #{url}: #{e.message}")
+      end
     end
 
     dress_data = JSON.parse(visit_params[:selected_dress])
