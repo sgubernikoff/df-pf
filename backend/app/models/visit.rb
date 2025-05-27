@@ -39,7 +39,6 @@ class Visit < ApplicationRecord
     pdf.move_down(pdf.bounds.height / 2 - 50)
     logo_path = Rails.root.join("public", "images", "DanielleFrankelMainLogo.jpg")
     pdf.image(logo_path, width: 200, position: :center) if File.exist?(logo_path)
-
     pdf.move_down(15)
     pdf.font_size(24) { pdf.text(user.name || "Client", align: :center, style: :bold) }
 
@@ -83,80 +82,82 @@ class Visit < ApplicationRecord
       end
     end
 
-    # Gallery Images
+    # Gallery
     if images.attached?
-      pdf.start_new_page
       image_gap = 10
       image_width = (pdf.bounds.width - image_gap * 2) / 3.0
       image_height = image_width * 1.5
-      vertical_gap = 20
+      row_gap = 20
 
-      images.each_slice(3).with_index do |row_images, row_idx|
-        start_y = pdf.cursor
+      row_index = 0
+      col_index = 0
 
-        # Check space
-        space_needed = image_height + vertical_gap
-        if pdf.cursor < space_needed + 20
+      images.each_with_index do |img, idx|
+        x = col_index * (image_width + image_gap)
+        y = pdf.cursor
+
+        # Start new page if not enough space
+        if y < image_height + row_gap
           pdf.start_new_page
-          start_y = pdf.cursor
+          y = pdf.cursor
+          row_index = 0
         end
 
-        row_images.each_with_index do |img, col|
-          x = col * (image_width + image_gap)
-          y = start_y
-
-          img.blob.open do |file|
-            temp_img = nil
-            begin
-              ext = File.extname(file.path).downcase
-              file_to_use = if ext == ".heic"
-                convert_heic_to_jpg(file)
-              elsif ext == ".jpg" || ext == ".jpeg"
-                image = MiniMagick::Image.open(file.path)
-                image.auto_orient
-                image.strip
-                image.rotate(90) if image[:width] > image[:height]
-                jpg_file = Tempfile.new(['oriented', '.jpg'], binmode: true)
-                image.write(jpg_file.path)
-                jpg_file
-              else
-                file
-              end
-
-              original = Vips::Image.new_from_file(file_to_use.path)
-              watermark_path = Rails.root.join("app/assets/images/watermark2.png")
-              next unless File.exist?(watermark_path)
-
-              watermark = Vips::Image.new_from_file(watermark_path.to_s)
-              watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
-              watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-              watermark = watermark * [1, 1, 1, 0.3]
-              composed = original.composite2(watermark, :over,
-                x: (original.width - watermark.width) / 2,
-                y: (original.height - watermark.height) / 2
-              )
-
-              temp_img = Tempfile.new(["img_#{row_idx}_#{col}", ".jpg"])
-              composed.write_to_file(temp_img.path)
-
-              pdf.bounding_box([x, y], width: image_width) do
-                pdf.image temp_img.path, fit: [image_width, image_height]
-              end
-            rescue => e
-              Rails.logger.error("Image #{row_idx * 3 + col + 1} failed: #{e.message}")
-            ensure
-              temp_img&.close
-              temp_img&.unlink
-              file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
+        img.blob.open do |file|
+          temp_img = nil
+          begin
+            ext = File.extname(file.path).downcase
+            file_to_use = if ext == ".heic"
+              convert_heic_to_jpg(file)
+            elsif ext == ".jpg" || ext == ".jpeg"
+              image = MiniMagick::Image.open(file.path)
+              image.auto_orient
+              image.strip
+              image.rotate(90) if image[:width] > image[:height]
+              jpg_file = Tempfile.new(['oriented', '.jpg'], binmode: true)
+              image.write(jpg_file.path)
+              jpg_file
+            else
+              file
             end
+
+            original = Vips::Image.new_from_file(file_to_use.path)
+            watermark_path = Rails.root.join("app/assets/images/watermark2.png")
+            next unless File.exist?(watermark_path)
+
+            watermark = Vips::Image.new_from_file(watermark_path.to_s)
+            watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
+            watermark = watermark.bandjoin(255) unless watermark.has_alpha?
+            watermark = watermark * [1, 1, 1, 0.3]
+            composed = original.composite2(watermark, :over,
+              x: (original.width - watermark.width) / 2,
+              y: (original.height - watermark.height) / 2
+            )
+
+            temp_img = Tempfile.new(["img_#{idx}", ".jpg"])
+            composed.write_to_file(temp_img.path)
+
+            pdf.bounding_box([x, pdf.cursor], width: image_width) do
+              pdf.image temp_img.path, fit: [image_width, image_height]
+            end
+          rescue => e
+            Rails.logger.error("Image #{idx + 1} failed: #{e.message}")
+          ensure
+            temp_img&.close
+            temp_img&.unlink
+            file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
           end
         end
 
-        pdf.move_down(image_height + vertical_gap)
+        col_index += 1
+        if col_index == 3
+          col_index = 0
+          pdf.move_down(image_height + row_gap)
+        end
       end
     end
 
-    # Notes Page
+    # Notes
     if notes.present?
       pdf.start_new_page
       pdf.font_size(10) { pdf.text "Notes:", style: :bold }
