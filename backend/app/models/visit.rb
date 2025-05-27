@@ -39,6 +39,7 @@ class Visit < ApplicationRecord
     pdf.move_down(pdf.bounds.height / 2 - 50)
     logo_path = Rails.root.join("public", "images", "DanielleFrankelMainLogo.jpg")
     pdf.image(logo_path, width: 200, position: :center) if File.exist?(logo_path)
+
     pdf.move_down(15)
     pdf.font_size(24) { pdf.text(user.name || "Client", align: :center, style: :bold) }
 
@@ -87,16 +88,19 @@ class Visit < ApplicationRecord
       image_gap = 10
       image_width = (pdf.bounds.width - image_gap * 2) / 3.0
       image_height = image_width * 1.5
-      vertical_gap = 20
+      row_height = image_height + 30
+      left_margin = 0
+      cursor_y = pdf.cursor
 
-      images.each_slice(3).with_index do |row_images, row_index|
-        if pdf.cursor < image_height + vertical_gap
+      images.each_slice(3).with_index do |row_images, row_idx|
+        if cursor_y - row_height < 50
           pdf.start_new_page
+          cursor_y = pdf.cursor
         end
 
         row_images.each_with_index do |img, col|
           x = col * (image_width + image_gap)
-          y = pdf.cursor
+          y = cursor_y
 
           img.blob.open do |file|
             temp_img = nil
@@ -129,14 +133,14 @@ class Visit < ApplicationRecord
                 y: (original.height - watermark.height) / 2
               )
 
-              temp_img = Tempfile.new(["img_#{row_index}_#{col}", ".jpg"])
+              temp_img = Tempfile.new(["img_#{row_idx}_#{col}", ".jpg"])
               composed.write_to_file(temp_img.path)
 
-              pdf.bounding_box([x, pdf.cursor], width: image_width) do
+              pdf.bounding_box([x, y], width: image_width) do
                 pdf.image temp_img.path, fit: [image_width, image_height]
               end
             rescue => e
-              Rails.logger.error("Image failed: #{e.message}")
+              Rails.logger.error("Image #{img.filename} failed: #{e.message}")
             ensure
               temp_img&.close
               temp_img&.unlink
@@ -145,7 +149,7 @@ class Visit < ApplicationRecord
           end
         end
 
-        pdf.move_down(image_height + vertical_gap)
+        cursor_y -= row_height
       end
     end
 
