@@ -52,7 +52,7 @@ class Visit < ApplicationRecord
       page_width = pdf.bounds.width
       image_gap = 10
       image_width = (page_width - image_gap * 2) / 3.0
-      top_y = pdf.bounds.height - 20
+      top_y = pdf.bounds.height - 10
       image_heights = []
 
       dress.image_urls.first(3).each_with_index do |url, i|
@@ -94,12 +94,12 @@ class Visit < ApplicationRecord
     if images.attached?
       images_per_row = 3
       gap_x = 10
-      gap_y = 20
+      gap_y = 10
       image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
       image_height = image_width * 1.25
 
       initial_top_y = pdf.bounds.top - 300  # Start halfway down
-      regular_top_y = pdf.bounds.top - 20
+      regular_top_y = pdf.bounds.top - 10
       current_y = initial_top_y
       is_first_gallery_page = true
 
