@@ -8,6 +8,8 @@
     <p>
       Your visit PDF has been generated and is ready for you to view.
     </p>
+    <p>Your PDF is attached to this email.</p>
+    <p><strong>Password to open the PDF:</strong> <%= @password %></p>
     <% if @visit.dress %>
       <p>Visit details for: <%= @visit.dress.name %></p>
     <% end %>

@@ -112,8 +112,7 @@ class VisitsController < ApplicationController
           format.json { render json: { error: "PDF not attached" }, status: :unprocessable_entity }
         else
           begin
-            NotificationMailer.job_completion_email(@visit.user, @visit.id).deliver_later
-            format.json { render json: { message: "Email has been queued for delivery" }, status: :accepted }
+            NotificationMailer.job_completion_email(@visit.user, @visit.id, "Contact us for your password").deliver_later
           rescue => e
             Rails.logger.error("Email enqueue failed: #{e.message}")
             format.json { render json: { error: "Failed to queue email" }, status: :internal_server_error }

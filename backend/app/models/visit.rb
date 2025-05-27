@@ -203,11 +203,22 @@ class Visit < ApplicationRecord
     FileUtils.mkdir_p(File.dirname(pdf_path))
     pdf.render_file(pdf_path)
 
+    password = SecureRandom.hex(4) # 8 characters
+
+    # ✅ Encrypt with HexaPDF
+    encrypted_path = pdf_path.sub_ext('.encrypted.pdf')
+    doc = HexaPDF::Document.open(pdf_path.to_s)
+    doc.encrypt(owner_password: 'admin', user_password: password, permissions: {print: true})
+    doc.write(encrypted_path.to_s)
+
     visit_pdf.attach(
-      io: File.open(pdf_path),
+      io: File.open(encrypted_path),
       filename: "visit_#{id}.pdf",
       content_type: "application/pdf"
     )
+
+    Rails.logger.info("Encrypted PDF attached for Visit #{id}")
+    return password if visit_pdf.attached?
 
     Rails.logger.info("PDF successfully generated and attached for Visit #{id}")
     return true if visit_pdf.attached?

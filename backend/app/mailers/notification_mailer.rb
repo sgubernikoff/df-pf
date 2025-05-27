@@ -1,10 +1,12 @@
 class NotificationMailer < ApplicationMailer
     default from: 'aglgegxg@gmail.com'
     
-    def job_completion_email(user, visit_id)
+    def job_completion_email(user, visit_id, password = nil)
       @user = user
       @visit = Visit.find(visit_id)
+      @password = password || "No password provided"
       @url = "localhost:5173/visit/#{8}"
+      
 
       if @visit.visit_pdf.attached?
         filename = "#{@visit.dress.name}-#{@user.name.parameterize}-#{@visit.created_at.to_date}.pdf"

@@ -92,6 +92,7 @@ GEM
     builder (3.3.0)
     case_transform (0.2)
       activesupport
+    cmdparse (3.0.7)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.3)
     crass (1.0.6)
@@ -128,8 +129,14 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
+    geom2d (0.4.1)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    hexapdf (1.3.0)
+      cmdparse (~> 3.0, >= 3.0.3)
+      geom2d (~> 0.4, >= 0.4.1)
+      openssl (>= 2.2.1)
+      strscan (>= 3.1.2)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     image_processing (1.14.0)
@@ -201,6 +208,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.8-x86_64-linux-musl)
       racc (~> 1.4)
+    openssl (3.3.0)
     orm_adapter (0.5.0)
     pdf-core (0.10.0)
     pg (1.5.9)
@@ -272,6 +280,7 @@ GEM
     securerandom (0.4.1)
     semantic_range (3.1.0)
     stringio (3.1.7)
+    strscan (3.1.5)
     thor (1.3.2)
     timeout (0.4.3)
     ttfunk (1.8.0)
@@ -314,6 +323,7 @@ DEPENDENCIES
   debug
   devise
   devise-jwt (~> 0.12.1)
+  hexapdf
   image_processing
   jsonapi-serializer (~> 2.2)
   kaminari (~> 1.2)

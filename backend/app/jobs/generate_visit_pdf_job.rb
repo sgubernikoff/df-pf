@@ -3,10 +3,10 @@ class GenerateVisitPdfJob < ApplicationJob
 
   def perform(visit_id)
     visit = Visit.find(visit_id)
+    password = visit.generate_pdf_and_store
     
-    if visit.generate_pdf_and_store
-      # PDF generation successful, send email notification
-      NotificationMailer.job_completion_email(visit.user, visit.id).deliver_now
+    if password
+      NotificationMailer.job_completion_email(visit.user, visit.id, password).deliver_now
     else
       # Handle failure case
       Rails.logger.error("Failed to generate PDF for Visit #{visit_id}")
