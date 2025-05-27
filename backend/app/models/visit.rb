@@ -126,7 +126,7 @@ class Visit < ApplicationRecord
                 img.write(jpg.path)
                 jpg
               else
-                file
+                file_to_use = file
               end
 
               original = Vips::Image.new_from_file(file_to_use.path, access: :sequential)
