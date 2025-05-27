@@ -96,70 +96,71 @@ class Visit < ApplicationRecord
       gap_x = 10
       gap_y = 20
       image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
-      image_height = image_width * 1.5
+      image_height = image_width * 1.25
 
-      initial_top_y = pdf.bounds.top - 300  # First page: halfway down
+      initial_top_y = pdf.bounds.top - 300  # Start halfway down
       regular_top_y = pdf.bounds.top - 40
       current_y = initial_top_y
+      is_first_gallery_page = true
 
-      images.each_slice(images_per_row).with_index do |row_images, page_idx|
-        if page_idx > 0
+      images.each_with_index do |image, i|
+        col = i % images_per_row
+        row = i / images_per_row
+
+        # Start new page only if needed (not enough vertical space)
+        if row > 0 && col == 0 && current_y - image_height < pdf.bounds.bottom + 50
           pdf.start_new_page
           current_y = regular_top_y
+          is_first_gallery_page = false
         end
 
-        row_images.each_with_index do |image, col|
-          x = col * (image_width + gap_x)
+        x = col * (image_width + gap_x)
 
-          image.blob.open do |file|
-            temp_img = nil
-            begin
-              ext = File.extname(file.path).downcase
-              file_to_use = if ext == ".heic"
-                convert_heic_to_jpg(file)
-              elsif [".jpg", ".jpeg"].include?(ext)
-                img = MiniMagick::Image.open(file.path)
-                img.auto_orient
-                img.strip
-                img.rotate(90) if img[:width] > img[:height]
-                jpg = Tempfile.new(['oriented', '.jpg'], binmode: true)
-                img.write(jpg.path)
-                jpg
-              else
-                file_to_use = file
-              end
-
-              original = Vips::Image.new_from_file(file_to_use.path, access: :sequential)
-              watermark_path = Rails.root.join("app/assets/images/watermark2.png")
-              next unless File.exist?(watermark_path)
-
-              watermark = Vips::Image.new_from_file(watermark_path.to_s)
-              watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
-              watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-              watermark = watermark * [1, 1, 1, 0.3]
-              x_offset = (original.width - watermark.width) / 2
-              y_offset = (original.height - watermark.height) / 2
-              composed = original.composite2(watermark, :over, x: x_offset, y: y_offset)
-
-              temp_img = Tempfile.new(["gallery", ".jpg"])
-              composed.write_to_file(temp_img.path)
-
-              pdf.image temp_img.path, at: [x, current_y], width: image_width, height: image_height
-            rescue => e
-              Rails.logger.error("Gallery image failed: #{e.message}")
-            ensure
-              temp_img&.close
-              temp_img&.unlink
-              file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
+        image.blob.open do |file|
+          temp_img = nil
+          begin
+            ext = File.extname(file.path).downcase
+            file_to_use = if ext == ".heic"
+              convert_heic_to_jpg(file)
+            elsif [".jpg", ".jpeg"].include?(ext)
+              img = MiniMagick::Image.open(file.path)
+              img.auto_orient
+              img.strip
+              img.rotate(90) if img[:width] > img[:height]
+              jpg = Tempfile.new(['oriented', '.jpg'], binmode: true)
+              img.write(jpg.path)
+              jpg
+            else
+              file_to_use = file
             end
+
+            original = Vips::Image.new_from_file(file_to_use.path, access: :sequential)
+            watermark_path = Rails.root.join("app/assets/images/watermark2.png")
+            next unless File.exist?(watermark_path)
+
+            watermark = Vips::Image.new_from_file(watermark_path.to_s)
+            watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
+            watermark = watermark.bandjoin(255) unless watermark.has_alpha?
+            watermark = watermark * [1, 1, 1, 0.3]
+            x_offset = (original.width - watermark.width) / 2
+            y_offset = (original.height - watermark.height) / 2
+            composed = original.composite2(watermark, :over, x: x_offset, y: y_offset)
+
+            temp_img = Tempfile.new(["gallery", ".jpg"])
+            composed.write_to_file(temp_img.path)
+
+            pdf.image temp_img.path, at: [x, current_y], width: image_width, height: image_height
+          rescue => e
+            Rails.logger.error("Gallery image failed: #{e.message}")
+          ensure
+            temp_img&.close
+            temp_img&.unlink
+            file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
           end
         end
 
-        current_y -= (image_height + gap_y)
-
-        if current_y - image_height < pdf.bounds.bottom + 50
-          pdf.start_new_page
-          current_y = regular_top_y
+        if col == images_per_row - 1 || i == images.size - 1
+          current_y -= (image_height + gap_y)
         end
       end
     end
