@@ -185,7 +185,7 @@ class Visit < ApplicationRecord
       top_padding = pdf.bounds.top - 50
       pdf.bounding_box([0, top_padding], width: pdf.bounds.width) do
         pdf.font_size(10) { pdf.text "Notes:", style: :bold }
-        pdf.move_down 8
+        pdf.move_down 5
         pdf.font_size(8) { pdf.text notes.to_s }
       end
     end
