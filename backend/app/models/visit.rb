@@ -191,12 +191,15 @@ class Visit < ApplicationRecord
       end
     end
 
-    if notes.present? && !notes_added
+    if notes.present?
       pdf.start_new_page
-      pdf.move_down 50
+
+      top_padding = pdf.bounds.top - 50
+      pdf.bounding_box([0, top_padding], width: pdf.bounds.width) do
       pdf.font_size(10) { pdf.text "Notes:", style: :bold }
       pdf.move_down 10
       pdf.font_size(8) { pdf.text notes.to_s }
+      end
     end
 
     pdf_path = Rails.root.join("tmp", "visits", "visit_#{id}.pdf")
