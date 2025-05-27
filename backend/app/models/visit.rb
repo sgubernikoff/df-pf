@@ -1,6 +1,8 @@
 require 'open-uri'
 require 'vips'
 require 'mini_magick'
+require 'hexapdf'
+require 'hexapdf/encryption/standard_security_handler'
 
 class Visit < ApplicationRecord
   has_many_attached :images, dependent: :purge_later
@@ -102,7 +104,7 @@ class Visit < ApplicationRecord
         end
       end
 
-      pdf.move_down(30) # ✅ Add spacing before gallery starts
+      pdf.move_down(30)
     else
       Rails.logger.warn("No dress or dress image URLs for Visit #{id}")
     end
@@ -110,7 +112,7 @@ class Visit < ApplicationRecord
     # Gallery Pages
     notes_added = false
     gap_x = 10
-    gap_y = 5 # ✅ Less vertical space between gallery rows
+    gap_y = 5
     page_width = pdf.bounds.width
     image_width = (page_width - gap_x * 2) / 3.0
     gallery_top_y = pdf.cursor - 100
@@ -189,7 +191,6 @@ class Visit < ApplicationRecord
       end
     end
 
-    # Notes page (if not already added)
     if notes.present? && !notes_added
       pdf.start_new_page
       pdf.move_down 50
@@ -198,17 +199,22 @@ class Visit < ApplicationRecord
       pdf.font_size(8) { pdf.text notes.to_s }
     end
 
-    # Save and attach
     pdf_path = Rails.root.join("tmp", "visits", "visit_#{id}.pdf")
     FileUtils.mkdir_p(File.dirname(pdf_path))
     pdf.render_file(pdf_path)
 
-    password = SecureRandom.hex(4) # 8 characters
+    password = SecureRandom.hex(4)
 
-    # ✅ Encrypt with HexaPDF
     encrypted_path = pdf_path.sub_ext('.encrypted.pdf')
     doc = HexaPDF::Document.open(pdf_path.to_s)
-    doc.encrypt(owner_password: 'admin', user_password: password, permissions: {print: true})
+
+    permissions = HexaPDF::Encryption::StandardSecurityHandler::PERMISSIONS[:print]
+
+    doc.encrypt(
+      owner_password: 'admin',
+      user_password: password,
+      permissions: permissions
+    )
     doc.write(encrypted_path.to_s)
 
     visit_pdf.attach(
@@ -217,11 +223,9 @@ class Visit < ApplicationRecord
       content_type: "application/pdf"
     )
 
-    Rails.logger.info("Encrypted PDF attached for Visit #{id}")
+    Rails.logger.info("Encrypted PDF successfully generated and attached for Visit #{id}")
     return password if visit_pdf.attached?
 
-    Rails.logger.info("PDF successfully generated and attached for Visit #{id}")
-    return true if visit_pdf.attached?
   rescue => e
     Rails.logger.error("Error generating PDF for Visit #{id}: #{e.class} - #{e.message}")
     Rails.logger.error(e.backtrace.join("\n"))
