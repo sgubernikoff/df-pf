@@ -2,7 +2,6 @@ require 'open-uri'
 require 'vips'
 require 'mini_magick'
 require 'hexapdf'
-require 'hexapdf/encryption/standard_security_handler'
 
 class Visit < ApplicationRecord
   has_many_attached :images, dependent: :purge_later
@@ -110,7 +109,6 @@ class Visit < ApplicationRecord
     end
 
     # Gallery Pages
-    notes_added = false
     gap_x = 10
     gap_y = 5
     page_width = pdf.bounds.width
@@ -179,35 +177,25 @@ class Visit < ApplicationRecord
           end
         end
       end
-
-      if idx == (images.count - 1) / 9 && notes.present? && !notes_added
-        if pdf.cursor > 20
-          pdf.move_down 5
-          pdf.font_size(10) { pdf.text "Notes:", style: :bold }
-          pdf.move_down 4
-          pdf.font_size(8) { pdf.text notes.to_s }
-          notes_added = true
-        end
-      end
     end
 
+    # Notes Page (only once)
     if notes.present?
       pdf.start_new_page
-
       top_padding = pdf.bounds.top - 50
       pdf.bounding_box([0, top_padding], width: pdf.bounds.width) do
-      pdf.font_size(10) { pdf.text "Notes:", style: :bold }
-      pdf.move_down 10
-      pdf.font_size(8) { pdf.text notes.to_s }
+        pdf.font_size(10) { pdf.text "Notes:", style: :bold }
+        pdf.move_down 10
+        pdf.font_size(8) { pdf.text notes.to_s }
       end
     end
 
+    # Save and Encrypt
     pdf_path = Rails.root.join("tmp", "visits", "visit_#{id}.pdf")
     FileUtils.mkdir_p(File.dirname(pdf_path))
     pdf.render_file(pdf_path)
 
     password = SecureRandom.hex(4)
-
     encrypted_path = pdf_path.sub_ext('.encrypted.pdf')
     doc = HexaPDF::Document.open(pdf_path.to_s)
 
@@ -220,12 +208,12 @@ class Visit < ApplicationRecord
     visit_pdf.attach(
       io: File.open(encrypted_path),
       filename: "visit_#{id}.pdf",
-      content_type: "application/pdf"
+      content_type: "application/pdf",
+      identify: false
     )
 
     Rails.logger.info("Encrypted PDF successfully generated and attached for Visit #{id}")
     return password if visit_pdf.attached?
-
   rescue => e
     Rails.logger.error("Error generating PDF for Visit #{id}: #{e.class} - #{e.message}")
     Rails.logger.error(e.backtrace.join("\n"))
