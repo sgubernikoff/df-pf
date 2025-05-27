@@ -90,19 +90,26 @@ class Visit < ApplicationRecord
       end
     end
 
-    # Gallery Pages
+    # Gallery Pages (updated layout)
     if images.attached?
+      images_per_row = 3
       gap_x = 10
       gap_y = 20
-      image_width = (pdf.bounds.width - gap_x * 2) / 3.0
+      image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
       image_height = image_width * 1.5
 
-      images.each_slice(9).with_index do |batch, idx|
-        pdf.start_new_page unless idx == 0
-        batch.each_with_index do |image, i|
-          row, col = i.divmod(3)
+      top_y = pdf.bounds.top - 40
+      current_y = top_y
+
+      images.each_slice(images_per_row) do |row_images|
+        # Start a new page if not enough space for a full row
+        if current_y - image_height < pdf.bounds.bottom + 50
+          pdf.start_new_page
+          current_y = pdf.bounds.top - 40
+        end
+
+        row_images.each_with_index do |image, col|
           x = col * (image_width + gap_x)
-          y = pdf.cursor - (row * (image_height + gap_y))
 
           image.blob.open do |file|
             temp_img = nil
@@ -110,7 +117,7 @@ class Visit < ApplicationRecord
               ext = File.extname(file.path).downcase
               file_to_use = if ext == ".heic"
                 convert_heic_to_jpg(file)
-              elsif ext == ".jpg" || ext == ".jpeg"
+              elsif [".jpg", ".jpeg"].include?(ext)
                 img = MiniMagick::Image.open(file.path)
                 img.auto_orient
                 img.strip
@@ -134,13 +141,12 @@ class Visit < ApplicationRecord
               y_offset = (original.height - watermark.height) / 2
               composed = original.composite2(watermark, :over, x: x_offset, y: y_offset)
 
-              temp_img = Tempfile.new(["gallery_#{i}", ".jpg"])
+              temp_img = Tempfile.new(["gallery", ".jpg"])
               composed.write_to_file(temp_img.path)
-              pdf.bounding_box([x, y], width: image_width) do
-                pdf.image temp_img.path, fit: [image_width, image_height]
-              end
+
+              pdf.image temp_img.path, at: [x, current_y], width: image_width, height: image_height
             rescue => e
-              Rails.logger.error("Gallery image #{i + 1} failed: #{e.message}")
+              Rails.logger.error("Gallery image failed: #{e.message}")
             ensure
               temp_img&.close
               temp_img&.unlink
@@ -148,6 +154,8 @@ class Visit < ApplicationRecord
             end
           end
         end
+
+        current_y -= (image_height + gap_y)
       end
     end
 
