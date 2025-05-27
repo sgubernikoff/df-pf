@@ -98,14 +98,14 @@ class Visit < ApplicationRecord
       image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
       image_height = image_width * 1.5
 
-      top_y = pdf.bounds.top - 40
-      current_y = top_y
+      initial_top_y = pdf.bounds.top - 300  # First page: halfway down
+      regular_top_y = pdf.bounds.top - 40
+      current_y = initial_top_y
 
-      images.each_slice(images_per_row) do |row_images|
-        # Start a new page if not enough space for a full row
-        if current_y - image_height < pdf.bounds.bottom + 50
+      images.each_slice(images_per_row).with_index do |row_images, page_idx|
+        if page_idx > 0
           pdf.start_new_page
-          current_y = pdf.bounds.top - 40
+          current_y = regular_top_y
         end
 
         row_images.each_with_index do |image, col|
@@ -156,6 +156,11 @@ class Visit < ApplicationRecord
         end
 
         current_y -= (image_height + gap_y)
+
+        if current_y - image_height < pdf.bounds.bottom + 50
+          pdf.start_new_page
+          current_y = regular_top_y
+        end
       end
     end
 
