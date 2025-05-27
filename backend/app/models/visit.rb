@@ -208,7 +208,10 @@ class Visit < ApplicationRecord
     encrypted_path = pdf_path.sub_ext('.encrypted.pdf')
     doc = HexaPDF::Document.open(pdf_path.to_s)
 
-    permissions = HexaPDF::Encryption::StandardSecurityHandler::PERMISSIONS[:print]
+    permissions = HexaPDF::Encryption::StandardSecurityHandler::ALLOW_PRINT |
+                  HexaPDF::Encryption::StandardSecurityHandler::ALLOW_MODIFY_CONTENT |
+                  HexaPDF::Encryption::StandardSecurityHandler::ALLOW_COPY |
+                  HexaPDF::Encryption::StandardSecurityHandler::ALLOW_ANNOTATE
 
     doc.encrypt(
       owner_password: 'admin',
