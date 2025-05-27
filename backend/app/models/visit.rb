@@ -90,7 +90,7 @@ class Visit < ApplicationRecord
       end
     end
 
-    # Gallery Pages (updated layout)
+    # Gallery Pages
     if images.attached?
       images_per_row = 3
       gap_x = 10
@@ -98,8 +98,8 @@ class Visit < ApplicationRecord
       image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
       image_height = image_width * 1.25
 
-      initial_top_y = pdf.bounds.top - 300  # Start halfway down
-      regular_top_y = pdf.bounds.top - 40
+      initial_top_y = pdf.bounds.top - 300  # Page 1
+      regular_top_y = pdf.bounds.top - 80   # Later pages
       current_y = initial_top_y
       is_first_gallery_page = true
 
@@ -107,7 +107,7 @@ class Visit < ApplicationRecord
         col = i % images_per_row
         row = i / images_per_row
 
-        # Start new page only if needed (not enough vertical space)
+        # Start new page if not enough space for next row
         if row > 0 && col == 0 && current_y - image_height < pdf.bounds.bottom + 50
           pdf.start_new_page
           current_y = regular_top_y
