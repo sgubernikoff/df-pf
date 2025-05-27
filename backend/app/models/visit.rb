@@ -15,7 +15,7 @@ class Visit < ApplicationRecord
   after_commit :generate_pdf_later, on: :create
 
   def generate_pdf_later
-    Rails.logger.info("Generating PDF for Visit #{id}")
+    Rails.logger.info("Generating PDF for Visit \#{id}")
     GenerateVisitPdfJob.perform_later(id)
   end
 
@@ -39,7 +39,6 @@ class Visit < ApplicationRecord
     pdf.move_down(pdf.bounds.height / 2 - 50)
     logo_path = Rails.root.join("public", "images", "DanielleFrankelMainLogo.jpg")
     pdf.image(logo_path, width: 200, position: :center) if File.exist?(logo_path)
-
     pdf.move_down(15)
     pdf.font_size(24) { pdf.text(user.name || "Client", align: :center, style: :bold) }
 
@@ -89,18 +88,19 @@ class Visit < ApplicationRecord
       image_width = (pdf.bounds.width - image_gap * 2) / 3.0
       image_height = image_width * 1.5
       vertical_gap = 20
-      left_margin = 0
 
+      col = 0
       images.each_with_index do |img, idx|
-        col = idx % 3
-        row = (idx / 3)
-
-        # Check space before adding image
-        space_needed = (row == 0 ? 0 : vertical_gap) + image_height
-        pdf.start_new_page if pdf.cursor < space_needed + 30
-
         x = col * (image_width + image_gap)
-        y = pdf.cursor - (row % 3) * (image_height + vertical_gap)
+
+        # Start new page if needed
+        if pdf.cursor < image_height + vertical_gap
+          pdf.start_new_page
+          col = 0
+          x = 0
+        end
+
+        y = pdf.cursor
 
         img.blob.open do |file|
           temp_img = nil
@@ -108,7 +108,7 @@ class Visit < ApplicationRecord
             ext = File.extname(file.path).downcase
             file_to_use = if ext == ".heic"
               convert_heic_to_jpg(file)
-            elsif ext == ".jpg" || ext == ".jpeg"
+            elsif [".jpg", ".jpeg"].include?(ext)
               image = MiniMagick::Image.open(file.path)
               image.auto_orient
               image.strip
@@ -136,7 +136,7 @@ class Visit < ApplicationRecord
             temp_img = Tempfile.new(["img_#{idx}", ".jpg"])
             composed.write_to_file(temp_img.path)
 
-            pdf.bounding_box([x, y], width: image_width) do
+            pdf.bounding_box([x, pdf.cursor], width: image_width) do
               pdf.image temp_img.path, fit: [image_width, image_height]
             end
           rescue => e
@@ -148,8 +148,9 @@ class Visit < ApplicationRecord
           end
         end
 
-        # After every 3 images, move cursor
-        if col == 2
+        col += 1
+        if col > 2
+          col = 0
           pdf.move_down(image_height + vertical_gap)
         end
       end
@@ -181,7 +182,7 @@ class Visit < ApplicationRecord
       identify: false
     )
 
-    Rails.logger.info("PDF done for Visit #{id}")
+    Rails.logger.info("PDF done for Visit \#{id}")
     password
   rescue => e
     Rails.logger.error("PDF generation error: #{e.class} - #{e.message}")
