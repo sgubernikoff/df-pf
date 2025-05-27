@@ -11,7 +11,6 @@ class Visit < ApplicationRecord
   belongs_to :user
 
   validates :user_id, presence: true
-  validates :images, presence: true, on: :create
 
   after_commit :generate_pdf_later, on: :create
 
