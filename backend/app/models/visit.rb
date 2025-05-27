@@ -46,10 +46,10 @@ class Visit < ApplicationRecord
     # Dress Page
     if dress&.image_urls.present?
       pdf.start_new_page
-      image_gap = 10
-      image_width = (pdf.bounds.width - image_gap * 2) / 3.0
+      image_width = 150
+      image_height = 225 # Consistent size (iPhone-like)
+      gap_x = 15
       top_y = pdf.cursor
-      image_heights = []
 
       dress.image_urls.first(3).each_with_index do |url, i|
         begin
@@ -58,13 +58,8 @@ class Visit < ApplicationRecord
           img_file.write URI.open(url).read
           img_file.rewind
 
-          image = Vips::Image.new_from_file(img_file.path)
-          aspect_ratio = image.width.to_f / image.height.to_f
-          image_height = image_width / aspect_ratio
-          x = i * (image_width + image_gap)
-
+          x = i * (image_width + gap_x)
           pdf.image img_file.path, at: [x, top_y], width: image_width, height: image_height
-          image_heights << image_height
         rescue => e
           Rails.logger.error("Dress image error: #{e.message}")
         ensure
@@ -73,7 +68,7 @@ class Visit < ApplicationRecord
         end
       end
 
-      pdf.move_down((image_heights.max || 0) + 20)
+      pdf.move_down(image_height + 30)
       pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
       pdf.font_size(10) do
         price_text = dress.price.to_s.encode("UTF-8", invalid: :replace, undef: :replace, replace: '')
@@ -81,75 +76,73 @@ class Visit < ApplicationRecord
         pdf.move_down 1
         pdf.text(dress.description.to_s, align: :center)
       end
+
+      pdf.move_down(40)
     end
 
-    # Gallery
+    # Gallery Grid
     if images.attached?
-      image_gap = 10
-      image_width = (pdf.bounds.width - image_gap * 2) / 3.0
-      image_height = image_width * 1.5
-      row_height = image_height + 30
-      left_margin = 0
-      cursor_y = pdf.cursor
+      image_width = 150
+      image_height = 225
+      gap_x = 15
+      gap_y = 30
 
-      images.each_slice(3).with_index do |row_images, row_idx|
-        if cursor_y - row_height < 50
-          pdf.start_new_page
-          cursor_y = pdf.cursor
-        end
+      images.each_with_index do |img, idx|
+        col = idx % 3
+        row = idx / 3
 
-        row_images.each_with_index do |img, col|
-          x = col * (image_width + image_gap)
-          y = cursor_y
+        # Start new page if not enough space for another row
+        available_space = pdf.cursor - image_height
+        pdf.start_new_page if available_space < gap_y + 20
 
-          img.blob.open do |file|
-            temp_img = nil
-            begin
-              ext = File.extname(file.path).downcase
-              file_to_use = if ext == ".heic"
-                convert_heic_to_jpg(file)
-              elsif ext == ".jpg" || ext == ".jpeg"
-                image = MiniMagick::Image.open(file.path)
-                image.auto_orient
-                image.strip
-                image.rotate(90) if image[:width] > image[:height]
-                jpg_file = Tempfile.new(['oriented', '.jpg'], binmode: true)
-                image.write(jpg_file.path)
-                jpg_file
-              else
-                file
-              end
+        x = col * (image_width + gap_x)
+        y = pdf.cursor
 
-              original = Vips::Image.new_from_file(file_to_use.path)
-              watermark_path = Rails.root.join("app/assets/images/watermark2.png")
-              next unless File.exist?(watermark_path)
-
-              watermark = Vips::Image.new_from_file(watermark_path.to_s)
-              watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
-              watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-              watermark = watermark * [1, 1, 1, 0.3]
-              composed = original.composite2(watermark, :over,
-                x: (original.width - watermark.width) / 2,
-                y: (original.height - watermark.height) / 2
-              )
-
-              temp_img = Tempfile.new(["img_#{row_idx}_#{col}", ".jpg"])
-              composed.write_to_file(temp_img.path)
-
-              pdf.bounding_box([x, y], width: image_width) do
-                pdf.image temp_img.path, fit: [image_width, image_height]
-              end
-            rescue => e
-              Rails.logger.error("Image #{img.filename} failed: #{e.message}")
-            ensure
-              temp_img&.close
-              temp_img&.unlink
-              file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
+        img.blob.open do |file|
+          temp_img = nil
+          begin
+            ext = File.extname(file.path).downcase
+            file_to_use = if ext == ".heic"
+              convert_heic_to_jpg(file)
+            else
+              image = MiniMagick::Image.open(file.path)
+              image.auto_orient
+              image.strip
+              image.rotate(90) if image[:width] > image[:height]
+              jpg_file = Tempfile.new(['oriented', '.jpg'], binmode: true)
+              image.write(jpg_file.path)
+              jpg_file
             end
+
+            original = Vips::Image.new_from_file(file_to_use.path)
+            watermark_path = Rails.root.join("app/assets/images/watermark2.png")
+            next unless File.exist?(watermark_path)
+
+            watermark = Vips::Image.new_from_file(watermark_path.to_s)
+            watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
+            watermark = watermark.bandjoin(255) unless watermark.has_alpha?
+            watermark = watermark * [1, 1, 1, 0.3]
+            composed = original.composite2(watermark, :over,
+              x: (original.width - watermark.width) / 2,
+              y: (original.height - watermark.height) / 2
+            )
+
+            temp_img = Tempfile.new(["img_#{idx}", ".jpg"])
+            composed.write_to_file(temp_img.path)
+
+            pdf.bounding_box([x, y], width: image_width, height: image_height) do
+              pdf.image temp_img.path, fit: [image_width, image_height]
+            end
+          rescue => e
+            Rails.logger.error("Image #{idx + 1} failed: #{e.message}")
+          ensure
+            temp_img&.close
+            temp_img&.unlink
+            file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
           end
         end
 
-        cursor_y -= row_height
+        pdf.move_down(image_height + gap_y) if col == 2
       end
     end
 
