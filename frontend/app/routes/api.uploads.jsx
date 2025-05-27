@@ -14,7 +14,8 @@ export const action = async ({ request }) => {
     }
 
     const { url } = await put(file.name, file, {
-      access: "public", // or "private" if needed
+      access: "public",
+      addRandomSuffix: true, // or "private" if needed
     });
 
     return new Response(JSON.stringify({ url }), {
