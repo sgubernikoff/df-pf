@@ -182,10 +182,10 @@ class Visit < ApplicationRecord
     # Notes Page (only once)
     if notes.present?
       pdf.start_new_page
-      top_padding = pdf.bounds.top - 50
+      top_padding = pdf.bounds.top - 20 # Adjusted padding to make it start higher
       pdf.bounding_box([0, top_padding], width: pdf.bounds.width) do
         pdf.font_size(10) { pdf.text "Notes:", style: :bold }
-        pdf.move_down 5
+        pdf.move_down 10
         pdf.font_size(8) { pdf.text notes.to_s }
       end
     end
