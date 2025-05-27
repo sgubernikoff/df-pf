@@ -205,12 +205,14 @@ class Visit < ApplicationRecord
     )
     doc.write(encrypted_path.to_s)
 
-    visit_pdf.attach(
+    blob = ActiveStorage::Blob.create_and_upload!(
       io: File.open(encrypted_path),
       filename: "visit_#{id}.pdf",
       content_type: "application/pdf",
       identify: false
     )
+
+    visit_pdf.attach(blob)
 
     Rails.logger.info("Encrypted PDF successfully generated and attached for Visit #{id}")
     return password if visit_pdf.attached?
