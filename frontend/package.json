@@ -15,6 +15,7 @@
     "@remix-run/react": "^2.16.6",
     "@remix-run/serve": "^2.16.6",
     "@remix-run/vercel": "^1.19.3",
+    "@vercel/blob": "^1.1.1",
     "ahooks": "^3.8.4",
     "axios": "^1.9.0",
     "isbot": "^4.1.0",

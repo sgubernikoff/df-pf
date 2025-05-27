@@ -1,25 +1,19 @@
 import { useFetcher, useLoaderData } from "@remix-run/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { fetchAllProductsFromCollection } from "../utils/shopifyClient.server";
 import DressAutocomplete from "../components/autocomplete/DressAutocomplete";
 import UserAutocomplete from "../components/autocomplete/UserAutocomplete";
 
-// --- 1. Loader: Fetch dresses ---
 export async function loader({ request }) {
   const cookieHeader = request.headers.get("cookie");
   const cookies = Object.fromEntries(
     cookieHeader?.split("; ").map((c) => c.split("=")) ?? []
   );
-
   const token = decodeURIComponent(cookies.token);
-
-  if (!token.includes("Bearer")) {
-    return redirect("/login");
-  }
+  if (!token.includes("Bearer")) return redirect("/login");
 
   const shopifyData = await fetchAllProductsFromCollection("new-arrivals");
-
   const res = await fetch("https://df-pf.onrender.com/current_user", {
     headers: {
       Authorization: token,
@@ -27,49 +21,36 @@ export async function loader({ request }) {
       credentials: "include",
     },
   });
-
   if (!res.ok) redirect("/login");
   const current_user = await res.json();
   if (!current_user.data.is_admin)
     return redirect(`/user/${current_user.data.id}`);
+
   return json({ shopifyData });
 }
 
-// --- 2. Action: Handle form submission ---
 export async function action({ request }) {
   const cookieHeader = request.headers.get("cookie");
   const cookies = Object.fromEntries(
     cookieHeader?.split("; ").map((c) => c.split("=")) ?? []
   );
-
   const token = decodeURIComponent(cookies.token);
   const formData = await request.formData();
 
   let parsedDress = {};
   const selectedDressStr = formData.get("visit[selected_dress]");
-
   if (selectedDressStr) {
     try {
       parsedDress = JSON.parse(selectedDressStr);
     } catch (e) {
       console.error("⚠️ Invalid JSON in visit[selected_dress]", e);
-      parsedDress = {};
     }
   }
-
   if (formData.get("price-override")) {
     parsedDress.price = `$${formatNumberInput(formData.get("price-override"))}`;
   }
-
-  // Always set (updated or not)
   formData.set("visit[selected_dress]", JSON.stringify(parsedDress));
   formData.delete("price-override");
-
-  // ✅ Debug log form data for backend
-  const debugPayload = {};
-  for (const [key, val] of formData.entries()) {
-    debugPayload[key] = val;
-  }
 
   const res = await fetch("https://df-pf.onrender.com/visits", {
     method: "POST",
@@ -77,34 +58,62 @@ export async function action({ request }) {
     headers: { Authorization: token },
   });
 
-  if (!res.ok) {
+  if (!res.ok)
     return json({ error: "Failed to create visit" }, { status: 400 });
-  }
-
   const data = await res.json();
-
   return json({ success: true, visit: data });
 }
 
-// --- 3. Component ---
 export default function NewVisit() {
   const { shopifyData } = useLoaderData();
   const fetcher = useFetcher();
-
+  const formRef = useRef();
   const [userQuery, setUserQuery] = useState("");
   const [email, setEmail] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedDress, setSelectedDress] = useState(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
 
+  async function handleUploadAndSubmit(e) {
+    e.preventDefault();
+    const form = formRef.current;
+    const fileInput = form.querySelector('input[name="visit[images][]"]');
+    const files = Array.from(fileInput.files);
+    const imageUrls = [];
+
+    for (const file of files) {
+      const uploadForm = new FormData();
+      uploadForm.append("file", file);
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        body: uploadForm,
+      });
+      const { url } = await res.json();
+      imageUrls.push(url);
+
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "visit[image_urls][]";
+      input.value = url;
+      form.appendChild(input);
+    }
+
+    fileInput.remove();
+    fetcher.submit(form, { method: "post", encType: "multipart/form-data" });
+  }
+
   return (
     <div className="form-create-page">
-      <fetcher.Form method="post" encType="multipart/form-data">
+      <fetcher.Form
+        ref={formRef}
+        method="post"
+        encType="multipart/form-data"
+        onSubmit={handleUploadAndSubmit}
+      >
         <h2>New Visit</h2>
-
         <button
           type="button"
-          onClick={() => setShowManualEntry((prev) => !prev)}
+          onClick={() => setShowManualEntry(!showManualEntry)}
         >
           {showManualEntry ? "Search For User" : "Create New User"}
         </button>
@@ -121,7 +130,6 @@ export default function NewVisit() {
                 required
               />
             </label>
-
             <label>
               Customer Email:
               <input
@@ -129,9 +137,7 @@ export default function NewVisit() {
                 name="visit[customer_email]"
                 value={selectedUser?.email || email}
                 readOnly={selectedUser}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                }}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </label>
           </>
@@ -189,16 +195,12 @@ export default function NewVisit() {
   );
 }
 
-// --- 4. Number Formatter ---
 function formatNumberInput(value) {
   if (value === "" || value === null || isNaN(value)) return "";
-
   const num = parseFloat(value);
   const hasDecimal = value.toString().includes(".");
   const rounded = hasDecimal ? num.toFixed(2) : Math.round(num).toString();
-
   const [whole, decimal] = rounded.split(".");
   const withCommas = Number(whole).toLocaleString();
-
   return decimal ? `${withCommas}.${decimal}` : withCommas;
 }
