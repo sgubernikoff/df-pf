@@ -1,10 +1,6 @@
 // app/routes/api.uploads.jsx
 import { put } from "@vercel/blob";
 
-const { url } = await put("articles/blob.txt", "Hello World!", {
-  access: "public",
-});
-
 export const action = async ({ request }) => {
   try {
     const formData = await request.formData();
