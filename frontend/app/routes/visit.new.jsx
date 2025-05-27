@@ -84,10 +84,12 @@ export default function NewVisit() {
     for (const file of files) {
       const uploadForm = new FormData();
       uploadForm.append("file", file);
+
       const res = await fetch("/api/uploads", {
         method: "POST",
         body: uploadForm,
       });
+
       const { url } = await res.json();
       imageUrls.push(url);
 
