@@ -1,22 +1,22 @@
+# Essential production data
+User.find_or_create_by(email: "admin@df.com") do |user|
+  user.name = "Admin User"
+  user.password = ENV['ADMIN_PASSWORD']
+  user.password_confirmation = ENV['ADMIN_PASSWORD']
+  user.is_admin = true
+end
+
+puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m"
+
+# Skip development/test seeds in production
+return if Rails.env.production?
+
 # Clear existing data
 puts "\e[33mClearing existing records...\e[0m"
 Visit.destroy_all
 Dress.destroy_all
 User.destroy_all  # Clearing existing users
 puts "\e[32m✔ Existing records cleared.\e[0m"
-
-# Essential production data
-# User.find_or_create_by(email: "admin@df.com") do |user|
-#   user.name = "Admin User"
-#   user.password = ENV['ADMIN_PASSWORD']
-#   user.password_confirmation = ENV['ADMIN_PASSWORD']
-#   user.is_admin = true
-# end
-
-# puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m"
-
-# Skip development/test seeds in production
-return if Rails.env.production?
 
 # Create Users first
 puts "\e[34mCreating Users...\e[0m"
