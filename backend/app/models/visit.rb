@@ -102,8 +102,8 @@ class Visit < ApplicationRecord
       iphone_aspect_ratio = 3.0 / 4.0  # width/height for portrait
       image_height = image_width / iphone_aspect_ratio  # This gives us the height for a 9:16 image
 
-      initial_top_y = pdf.bounds.top - 300  # Start halfway down
-      regular_top_y = pdf.bounds.top
+      initial_top_y = pdf.cursor - 20 
+      regular_top_y = pdf.cursor
       current_y = initial_top_y
       is_first_gallery_page = true
 
