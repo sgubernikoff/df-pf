@@ -42,7 +42,7 @@ class Visit < ApplicationRecord
     )
     pdf.font "Helvetica"
 
-    uniform_image_width = 155
+    uniform_image_width = 200  # Slightly larger than before
     uniform_image_gap = 10
     uniform_aspect_ratio = 3.0 / 4.0
     uniform_image_height = (uniform_image_width / uniform_aspect_ratio)
@@ -58,7 +58,6 @@ class Visit < ApplicationRecord
     if dress&.image_urls.present?
       pdf.start_new_page
       top_y = pdf.bounds.top
-      image_heights = []
 
       total_row_width = (uniform_image_width * 3) + (uniform_image_gap * 2)
       starting_x = (pdf.bounds.width - total_row_width) / 2
@@ -74,9 +73,6 @@ class Visit < ApplicationRecord
           x = starting_x + i * (uniform_image_width + uniform_image_gap)
 
           pdf.image image_file.path, at: [x, top_y], width: uniform_image_width, height: uniform_image_height
-          image_heights << uniform_image_height
-        rescue => e
-          Rails.logger.error("Error processing dress image #{url}: #{e.message}")
         ensure
           image_file.close
           image_file.unlink
@@ -169,8 +165,6 @@ class Visit < ApplicationRecord
                       at: [x + x_offset, current_y - y_offset],
                       width: display_width,
                       height: display_height
-          rescue => e
-            Rails.logger.error("Gallery image failed: #{e.message}")
           ensure
             temp_img&.close
             temp_img&.unlink
