@@ -42,14 +42,11 @@ class Visit < ApplicationRecord
     )
     pdf.font "Helvetica"
 
-    # Shared image sizing constants
-    uniform_image_width = 140
+    uniform_image_width = 155
     uniform_image_gap = 10
     uniform_aspect_ratio = 3.0 / 4.0
-    uniform_scaling_factor = 0.93
-    uniform_image_height = (uniform_image_width / uniform_aspect_ratio) * uniform_scaling_factor
+    uniform_image_height = (uniform_image_width / uniform_aspect_ratio)
 
-    # Cover Page
     pdf.move_down(pdf.bounds.height / 2 - 50)
     logo_path = Rails.root.join("public", "images", "DanielleFrankelMainLogo.jpg")
     pdf.image(logo_path, width: 200, position: :center) if File.exist?(logo_path)
@@ -58,11 +55,13 @@ class Visit < ApplicationRecord
     client_name = user.name || "Client"
     pdf.font_size(24) { pdf.text client_name, align: :center, style: :bold }
 
-    # Dress Page
     if dress&.image_urls.present?
       pdf.start_new_page
       top_y = pdf.bounds.top
       image_heights = []
+
+      total_row_width = (uniform_image_width * 3) + (uniform_image_gap * 2)
+      starting_x = (pdf.bounds.width - total_row_width) / 2
 
       dress.image_urls.first(3).each_with_index do |url, i|
         begin
@@ -72,7 +71,7 @@ class Visit < ApplicationRecord
           image_file.rewind
 
           image = Vips::Image.new_from_file(image_file.path)
-          x = i * (uniform_image_width + uniform_image_gap)
+          x = starting_x + i * (uniform_image_width + uniform_image_gap)
 
           pdf.image image_file.path, at: [x, top_y], width: uniform_image_width, height: uniform_image_height
           image_heights << uniform_image_height
@@ -97,13 +96,15 @@ class Visit < ApplicationRecord
       end
     end
 
-    # Gallery Pages
     if images.attached?
       images_per_row = 3
       gap_x = uniform_image_gap
       gap_y = 10
       image_width = uniform_image_width
       image_height = uniform_image_height
+
+      total_row_width = (image_width * images_per_row) + (gap_x * (images_per_row - 1))
+      starting_x = (pdf.bounds.width - total_row_width) / 2
 
       initial_top_y = pdf.cursor - 5
       regular_top_y = pdf.cursor - 5
@@ -118,7 +119,7 @@ class Visit < ApplicationRecord
           current_y = regular_top_y
         end
 
-        x = col * (image_width + gap_x)
+        x = starting_x + col * (image_width + gap_x)
 
         image.blob.open do |file|
           temp_img = nil
@@ -130,10 +131,7 @@ class Visit < ApplicationRecord
               img = MiniMagick::Image.open(file.path)
               img.auto_orient
               img.strip
-
-              actual_aspect_ratio = img[:width].to_f / img[:height].to_f
-              img.rotate(90) if actual_aspect_ratio > 1.2
-
+              img.rotate(90) if img[:width].to_f / img[:height].to_f > 1.2
               jpg = Tempfile.new(['oriented', '.jpg'], binmode: true)
               img.write(jpg.path)
               jpg
@@ -186,7 +184,6 @@ class Visit < ApplicationRecord
       end
     end
 
-    # Notes Page
     if notes.present?
       pdf.start_new_page
       pdf.font_size(10) { pdf.text "Notes:", style: :bold }
@@ -194,7 +191,6 @@ class Visit < ApplicationRecord
       pdf.font_size(8) { pdf.text notes.to_s }
     end
 
-    # Save and Encrypt
     pdf_path = Rails.root.join("tmp", "visits", "visit_#{id}.pdf")
     FileUtils.mkdir_p(File.dirname(pdf_path))
     pdf.render_file(pdf_path)
