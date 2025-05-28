@@ -99,7 +99,7 @@ class Visit < ApplicationRecord
   
       # Calculate height based on iPhone's 9:16 aspect ratio
       # For portrait images from iPhone, we want to maintain the aspect ratio
-      iphone_aspect_ratio = 9.0 / 16.0  # width/height for portrait
+      iphone_aspect_ratio = 3.0 / 4.0  # width/height for portrait
       image_height = image_width / iphone_aspect_ratio  # This gives us the height for a 9:16 image
 
       initial_top_y = pdf.bounds.top - 300  # Start halfway down
