@@ -52,7 +52,7 @@ class Visit < ApplicationRecord
       page_width = pdf.bounds.width
       image_gap = 10
       image_width = (page_width - image_gap * 2) / 3.0
-      top_y = pdf.bounds.top - 5
+      top_y = pdf.bounds.top + 5
       image_heights = []
 
       dress.image_urls.first(3).each_with_index do |url, i|
@@ -77,7 +77,7 @@ class Visit < ApplicationRecord
         end
       end
 
-      bottom_y = top_y - (image_heights.max || 0) - 5 
+      bottom_y = top_y - (image_heights.max || 0) + 5 
       pdf.bounding_box([0, bottom_y + 5], width: page_width) do
         pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
         pdf.font_size(10) do
@@ -102,8 +102,8 @@ class Visit < ApplicationRecord
       iphone_aspect_ratio = 3.0 / 4.0  # width/height for portrait
       image_height = image_width / iphone_aspect_ratio  # This gives us the height for a 9:16 image
 
-      initial_top_y = pdf.cursor - 20 
-      regular_top_y = pdf.cursor
+      initial_top_y = pdf.cursor - 5
+      regular_top_y = pdf.cursor - 5
       current_y = initial_top_y
       is_first_gallery_page = true
 
