@@ -34,7 +34,7 @@ class Visit < ApplicationRecord
   def generate_pdf_and_store
     Rails.logger.info("Starting PDF generation for Visit #{id}...")
 
-    pdf = Prawn::Document.new(top_margin: 20, bottom_margin: 20)
+    pdf = Prawn::Document.new
     pdf.font "Helvetica"
 
     # Cover Page
@@ -52,7 +52,7 @@ class Visit < ApplicationRecord
       page_width = pdf.bounds.width
       image_gap = 10
       image_width = (page_width - image_gap * 2) / 3.0
-      top_y = pdf.bounds.top - 10
+      top_y = pdf.bounds.top - 5
       image_heights = []
 
       dress.image_urls.first(3).each_with_index do |url, i|
@@ -77,8 +77,8 @@ class Visit < ApplicationRecord
         end
       end
 
-      bottom_y = top_y - (image_heights.max || 0) - 10
-      pdf.bounding_box([0, bottom_y], width: page_width) do
+      bottom_y = top_y - (image_heights.max || 0) - 5 
+      pdf.bounding_box([0, bottom_y + 5], width: page_width) do
         pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
         pdf.font_size(10) do
           pdf.move_down 1
@@ -88,87 +88,117 @@ class Visit < ApplicationRecord
           pdf.text(dress.description.to_s, align: :center)
         end
       end
+    end
 
-      # Inline Gallery of 6 images (2 rows of 3)
-      if images.attached?
-        gallery_images = images.first(6)
-        images_per_row = 3
-        gap_x = 10
-        gap_y = 10
-        image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
-        iphone_aspect_ratio = 3.0 / 4.0
-        image_height = (image_width / iphone_aspect_ratio) * 0.93
+    # Gallery Pages (updated layout for iPhone 9:16 aspect ratio)
+    if images.attached?
+      images_per_row = 3
+      gap_x = 10
+      gap_y = 10
+      image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
+  
+      # Calculate height based on iPhone's 9:16 aspect ratio
+      # For portrait images from iPhone, we want to maintain the aspect ratio
+      iphone_aspect_ratio = 3.0 / 4.0  # width/height for portrait
+      image_height = image_width / iphone_aspect_ratio  # This gives us the height for a 9:16 image
 
-        start_y = bottom_y - 20
-        current_y = start_y
+      initial_top_y = pdf.bounds.top - 300  # Start halfway down
+      regular_top_y = pdf.bounds.top
+      current_y = initial_top_y
+      is_first_gallery_page = true
 
-        gallery_images.each_with_index do |image, i|
-          col = i % images_per_row
-          row = i / images_per_row
-          x = col * (image_width + gap_x)
+      images.each_with_index do |image, i|
+        col = i % images_per_row
+        row = i / images_per_row
 
-          image.blob.open do |file|
-            temp_img = nil
-            begin
-              ext = File.extname(file.path).downcase
-              file_to_use = if ext == ".heic"
-                convert_heic_to_jpg(file)
-              elsif [".jpg", ".jpeg"].include?(ext)
-                img = MiniMagick::Image.open(file.path)
-                img.auto_orient
-                img.strip
-                img.rotate(90) if img[:width].to_f / img[:height] > 1.2
-                jpg = Tempfile.new(['oriented', '.jpg'], binmode: true)
-                img.write(jpg.path)
-                jpg
-              else
-                file
+        # Start new page only if needed (not enough vertical space)
+        if row > 0 && col == 0 && current_y - image_height < pdf.bounds.bottom
+          pdf.start_new_page
+          current_y = regular_top_y
+          is_first_gallery_page = false
+        end
+
+        x = col * (image_width + gap_x)
+
+        image.blob.open do |file|
+          temp_img = nil
+          begin
+            ext = File.extname(file.path).downcase
+            file_to_use = if ext == ".heic"
+              convert_heic_to_jpg(file)
+            elsif [".jpg", ".jpeg"].include?(ext)
+              img = MiniMagick::Image.open(file.path)
+              img.auto_orient
+              img.strip
+          
+              # Get actual dimensions after orientation
+              actual_width = img[:width]
+              actual_height = img[:height]
+              actual_aspect_ratio = actual_width.to_f / actual_height.to_f
+          
+              # Only rotate if it's clearly landscape (aspect ratio > 1.2)
+              # This prevents unnecessary rotation of square-ish or already portrait images
+              if actual_aspect_ratio > 1.2
+                img.rotate(90)
               end
-
-              original = Vips::Image.new_from_file(file_to_use.path, access: :sequential)
-              aspect_ratio = original.width.to_f / original.height.to_f
-
-              display_width, display_height =
-                if aspect_ratio > (image_width / image_height)
-                  [image_width, image_width / aspect_ratio]
-                else
-                  [image_height * aspect_ratio, image_height]
-                end
-
-              x_offset = (image_width - display_width) / 2
-              y_offset = (image_height - display_height) / 2
-
-              watermark_path = Rails.root.join("app/assets/images/watermark2.png")
-              next unless File.exist?(watermark_path)
-
-              watermark = Vips::Image.new_from_file(watermark_path.to_s)
-              watermark = watermark.resize(original.width.to_f / watermark.width)
-              watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-              watermark = watermark * [1, 1, 1, 0.3]
-              composed = original.composite2(watermark, :over,
-                                             x: (original.width - watermark.width) / 2,
-                                             y: (original.height - watermark.height) / 2)
-
-              temp_img = Tempfile.new(["gallery", ".jpg"])
-              composed.write_to_file(temp_img.path)
-
-              pdf.image temp_img.path,
-                        at: [x + x_offset, current_y - y_offset],
-                        width: display_width,
-                        height: display_height
-
-            rescue => e
-              Rails.logger.error("Gallery image failed: #{e.message}")
-            ensure
-              temp_img&.close
-              temp_img&.unlink
-              file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
+          
+              jpg = Tempfile.new(['oriented', '.jpg'], binmode: true)
+              img.write(jpg.path)
+              jpg
+            else
+              file_to_use = file
             end
-          end
 
-          if col == images_per_row - 1
-            current_y -= (image_height + gap_y)
+            original = Vips::Image.new_from_file(file_to_use.path, access: :sequential)
+        
+            # Calculate the actual display dimensions while maintaining aspect ratio
+            original_aspect_ratio = original.width.to_f / original.height.to_f
+        
+            if original_aspect_ratio > (image_width.to_f / image_height)
+              # Image is wider relative to our target box - fit to width
+              display_width = image_width
+              display_height = image_width / original_aspect_ratio
+            else
+              # Image is taller relative to our target box - fit to height
+              display_height = image_height
+              display_width = image_height * original_aspect_ratio
+            end
+        
+            # Center the image in the allocated space
+            x_offset_in_box = (image_width - display_width) / 2
+            y_offset_in_box = (image_height - display_height) / 2
+        
+            watermark_path = Rails.root.join("app/assets/images/watermark2.png")
+            next unless File.exist?(watermark_path)
+
+            watermark = Vips::Image.new_from_file(watermark_path.to_s)
+            watermark = watermark.resize(original.width.to_f / watermark.width) if watermark.width > original.width
+            watermark = watermark.bandjoin(255) unless watermark.has_alpha?
+            watermark = watermark * [1, 1, 1, 0.3]
+            watermark_x_offset = (original.width - watermark.width) / 2
+            watermark_y_offset = (original.height - watermark.height) / 2
+            composed = original.composite2(watermark, :over, x: watermark_x_offset, y: watermark_y_offset)
+
+            temp_img = Tempfile.new(["gallery", ".jpg"])
+            composed.write_to_file(temp_img.path)
+
+            # Position image with centering offsets
+            pdf.image temp_img.path, 
+                      at: [x + x_offset_in_box, current_y - y_offset_in_box], 
+                      width: display_width, 
+                      height: display_height
+                  
+          rescue => e
+            Rails.logger.error("Gallery image failed: #{e.message}")
+          ensure
+            temp_img&.close
+            temp_img&.unlink
+            file_to_use&.close if file_to_use.is_a?(Tempfile) && file_to_use != file
           end
+        end
+
+        if col == images_per_row - 1 || i == images.size - 1
+          current_y -= (image_height + gap_y)
         end
       end
     end
