@@ -128,7 +128,7 @@ class Visit < ApplicationRecord
               convert_heic_to_jpg(file)
             elsif [".jpg", ".jpeg"].include?(ext)
               img = MiniMagick::Image.open(file.path)
-              im g.auto_orient
+              img.auto_orient
               img.strip
           
               # Get actual dimensions after orientation
