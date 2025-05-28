@@ -108,7 +108,7 @@ class Visit < ApplicationRecord
         row = i / images_per_row
 
         # Start new page only if needed (not enough vertical space)
-        if row > 0 && col == 0 && current_y - image_height < pdf.bounds.bottom + 50
+        if row > 0 && col == 0 && current_y - image_height < pdf.bounds.bottom + 10
           pdf.start_new_page
           current_y = regular_top_y
           is_first_gallery_page = false
