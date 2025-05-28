@@ -34,7 +34,12 @@ class Visit < ApplicationRecord
   def generate_pdf_and_store
     Rails.logger.info("Starting PDF generation for Visit #{id}...")
 
-    pdf = Prawn::Document.new
+    pdf = Prawn::Document.new(
+      top_margin: 5,
+      bottom_margin: 5,
+      left_margin: 0,
+      right_margin: 0
+    )
     pdf.font "Helvetica"
 
     # Cover Page
