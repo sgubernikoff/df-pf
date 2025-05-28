@@ -103,7 +103,7 @@ class Visit < ApplicationRecord
       image_height = image_width / iphone_aspect_ratio  # This gives us the height for a 9:16 image
 
       initial_top_y = pdf.bounds.top - 300  # Start halfway down
-      regular_top_y = pdf.bounds.top - 10
+      regular_top_y = pdf.bounds.top
       current_y = initial_top_y
       is_first_gallery_page = true
 
@@ -112,7 +112,7 @@ class Visit < ApplicationRecord
         row = i / images_per_row
 
         # Start new page only if needed (not enough vertical space)
-        if row > 0 && col == 0 && current_y - image_height < pdf.bounds.bottom + 10
+        if row > 0 && col == 0 && current_y - image_height < pdf.bounds.bottom
           pdf.start_new_page
           current_y = regular_top_y
           is_first_gallery_page = false
