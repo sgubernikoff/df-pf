@@ -35,10 +35,10 @@ class Visit < ApplicationRecord
     Rails.logger.info("Starting PDF generation for Visit #{id}...")
 
     pdf = Prawn::Document.new(
-      top_margin: 5,
-      bottom_margin: 5,
-      left_margin: 0,
-      right_margin: 0
+      top_margin: 10,
+      bottom_margin: 10,
+      left_margin: 10,
+      right_margin: 10
     )
     pdf.font "Helvetica"
 
@@ -82,8 +82,8 @@ class Visit < ApplicationRecord
         end
       end
 
-      bottom_y = top_y - (image_heights.max || 0) + 5 
-      pdf.bounding_box([0, bottom_y + 5], width: page_width) do
+      bottom_y = top_y - (image_heights.max || 0)
+      pdf.bounding_box([0, bottom_y - 5], width: page_width) do
         pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
         pdf.font_size(10) do
           pdf.move_down 1
