@@ -76,7 +76,9 @@ config.action_mailer.smtp_settings = {
   user_name:            ENV['GMAIL_USERNAME'],
   password:             ENV['GMAIL_PASSWORD'],
   authentication:       'plain',
-  enable_starttls_auto: true
+  enable_starttls_auto: true,
+  open_timeout:         30,
+  read_timeout:         120  
 }
 
   # Ignore bad email addresses and do not raise email delivery errors.
