@@ -6,10 +6,7 @@
 li::marker {
   color: white;
 }
-input,
-textarea {
-  font-size: 16px;
-}
+
 input:focus,
 textarea:focus {
   outline: none !important;
@@ -349,5 +346,9 @@ textarea {
   }
   .user-visits-container > a > img {
     width: 100%;
+  }
+  input,
+  textarea {
+    font-size: 16px;
   }
 }
