@@ -52,7 +52,7 @@ class Visit < ApplicationRecord
       page_width = pdf.bounds.width
       image_gap = 10
       image_width = (page_width - image_gap * 2) / 3.0
-      top_y = pdf.bounds.height - 10
+      top_y = pdf.bounds.height - 3
       image_heights = []
 
       dress.image_urls.first(3).each_with_index do |url, i|
@@ -77,7 +77,7 @@ class Visit < ApplicationRecord
         end
       end
 
-      bottom_y = top_y - (image_heights.max || 0) - 10
+      bottom_y = top_y - (image_heights.max || 0) - 3
       pdf.bounding_box([0, bottom_y], width: page_width) do
         pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
         pdf.font_size(10) do
@@ -97,7 +97,7 @@ class Visit < ApplicationRecord
         gap_y = 10
         image_width = (pdf.bounds.width - (images_per_row - 1) * gap_x) / images_per_row
         iphone_aspect_ratio = 3.0 / 4.0
-        image_height = image_width / iphone_aspect_ratio
+        image_height = (image_width / iphone_aspect_ratio) * 0.95
 
         start_y = bottom_y - 20
         current_y = start_y
