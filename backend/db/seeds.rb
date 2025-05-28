@@ -5,6 +5,19 @@ Dress.destroy_all
 User.destroy_all  # Clearing existing users
 puts "\e[32m✔ Existing records cleared.\e[0m"
 
+# Essential production data
+# User.find_or_create_by(email: "admin@df.com") do |user|
+#   user.name = "Admin User"
+#   user.password = ENV['ADMIN_PASSWORD']
+#   user.password_confirmation = ENV['ADMIN_PASSWORD']
+#   user.is_admin = true
+# end
+
+# puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m"
+
+# Skip development/test seeds in production
+return if Rails.env.production?
+
 # Create Users first
 puts "\e[34mCreating Users...\e[0m"
 
@@ -47,15 +60,6 @@ user5 = User.create!(
   is_admin: false
 )
 puts "\e[32m✔ Created User: #{user5.name} (#{user5.email})\e[0m"
-
-# 🔥 Create Admin User
-admin_user = User.create!(
-  name: "Admin User",
-  email: "admin@df.com",
-  password: "adminpass123", password_confirmation: "adminpass123",
-  is_admin: true
-)
-puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m"
 
 # Create Dresses
 puts "\e[34mCreating Dresses...\e[0m"
