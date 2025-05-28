@@ -7,7 +7,7 @@ class GenerateVisitPdfJob < ApplicationJob
 
     if password
       begin
-        NotificationMailer.job_completion_email(visit.user, visit.id, password).deliver_later
+        NotificationMailer.with(user: visit.user, visit_id: visit.id, password: password).job_completion_email.deliver_later
       rescue Net::ReadTimeout => e
         Rails.logger.warn("Email likely sent, but SMTP response timed out: #{e.message}")
       end
