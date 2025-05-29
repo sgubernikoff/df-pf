@@ -181,6 +181,8 @@ class Visit < ApplicationRecord
 
     if notes.present?
       pdf.start_new_page
+      pdf.move_down 30
+      pdf.move_right 30
       pdf.font_size(10) { pdf.text "Notes:", style: :bold }
       pdf.move_down 10
       pdf.font_size(8) { pdf.text notes.to_s }
