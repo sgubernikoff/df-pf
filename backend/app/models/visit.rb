@@ -42,7 +42,7 @@ class Visit < ApplicationRecord
     )
     pdf.font "Helvetica"
 
-    uniform_image_width = 200  # Slightly larger than before
+    uniform_image_width = 165
     uniform_image_gap = 10
     uniform_aspect_ratio = 3.0 / 4.0
     uniform_image_height = (uniform_image_width / uniform_aspect_ratio)
