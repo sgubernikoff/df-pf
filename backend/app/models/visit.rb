@@ -35,10 +35,10 @@ class Visit < ApplicationRecord
     Rails.logger.info("Starting PDF generation for Visit #{id}...")
 
     pdf = Prawn::Document.new(
-      top_margin: 10,
-      bottom_margin: 10,
-      left_margin: 10,
-      right_margin: 10
+      top_margin: 30,
+      bottom_margin: 30,
+      left_margin: 30,
+      right_margin: 30
     )
     pdf.font "Helvetica"
 
@@ -181,7 +181,7 @@ class Visit < ApplicationRecord
 
     if notes.present?
       pdf.start_new_page
-      pdf.bounding_box([30, pdf.cursor - 30], width: pdf.bounds.width - 60) do
+      pdf.bounding_box([10, pdf.cursor - 10], width: pdf.bounds.width - 20) do
         pdf.font_size(10) { pdf.text "Notes:", style: :bold }
         pdf.move_down 10
         pdf.font_size(8) { pdf.text notes.to_s }
