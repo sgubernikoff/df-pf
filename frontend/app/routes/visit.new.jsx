@@ -13,7 +13,7 @@ export async function loader({ request }) {
   const token = decodeURIComponent(cookies.token);
   if (!token.includes("Bearer")) return redirect("/login");
 
-  const shopifyData = await fetchAllProductsFromCollection("new-arrivals");
+  const shopifyData = await fetchAllProductsFromCollection("bridal");
   const res = await fetch("https://df-pf.onrender.com/current_user", {
     headers: {
       Authorization: token,
