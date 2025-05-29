@@ -1,5 +1,3 @@
-const fetch = require("node-fetch");
-
 const BLOB_STORE_ID = process.env.BLOB_STORE_ID;
 const TOKEN = process.env.VERCEL_TOKEN;
 
@@ -11,14 +9,17 @@ async function listBlobs(cursor = "") {
   const url = `https://blob.vercel-storage.com/api/v1/blobs?storeId=${BLOB_STORE_ID}${
     cursor ? `&cursor=${cursor}` : ""
   }`;
+
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
+
   if (!res.ok) {
     throw new Error(`Failed to list blobs: ${res.statusText}`);
   }
+
   return res.json();
 }
 
@@ -29,6 +30,7 @@ async function deleteBlob(blobUrl) {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
+
   if (!res.ok) {
     console.error(`Failed to delete ${blobUrl}: ${res.statusText}`);
   } else {
