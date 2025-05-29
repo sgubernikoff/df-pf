@@ -42,7 +42,7 @@ class Visit < ApplicationRecord
     )
     pdf.font "Helvetica"
 
-    uniform_image_width = 165
+    uniform_image_width = 150
     uniform_image_gap = 10
     uniform_aspect_ratio = 3.0 / 4.0
     uniform_image_height = (uniform_image_width / uniform_aspect_ratio)
@@ -80,7 +80,7 @@ class Visit < ApplicationRecord
       end
 
       bottom_y = top_y - uniform_image_height
-      pdf.bounding_box([0, bottom_y - 5], width: pdf.bounds.width) do
+      pdf.bounding_box([0, bottom_y - 20], width: pdf.bounds.width) do
         pdf.font_size(12) { pdf.text dress.name.to_s, align: :center, style: :bold }
         pdf.font_size(10) do
           pdf.move_down 1
@@ -89,6 +89,7 @@ class Visit < ApplicationRecord
           pdf.move_down 1
           pdf.text(dress.description.to_s, align: :center)
         end
+        pdf.move_down 20
       end
     end
 
