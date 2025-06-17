@@ -1,3 +1,4 @@
+require Rails.root.join('app/mailers/application_mailer')
 class CustomDeviseMailer < ApplicationMailer
   default from: 'no-reply@yourdomain.com'
   helper :application
