@@ -1,7 +1,6 @@
 require Rails.root.join('app/mailers/application_mailer')
 class CustomDeviseMailer < ApplicationMailer
   default from: 'no-reply@yourdomain.com'
-  helper :application
   default template_path: 'devise/mailer' # fallback to Devise views
 
   def reset_password_instructions(record, token, opts = {})
