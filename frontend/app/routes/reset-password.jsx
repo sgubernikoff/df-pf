@@ -34,14 +34,19 @@ export default function ResetPassword() {
         }),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data?.error || "Failed to reset password");
+        const message =
+          data?.errors?.full_messages?.[0] ||
+          data?.error ||
+          "Failed to reset password";
+        throw new Error(message);
       }
 
       setSuccess(true);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
