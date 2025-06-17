@@ -12,7 +12,7 @@ class Visit < ApplicationRecord
 
   validates :user_id, presence: true
 
-  after_commit :generate_pdf_later, on: :create
+#  after_commit :generate_pdf_later, on: :create
 
   def generate_pdf_later
     Rails.logger.info("Generating PDF for Visit #{id}")
