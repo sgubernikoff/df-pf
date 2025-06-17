@@ -11,4 +11,10 @@ class User < ApplicationRecord
     validates :email, presence: true, uniqueness: true
     validates :name, presence: true
 
+  def send_reset_password_instructions
+    token = set_reset_password_token
+    CustomDeviseMailer.reset_password_instructions(self, token).deliver_later
+    token
+  end
+
 end
