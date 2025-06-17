@@ -28,13 +28,19 @@ export default function ResetPassword() {
         body: JSON.stringify({
           user: {
             reset_password_token: token,
-            password: password,
+            password,
             password_confirmation: confirm,
           },
         }),
       });
 
-      const data = await res.json();
+      let data;
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        data = { error: await res.text() };
+      }
 
       if (!res.ok) {
         const message =
