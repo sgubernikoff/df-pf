@@ -42,13 +42,14 @@ class VisitsController < ApplicationController
       customer_name = visit_params[:customer_name]
       customer_email = visit_params[:customer_email]
       password = SecureRandom.urlsafe_base64(16)
-      user = User.create(
+      user = User.new(
         name: customer_name,
         email: customer_email,
         password: password,
         password_confirmation: password,
         is_admin: false
       )
+      user.send_reset_password_instructions if user.save
     end
 
     unless user&.persisted?
