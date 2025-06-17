@@ -1,4 +1,4 @@
-class CustomDeviseMailer < Devise::Mailer
+class CustomDeviseMailer < ApplicationMailer
   default from: 'no-reply@yourdomain.com'
   helper :application
   default template_path: 'devise/mailer' # fallback to Devise views
