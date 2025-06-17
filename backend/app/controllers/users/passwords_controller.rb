@@ -10,4 +10,10 @@ class Users::PasswordsController < Devise::PasswordsController
       render json: { errors: resource.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
+  private
+
+  def resource_params
+    params.require(:user).permit(:reset_password_token, :password, :password_confirmation)
+  end
 end
