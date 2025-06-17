@@ -60,45 +60,41 @@ function VisitGridItem({ v }) {
   console.log("Product debug:", product);
 
   return (
-    <div className="hover-scale-wrapper">
-      <div className="user-dress-container">
-        <div className="dress-info">
-          <p className="dress-name">
-            {product.title || "missing shopify data"}
-          </p>
-          <p className="dress-price">
-            {product.price ? `$${product.price}` : ""}
-          </p>
-        </div>
-        <Link
-          to={`/visit/${v.attributes?.id}`}
-          onClick={(e) => {
-            if (isProcessing) e.preventDefault();
-          }}
-        >
-          <div
-            className={`dress-image-wrapper${
-              isProcessing ? " processing" : ""
-            }`}
-          >
-            {product.imageUrl ? (
-              <img
-                className="dress-image"
-                src={`${product.imageUrl}&width=333`}
-                alt={product.title || "No title"}
-              />
-            ) : (
-              <div>Image not available</div>
-            )}
-            {isProcessing && (
-              <div className="processing-overlay">
-                <p>PROCESSING</p>
-              </div>
-            )}
-          </div>
-        </Link>
-        {!isProcessing && <ResendEmailButton visitId={v.attributes?.id} />}
+    <div className="user-dress-container">
+      <div className="dress-info">
+        <p className="dress-name">{product.title || "missing shopify data"}</p>
+        <p className="dress-price">
+          {product.price ? `$${product.price}` : ""}
+        </p>
       </div>
+      <Link
+        to={`/visit/${v.attributes?.id}`}
+        onClick={(e) => {
+          if (isProcessing) e.preventDefault();
+        }}
+      >
+        <div
+          className={`hover-scale-wrapper dress-image-wrapper${
+            isProcessing ? " processing" : ""
+          }`}
+        >
+          {product.imageUrl ? (
+            <img
+              className="dress-image"
+              src={`${product.imageUrl}&width=333`}
+              alt={product.title || "No title"}
+            />
+          ) : (
+            <div>Image not available</div>
+          )}
+          {isProcessing && (
+            <div className="processing-overlay">
+              <p>PROCESSING</p>
+            </div>
+          )}
+        </div>
+      </Link>
+      {!isProcessing && <ResendEmailButton visitId={v.attributes?.id} />}
     </div>
   );
 }
