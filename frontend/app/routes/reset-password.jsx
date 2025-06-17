@@ -53,14 +53,17 @@ export default function ResetPassword() {
 
       setSuccess(true);
 
+      const record = data.data || data.user || {}; // capture user record from response
+
       const loginRes = await fetch("https://df-pf.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           user: {
-            email: data.email,
+            email: record.email,
             password,
           },
         }),
