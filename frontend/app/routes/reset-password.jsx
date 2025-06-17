@@ -53,15 +53,33 @@ export default function ResetPassword() {
 
       setSuccess(true);
 
-      const userRes = await fetch("https://df-pf.onrender.com/current_user", {
+      const loginRes = await fetch("https://df-pf.onrender.com/login", {
+        method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          user: {
+            email: data.email,
+            password,
+          },
+        }),
       });
-      if (userRes.ok) {
-        const userData = await userRes.json();
-        navigate(`/user/${userData.data.id}`);
+
+      if (loginRes.ok) {
+        const currentUserRes = await fetch(
+          "https://df-pf.onrender.com/current_user",
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (currentUserRes.ok) {
+          const userData = await currentUserRes.json();
+          navigate(`/user/${userData.data.id}`);
+        }
       }
     } catch (err) {
       setError(err.message || "Something went wrong");
@@ -73,8 +91,7 @@ export default function ResetPassword() {
   return (
     <div className="login-page">
       <p>Set Your Password</p>
-      {success ? // <p>Password successfully updated! You can now log in.</p>
-      null : (
+      {success ? null : ( // <p>Password successfully updated! You can now log in.</p>
         <form onSubmit={handleSubmit}>
           <div>
             <label>New Password</label>
