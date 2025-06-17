@@ -41,15 +41,7 @@ export default function Visit() {
         <p>{attributes.email}</p>
       </div>
       <p>Dresses</p>
-      <div
-        className="user-visits-container"
-        style={{
-          display: "grid",
-          gap: "1vw",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 0fr))",
-          gridTemplateRows: "min-content",
-        }}
-      >
+      <div className="user-visits-container">
         {attributes.visits?.data?.map((v) => {
           return (
             <VisitGridItem
@@ -68,32 +60,30 @@ function VisitGridItem({ v }) {
     <div className="user-dress-container">
       <Link
         to={`/visit/${v.attributes?.id}`}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          border: "1px solid #e9e9e9",
-          position: "relative",
-          cursor: !v.attributes?.isPdfReady ? "not-allowed" : "",
-          pointerEvents: !v.attributes?.isPdfReady ? "none" : "",
-          padding: "1rem",
-        }}
         onClick={(e) => {
           if (!v.attributes?.isPdfReady) e.preventDefault();
         }}
         // className="user-dress-container"
       >
+        <div className="dress-info">
+          <p className="dress-name">
+            {v.attributes?.product?.title || "missing shopify data"}
+          </p>
+          <p className="dress-price">
+            {v.attributes?.product?.price
+              ? `$${v.attributes.product.price}`
+              : ""}
+          </p>
+        </div>
         {v.attributes?.product?.imageUrl ? (
           <img
-            style={{ width: "100%" }}
+            className="dress-image"
             src={`${v?.attributes?.product?.imageUrl}&width=333`}
             alt={v.attributes.product.title || "No title"}
           />
         ) : (
           <div>Image not available</div>
         )}
-        <span>{v.attributes?.product?.title || "missing shopify data"}</span>
         {!v?.attributes?.isPdfReady && (
           <div
             style={{
