@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useLocation } from "@remix-run/react";
 
 export default function ResetPassword() {
-  const searchParams = useSearchParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
   const token = searchParams.get("token");
 
   const [password, setPassword] = useState("");
