@@ -10,6 +10,10 @@ Rails.application.routes.draw do
     passwords: 'users/passwords'
   }
 
+  devise_scope :user do
+    put '/users/password', to: 'users/passwords#update', as: :update_user_password
+  end
+
   resources :protected_resources, only: [:index]
   get 'current_user', to: 'users#show_me'
   get "users/search", to: "users#search"
