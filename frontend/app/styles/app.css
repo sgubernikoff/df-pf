@@ -273,12 +273,13 @@ textarea {
   transition: transform 0.3s ease;
 }
 
-.user-dress-container:hover {
+.dress-image-wrapper:hover .dress-image,
+.dress-image-wrapper:hover .processing-overlay {
   transform: scale(1.02);
 }
 
-.dress-image-wrapper:hover .processing-overlay {
-  transform: scale(1.02);
+.dress-image,
+.processing-overlay {
   transition: transform 0.3s ease;
 }
 
