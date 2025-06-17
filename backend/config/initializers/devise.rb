@@ -1,4 +1,8 @@
 # frozen_string_literal: true
+# frozen_string_literal: true
+
+# Require custom devise mailer
+require Rails.root.join('app/mailers/custom_devise_mailer')
 
 # Assuming you have not yet modified this file, each configuration option below
 # is set to its default value. Note that some are commented out while others
