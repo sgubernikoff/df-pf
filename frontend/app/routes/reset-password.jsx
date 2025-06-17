@@ -78,6 +78,7 @@ export default function ResetPassword() {
         );
         if (currentUserRes.ok) {
           const userData = await currentUserRes.json();
+          console.log("🔍 Current user data after password reset:", userData);
           navigate(`/user/${userData.data.id}`);
         }
       }
