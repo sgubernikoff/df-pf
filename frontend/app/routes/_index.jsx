@@ -11,15 +11,21 @@ export function meta() {
 }
 
 export async function loader({ request }) {
+  const url = new URL(request.url);
+  const publicPaths = ["/reset-password", "/login", "/signup"];
+
+  if (publicPaths.includes(url.pathname)) {
+    return null; // skip auth check
+  }
+
   const cookieHeader = request.headers.get("cookie");
   const cookies = Object.fromEntries(
     cookieHeader?.split("; ").map((c) => c.split("=")) ?? []
   );
 
-  const token = decodeURIComponent(cookies.token);
+  const token = decodeURIComponent(cookies.token || "");
 
   if (!token.includes("Bearer")) {
-    // redirect to login or return null
     return redirect("/login");
   }
 
@@ -31,8 +37,9 @@ export async function loader({ request }) {
     },
   });
 
-  if (!res.ok) redirect("/login");
+  if (!res.ok) return redirect("/login");
   const current_user = await res.json();
+
   if (!current_user.data.is_admin)
     return redirect(`/user/${current_user.data.id}`);
 
