@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useLocation } from "@remix-run/react";
+import { useLocation, useNavigate } from "@remix-run/react";
 
 export default function ResetPassword() {
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const token = searchParams.get("token");
 
@@ -51,6 +52,17 @@ export default function ResetPassword() {
       }
 
       setSuccess(true);
+
+      const userRes = await fetch("https://df-pf.onrender.com/current_user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      if (userRes.ok) {
+        const userData = await userRes.json();
+        navigate(`/user/${userData.data.id}`);
+      }
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
@@ -61,9 +73,8 @@ export default function ResetPassword() {
   return (
     <div className="login-page">
       <p>Set Your Password</p>
-      {success ? (
-        <p>Password successfully updated! You can now log in.</p>
-      ) : (
+      {success ? // <p>Password successfully updated! You can now log in.</p>
+      null : (
         <form onSubmit={handleSubmit}>
           <div>
             <label>New Password</label>
