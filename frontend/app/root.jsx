@@ -8,7 +8,7 @@ import {
 
 import Header from "./components/Header";
 // import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useLocation } from "@remix-run/react";
 import { AuthProvider } from "./context/auth";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 
@@ -66,13 +66,23 @@ export function Layout({ children }) {
 
 // Main App component that renders the header and page content
 export default function App() {
+  const location = useLocation();
+  const publicPaths = ["/reset-password", "/login", "/signup"];
+  const isPublic = publicPaths.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
   return (
     <AuthProvider>
-      <Header /> {/* Pass the user data to the Header component */}
+      <Header />
       <main>
-        <ProtectedRoutes>
-          <Outlet /> {/* Render the child routes/content */}
-        </ProtectedRoutes>
+        {isPublic ? (
+          <Outlet />
+        ) : (
+          <ProtectedRoutes>
+            <Outlet />
+          </ProtectedRoutes>
+        )}
       </main>
     </AuthProvider>
   );
