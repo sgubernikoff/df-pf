@@ -59,8 +59,8 @@ export default function ResetPassword() {
   };
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "400px", margin: "auto" }}>
-      <h2>Set Your Password</h2>
+    <div className="login-page">
+      <p>Set Your Password</p>
       {success ? (
         <p>Password successfully updated! You can now log in.</p>
       ) : (
