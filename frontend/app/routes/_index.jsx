@@ -14,7 +14,7 @@ export async function loader({ request }) {
   const url = new URL(request.url);
   const publicPaths = ["/reset-password", "/login", "/signup"];
 
-  if (publicPaths.includes(url.pathname)) {
+  if (publicPaths.some((path) => url.pathname.startsWith(path))) {
     return null; // skip auth check
   }
 
