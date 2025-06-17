@@ -56,62 +56,43 @@ export default function Visit() {
 }
 
 function VisitGridItem({ v }) {
+  const isProcessing = !v?.attributes?.isPdfReady;
   return (
     <div className="user-dress-container">
+      <div className="dress-info">
+        <p className="dress-name">
+          {v.attributes?.product?.title || "missing shopify data"}
+        </p>
+        <p className="dress-price">
+          {v.attributes?.product?.price ? `$${v.attributes.product.price}` : ""}
+        </p>
+      </div>
       <Link
         to={`/visit/${v.attributes?.id}`}
         onClick={(e) => {
-          if (!v.attributes?.isPdfReady) e.preventDefault();
+          if (isProcessing) e.preventDefault();
         }}
-        // className="user-dress-container"
       >
-        <div className="dress-info">
-          <p className="dress-name">
-            {v.attributes?.product?.title || "missing shopify data"}
-          </p>
-          <p className="dress-price">
-            {v.attributes?.product?.price
-              ? `$${v.attributes.product.price}`
-              : ""}
-          </p>
+        <div
+          className={`dress-image-wrapper${isProcessing ? " processing" : ""}`}
+        >
+          {v.attributes?.product?.imageUrl ? (
+            <img
+              className="dress-image"
+              src={`${v?.attributes?.product?.imageUrl}&width=333`}
+              alt={v.attributes.product.title || "No title"}
+            />
+          ) : (
+            <div>Image not available</div>
+          )}
+          {isProcessing && (
+            <div className="processing-overlay">
+              <p>PROCESSING</p>
+            </div>
+          )}
         </div>
-        {v.attributes?.product?.imageUrl ? (
-          <img
-            className="dress-image"
-            src={`${v?.attributes?.product?.imageUrl}&width=333`}
-            alt={v.attributes.product.title || "No title"}
-          />
-        ) : (
-          <div>Image not available</div>
-        )}
-        {!v?.attributes?.isPdfReady && (
-          <div
-            style={{
-              position: "absolute",
-              background: "black",
-              opacity: 0.25,
-              inset: 0,
-              zIndex: 2,
-            }}
-          >
-            <p
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%,-50%) rotate(45deg)",
-                fontSize: "24px",
-                color: "white",
-              }}
-            >
-              PROCESSING
-            </p>
-          </div>
-        )}
       </Link>
-      {v.attributes?.isPdfReady && (
-        <ResendEmailButton visitId={v.attributes?.id} />
-      )}
+      {!isProcessing && <ResendEmailButton visitId={v.attributes?.id} />}
     </div>
   );
 }

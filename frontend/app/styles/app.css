@@ -259,11 +259,13 @@ textarea {
 .user-dress-container,
 .user-page-link {
   transition: transform 0.3s ease;
+  border: none;
+  outline: none;
 }
 
 .user-dress-container:hover,
 .user-page-link:hover {
-  transform: scale(1.05); /* Slight magnification */
+  transform: none; /* Removed zoom on container */
 }
 
 .user-dress-container {
@@ -275,6 +277,66 @@ textarea {
   width: 50%;
   margin: auto;
   margin-top: 5rem;
+}
+
+.user-visits-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+  margin: 2rem auto;
+  max-width: 75%;
+}
+
+.user-visits-container > a {
+  text-decoration: none;
+  color: black;
+  display: block;
+}
+
+.dress-info {
+  text-align: left;
+  margin-top: 0.5rem;
+}
+
+.dress-name {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.dress-price {
+  font-size: 14px;
+}
+
+.dress-image-wrapper {
+  position: relative;
+}
+
+.dress-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+.dress-image-wrapper:hover .dress-image {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.processing-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
 }
 
 @media (max-width: 600px) {
@@ -338,52 +400,19 @@ textarea {
     padding: 1rem;
   }
   .user-visits-container {
-    display: block !important;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem;
+    margin: 2rem auto;
+    max-width: 75%;
   }
   .user-visits-container > a {
-    width: 100%;
-    margin-bottom: 1rem;
-  }
-  .user-visits-container > a > img {
-    width: 100%;
+    text-decoration: none;
+    color: black;
+    display: block;
   }
   input,
   textarea {
     font-size: 16px;
   }
-}
-
-.user-visits-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.user-visits-container > a {
-  text-decoration: none;
-  color: black;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.dress-info {
-  text-align: left;
-  margin-top: 0.5rem;
-}
-
-.dress-name {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.dress-price {
-  font-size: 14px;
-}
-
-.dress-image {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
 }
