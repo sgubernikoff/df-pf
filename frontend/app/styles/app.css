@@ -263,13 +263,18 @@ textarea {
   outline: none;
 }
 
-.user-dress-container:hover,
+/* .user-dress-container:hover,
 .user-page-link:hover {
-  transform: none; /* Removed zoom on container */
-}
+  transform: none;
+} */
 
 .user-dress-container {
   width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.user-dress-container:hover {
+  transform: scale(1.05);
 }
 
 .users-page {
@@ -392,19 +397,19 @@ textarea {
     transition: none;
   }
 
-  .user-dress-container:hover,
+  /* .user-dress-container:hover,
   .user-page-link:hover {
-    transform: none; /* Slight magnification */
-  }
+    transform: none;
+  } */
   .login-page {
     padding: 1rem;
   }
   .user-visits-container {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr;
     gap: 3rem;
     margin: 2rem auto;
-    max-width: 75%;
+    max-width: 90%;
   }
   .user-visits-container > a {
     text-decoration: none;

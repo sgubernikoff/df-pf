@@ -57,6 +57,7 @@ export default function Visit() {
 function VisitGridItem({ v }) {
   const isProcessing = !v?.attributes?.isPdfReady;
   const product = v.attributes?.product || {};
+  console.log("Product debug:", product);
 
   return (
     <div className="hover-scale-wrapper">
