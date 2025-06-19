@@ -25,16 +25,15 @@ class WatermarkJob < ApplicationJob
     return unless File.exist?(watermark_path)
 
     watermark = Vips::Image.new_from_file(watermark_path.to_s)
-    watermark = watermark.resize(original.width.to_f / 2 / watermark.width) # Make it large
+    watermark = watermark.resize(original.height.to_f / watermark.height)
     watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-    watermark = watermark * [1, 1, 1, 1.0] # Fully opaque
+    watermark = watermark * [1, 1, 1, 0.5] # 50% opacity for visibility
 
     composed = original.composite2(watermark, :over,
       x: (original.width - watermark.width) / 2,
       y: (original.height - watermark.height) / 2)
 
-    output_ext = File.extname(filename).downcase
-    output_path = "#{temp_file.path}#{output_ext}"
+    output_path = temp_file.path
     composed.write_to_file(output_path)
 
     s3.put_object(
@@ -44,7 +43,6 @@ class WatermarkJob < ApplicationJob
       content_type: content_type
     )
 
-    File.delete(output_path) if File.exist?(output_path)
     temp_file.close
     temp_file.unlink
   end
