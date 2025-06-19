@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useLocation, useNavigate } from "@remix-run/react";
+import { AuthContext } from "../context/auth";
 
 export default function ResetPassword() {
   const location = useLocation();
@@ -12,6 +13,8 @@ export default function ResetPassword() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,38 +55,15 @@ export default function ResetPassword() {
       }
 
       setSuccess(true);
-
+      console.log(data);
       const record = data.data || data.user || {}; // capture user record from response
 
-      const loginRes = await fetch("https://df-pf.onrender.com/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          user: {
-            email: record.email,
-            password,
-          },
-        }),
-      });
-
-      if (loginRes.ok) {
-        const currentUserRes = await fetch(
-          "https://df-pf.onrender.com/current_user",
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-          }
-        );
-        if (currentUserRes.ok) {
-          const userData = await currentUserRes.json();
-          console.log("🔍 Current user data after password reset:", userData);
-          navigate(`/user/${userData.data.id}`);
-        }
+      const user = await login(record.email, password);
+      if (user?.id) {
+        if (user?.is_admin) navigate("/visit/new");
+        else navigate(`/user/${user.id}`);
+      } else {
+        setError("Invalid credentials");
       }
     } catch (err) {
       setError(err.message || "Something went wrong");

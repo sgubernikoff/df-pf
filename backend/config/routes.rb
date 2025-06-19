@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 
   devise_scope :user do
     put '/users/password', to: 'users/passwords#update', as: :update_user_password
+    post '/users/manual_password_reset', to: 'users/passwords#create', as: :manual_password_reset
   end
 
   resources :protected_resources, only: [:index]

@@ -4,10 +4,20 @@ class CustomDeviseMailer < ApplicationMailer
   default from: 'sgubernikoff@gmail.com'
   default template_path: 'devise/mailer' # fallback to Devise views
 
+  # Original method for initial user creation
   def reset_password_instructions(record, token, opts = {})
     @token = token
     @reset_url = build_reset_url(token)
     opts[:subject] = "Set up your password"
+    mail(to: record.email, subject: opts[:subject])
+  end
+
+  # New method for manual password resets
+  def manual_reset_password_instructions(record, token, opts = {})
+    @token = token
+    @reset_url = build_reset_url(token)
+    @user = record
+    opts[:subject] = "Reset your password"
     mail(to: record.email, subject: opts[:subject])
   end
 

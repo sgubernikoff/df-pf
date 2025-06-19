@@ -40,10 +40,9 @@ export default function Login() {
     e.preventDefault();
     setResetLoading(true);
     setResetError("");
-
     try {
       const response = await fetch(
-        "https://df-pf.onrender.com.com/users/password",
+        "https://df-pf.onrender.com/users/manual_password_reset",
         {
           method: "POST",
           credentials: "include",
