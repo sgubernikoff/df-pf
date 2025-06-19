@@ -61,6 +61,15 @@ user5 = User.create!(
 )
 puts "\e[32m✔ Created User: #{user5.name} (#{user5.email})\e[0m"
 
+admin_user = User.find_or_create_by(email: "admin@df.com") do |user|
+  user.name = "Admin User"
+  user.password = "adminpass123"
+  user.password_confirmation = "adminpass123"
+  user.is_admin = true
+end
+puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m" if admin_user&.persisted?
+
+
 # Create Dresses
 puts "\e[34mCreating Dresses...\e[0m"
 
