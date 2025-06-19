@@ -21,22 +21,7 @@ class UploadsController < ApplicationController
       content_type = uploaded_file.content_type
       filename = uploaded_file.original_filename
 
-      # 🖼️ Image processing (add watermark for images only)
-      if content_type.start_with?("image")
-        image = MiniMagick::Image.open(tempfile.path)
-
-        # Add a simple text watermark (or path to PNG watermark image)
-        image.combine_options do |c|
-          c.gravity "SouthEast"
-          c.draw "text 10,10 'Danielle Frankel'"
-          c.fill "white"
-          c.pointsize "22"
-        end
-
-        image.write(tempfile.path)
-      end
-
-      # 📤 Upload to S3
+      # Upload raw file to S3 immediately
       s3.put_object(
         bucket: ENV["S3_BUCKET_NAME"],
         key: filename,
@@ -44,7 +29,9 @@ class UploadsController < ApplicationController
         content_type: content_type
       )
 
-      # 🧷 Construct public URL
+      # Enqueue background job for watermarking
+      WatermarkJob.perform_later(filename: filename, content_type: content_type)
+
       url = "https://#{ENV['S3_BUCKET_NAME']}.s3.#{ENV['AWS_REGION']}.amazonaws.com/#{filename}"
       urls << url
     end
