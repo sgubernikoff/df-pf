@@ -79,26 +79,26 @@ export default function NewVisit() {
     const form = formRef.current;
     const fileInput = form.querySelector('input[name="visit[images][]"]');
     const files = Array.from(fileInput.files);
-    const imageUrls = [];
 
-    for (const file of files) {
-      const uploadForm = new FormData();
-      uploadForm.append("file", file);
+    const uploadForm = new FormData();
+    files.forEach((file) => {
+      uploadForm.append("files[]", file);
+    });
 
-      const res = await fetch("/api/uploads", {
-        method: "POST",
-        body: uploadForm,
-      });
+    const res = await fetch("https://df-pf.onrender.com/upload", {
+      method: "POST",
+      body: uploadForm,
+    });
 
-      const { url } = await res.json();
-      imageUrls.push(url);
+    const { urls } = await res.json();
 
+    urls.forEach((url) => {
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = "visit[image_urls][]";
       input.value = url;
       form.appendChild(input);
-    }
+    });
 
     fileInput.remove();
     fetcher.submit(form, { method: "post", encType: "multipart/form-data" });
