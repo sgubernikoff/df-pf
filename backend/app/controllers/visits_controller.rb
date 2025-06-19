@@ -15,13 +15,14 @@ class VisitsController < ApplicationController
     unless current_user.is_admin || @visit.user_id == current_user.id
       return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
     end
-  
+    puts "*****************************not attached*****************************"
     if @visit.images.attached?
+      puts "*****************************attached*****************************"
       images_data = @visit.images.map do |image|
         {
           id: image.id,
           filename: image.filename.to_s,
-          url: rails_blob_url(image)  # This works with S3
+          url: image.url
         }
       end
       
@@ -66,16 +67,56 @@ class VisitsController < ApplicationController
 
     @visit = Visit.new(visit_params.except(:selected_dress, :customer_name, :customer_email, :image_urls))
     @visit.user = user
+    
+    puts "=== IMAGE UPLOAD DEBUG ==="
+    puts "Raw JSON string: #{visit_params[:image_urls]}"
+    puts "String length: #{visit_params[:image_urls]&.length}"
 
     image_urls = Array(visit_params[:image_urls]).reject { |url| url == "undefined" }
-    image_urls.each_with_index do |url, i|
+    image_urls.each do |json_string|
+      puts "----------------------------------------------------------------------"
+  
       begin
-        downloaded = URI.open(url)
-        filename = File.basename(URI.parse(url).path)
-        @visit.images.attach(io: downloaded, filename: filename)
-      rescue => e
-        Rails.logger.error("Failed to attach image #{i + 1} from URL #{url}: #{e.message}")
-      end
+      # Parse the JSON string to get the metadata hash
+      metadata = JSON.parse(json_string)
+      puts "Parsed metadata: #{metadata}"
+    
+      # Extract the values from the hash
+      key = metadata["key"]
+      filename = metadata["filename"]
+      content_type = metadata["content_type"]
+      byte_size = metadata["byte_size"]
+      checksum = metadata["checksum"]
+    
+      puts "Creating blob with:"
+      puts "  Key: #{key}"
+      puts "  Filename: #{filename}"
+      puts "  Content-Type: #{content_type}"
+      puts "  Byte Size: #{byte_size}"
+      puts "  Checksum: #{checksum}"
+    
+      # Use create! (not create_before_direct_upload!) with the actual metadata
+      blob = ActiveStorage::Blob.create!(
+        key: key,
+        filename: filename,
+        content_type: content_type,
+        byte_size: byte_size,
+        checksum: checksum,
+        service_name: "amazon"
+      )
+    
+      @visit.images.attach(blob)
+      puts "✅ Successfully attached #{filename}"
+    
+    rescue JSON::ParserError => e
+      puts "❌ JSON Parse Error: #{e.message}"
+      Rails.logger.error("JSON Parse Error for #{json_string}: #{e.message}")
+    rescue => e
+      puts "❌ Attachment Error: #{e.message}"
+      Rails.logger.error("Failed to attach image: #{e.message}")
+    end
+  
+      puts "----------------------------------------------------------------------"
     end
 
     dress_data = JSON.parse(visit_params[:selected_dress])

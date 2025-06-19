@@ -104,7 +104,22 @@ export default function NewVisit() {
 
       xhr.addEventListener("load", () => {
         if (xhr.status === 201) {
-          resolve(presignedData.final_url);
+          // Parse the S3 response to get ETag
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(xhr.responseText, "text/xml");
+          const etag =
+            xmlDoc
+              .getElementsByTagName("ETag")[0]
+              ?.textContent?.replace(/"/g, "") || null;
+
+          resolve({
+            key: presignedData.filename,
+            filename: file.name,
+            content_type: file.type,
+            byte_size: file.size,
+            checksum: etag, // ETag from S3 response
+            url: presignedData.final_url,
+          });
         } else {
           reject(new Error(`Upload failed: ${xhr.status}`));
         }
@@ -155,20 +170,18 @@ export default function NewVisit() {
       }
 
       const { presigned_urls } = await presignedResponse.json();
-
       // 2. Upload all files in parallel to S3
       const uploadPromises = files.map((file, index) =>
         uploadFileToS3(file, presigned_urls[index], index)
       );
 
-      const urls = await Promise.all(uploadPromises);
-      console.log(urls);
+      const uploadResults = await Promise.all(uploadPromises);
       // 3. Add URLs to form and submit
-      urls.forEach((url) => {
+      uploadResults.forEach((result) => {
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = "visit[image_urls][]";
-        input.value = url;
+        input.value = JSON.stringify(result);
         form.appendChild(input);
       });
 
