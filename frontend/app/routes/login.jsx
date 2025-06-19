@@ -85,7 +85,7 @@ export default function Login() {
       <div className="login-page">
         {!resetSent ? (
           <>
-            <h2>Reset Your Password</h2>
+            <p>Reset Your Password</p>
 
             {resetError && <p className="error">{resetError}</p>}
 
@@ -123,7 +123,7 @@ export default function Login() {
         ) : (
           <div className="reset-success">
             <div className="success-icon">📧</div>
-            <h2>Check Your Email</h2>
+            <p>Check Your Email</p>
             <p className="success-message">
               We've sent a password reset link to <strong>{resetEmail}</strong>
             </p>
@@ -152,7 +152,7 @@ export default function Login() {
   // Regular login form
   return (
     <div className="login-page">
-      <h2>Login</h2>
+      <p>Login</p>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
