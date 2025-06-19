@@ -79,7 +79,7 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
       
       # Apply opacity (adjust 0.3 for less opacity, 0.7 for more)
-      watermark = watermark * [1, 1, 1, 0.9]
+      watermark = watermark * [1, 1, 1, 2]
 
       # Composite watermark over entire image
       composed = original.composite2(watermark, :over, x: 0, y: 0)

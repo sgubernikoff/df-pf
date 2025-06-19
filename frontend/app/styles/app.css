@@ -3,6 +3,26 @@
   src: url("../assets/regular.woff2") format("woff2");
 }
 
+@font-face {
+  font-family: "bodoni";
+  src: url("../assets/Bodoni.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "sigmund";
+  src: url("../assets/Sigmund.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "nicolas";
+  src: url("../assets/Nicolas.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "sweet";
+  src: url("../assets/Sweet.otf") format("opentype");
+}
+
 li::marker {
   color: white;
 }
@@ -14,7 +34,7 @@ textarea:focus {
 }
 
 * {
-  font-family: "regular";
+  font-family: "sweet";
   font-size: 12px;
   margin: 0;
   padding: 0;
