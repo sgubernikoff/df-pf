@@ -191,7 +191,7 @@ button.logout-btn {
 }
 
 .success-instructions {
-  color: #666;
+  color: #black;
   line-height: 1.6;
   margin-bottom: 2rem;
 }
@@ -209,13 +209,12 @@ button.logout-btn {
 .button-group {
   display: flex;
   flex-direction: column;
-  width: 50%;
+  width: 100%;
   margin: auto;
   gap: 10px;
 }
 
-.secondary-button,
-.secondary-button {
+.primary-button {
   width: 100%;
   padding: 10px;
   border: 1px solid black;
@@ -226,7 +225,17 @@ button.logout-btn {
   font-size: inherit;
   cursor: pointer;
 }
-
+.secondary-button {
+  background-color: #e9e9e9;
+  color: black;
+  border-radius: 0;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid black;
+}
 main {
   flex: 1;
   width: 100%;
