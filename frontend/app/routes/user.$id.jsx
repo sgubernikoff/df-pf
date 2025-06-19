@@ -63,9 +63,7 @@ function VisitGridItem({ v }) {
     <div className="user-dress-container">
       <div className="dress-info">
         <p className="dress-name">{product.title || "missing shopify data"}</p>
-        <p className="dress-price">
-          {product.price ? `$${product.price}` : ""}
-        </p>
+        <p className="dress-price">{v.attributes.price}</p>
       </div>
       <Link
         to={`/visit/${v.attributes?.id}`}

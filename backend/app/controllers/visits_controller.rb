@@ -80,7 +80,7 @@ class VisitsController < ApplicationController
     )
 
     if @visit.save
-      @visit.update(dress_id: @dress.id, shopify_dress_id: dress_data["id"]) if @dress.save
+      @visit.update(dress_id: @dress.id, shopify_dress_id: dress_data["id"], price:dress_data["price"]) if @dress.save
 
       respond_to do |format|
         format.html { redirect_to @visit, notice: 'Visit was successfully created.' }
