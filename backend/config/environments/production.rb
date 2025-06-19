@@ -65,11 +65,6 @@ Rails.application.configure do
   config.active_job.queue_adapter = :sidekiq
   # config.active_job.queue_name_prefix = "df_pf_production"
 
-  # For retry configuration
-  class WatermarkJob < ApplicationJob
-    retry_on StandardError, wait: 5.seconds, attempts: 3
-    discard_on ActiveJob::DeserializationError
-  end
 
   config.action_mailer.perform_caching = false
 
