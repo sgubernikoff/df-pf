@@ -74,34 +74,141 @@ export default function NewVisit() {
   const [selectedDress, setSelectedDress] = useState(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
 
+  // New state for upload progress
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState([]);
+
+  async function uploadFileToS3(file, presignedData, index) {
+    const formData = new FormData();
+
+    // Add all the presigned fields
+    Object.entries(presignedData.fields).forEach(([key, value]) => {
+      formData.append(key, value);
+    });
+    formData.append("file", file);
+
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+
+      // Track upload progress
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          setUploadProgress((prev) => {
+            const newProgress = [...prev];
+            newProgress[index] = { name: file.name, progress: percentComplete };
+            return newProgress;
+          });
+        }
+      });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status === 201) {
+          resolve(presignedData.final_url);
+        } else {
+          reject(new Error(`Upload failed: ${xhr.status}`));
+        }
+      });
+
+      xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+
+      xhr.open("POST", presignedData.url);
+      xhr.send(formData);
+    });
+  }
+
   async function handleUploadAndSubmit(e) {
     e.preventDefault();
     const form = formRef.current;
     const fileInput = form.querySelector('input[name="visit[images][]"]');
     const files = Array.from(fileInput.files);
 
-    const uploadForm = new FormData();
-    files.forEach((file) => {
-      uploadForm.append("files[]", file);
-    });
+    if (files.length === 0) {
+      // No files to upload, submit directly
+      fetcher.submit(form, { method: "post", encType: "multipart/form-data" });
+      return;
+    }
 
-    const res = await fetch("https://df-pf.onrender.com/upload", {
-      method: "POST",
-      body: uploadForm,
-    });
+    setUploading(true);
+    setUploadProgress(files.map((f) => ({ name: f.name, progress: 0 })));
+    console.log("1");
+    try {
+      // 1. Get presigned URLs for all files via Remix API route
+      const filesInfo = files.map((file) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      }));
+      console.log("log2");
+      const presignedResponse = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ files: filesInfo }),
+      });
+      console.log(presignedResponse);
 
-    const { urls } = await res.json();
+      if (!presignedResponse.ok) {
+        const errorData = await presignedResponse.json();
+        throw new Error(errorData.error || "Failed to get presigned URLs");
+      }
 
-    urls.forEach((url) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = "visit[image_urls][]";
-      input.value = url;
-      form.appendChild(input);
-    });
+      const { presigned_urls } = await presignedResponse.json();
 
-    fileInput.remove();
-    fetcher.submit(form, { method: "post", encType: "multipart/form-data" });
+      // 2. Upload all files in parallel to S3
+      const uploadPromises = files.map((file, index) =>
+        uploadFileToS3(file, presigned_urls[index], index)
+      );
+
+      const urls = await Promise.all(uploadPromises);
+      console.log(urls);
+      // 3. Add URLs to form and submit
+      urls.forEach((url) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "visit[image_urls][]";
+        input.value = url;
+        form.appendChild(input);
+      });
+
+      // 4. Queue watermarking jobs for each uploaded file via Remix API route
+      const watermarkPromises = presigned_urls.map(async (presigned) => {
+        try {
+          const response = await fetch("/api/watermark", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ filename: presigned.filename }),
+          });
+
+          if (!response.ok) {
+            console.error(`Watermark queue failed for ${presigned.filename}`);
+          }
+
+          return response.json();
+        } catch (error) {
+          console.error(
+            `Watermark queue error for ${presigned.filename}:`,
+            error
+          );
+        }
+      });
+
+      // Don't wait for watermarking to complete, but handle any errors gracefully
+      Promise.all(watermarkPromises).catch(console.error);
+
+      // Remove file input and submit
+      fileInput.remove();
+      fetcher.submit(form, { method: "post", encType: "multipart/form-data" });
+    } catch (error) {
+      console.error("Upload failed:", error);
+      alert(`Upload failed: ${error.message}. Please try again.`);
+    } finally {
+      setUploading(false);
+      setUploadProgress([]);
+    }
   }
 
   return (
@@ -180,10 +287,47 @@ export default function NewVisit() {
             type="file"
             name="visit[images][]"
             multiple
+            accept="image/*"
+            disabled={uploading}
           />
         </label>
 
-        <button type="submit">Submit Visit</button>
+        {/* Upload Progress */}
+        {uploading && (
+          <div style={{ marginBottom: "1rem" }}>
+            <p>Uploading files...</p>
+            {uploadProgress.map((file, index) => (
+              <div key={index} style={{ marginBottom: "0.5rem" }}>
+                <div style={{ fontSize: "0.9em" }}>{file.name}</div>
+                <div
+                  style={{
+                    width: "100%",
+                    backgroundColor: "#e0e0e0",
+                    borderRadius: "4px",
+                    height: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${file.progress}%`,
+                      backgroundColor: "#4CAF50",
+                      height: "100%",
+                      borderRadius: "4px",
+                      transition: "width 0.3s ease",
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: "0.8em", color: "#666" }}>
+                  {Math.round(file.progress)}%
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button type="submit" disabled={uploading}>
+          {uploading ? "Uploading..." : "Submit Visit"}
+        </button>
 
         {fetcher.data?.success && (
           <p>

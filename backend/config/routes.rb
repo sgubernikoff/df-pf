@@ -29,6 +29,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   post '/upload', to: 'uploads#create'
+  resources :watermark_queue, only: [:create], path: 'queue_watermark'
 
   root 'home#index'
 end

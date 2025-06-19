@@ -2,42 +2,64 @@ require 'aws-sdk-s3'
 require 'mini_magick'
 
 class UploadsController < ApplicationController
-  skip_before_action :authenticate_user! # or whatever auth method you use
-
+  before_action :authenticate_user!
+  
   def create
-    uploaded_files = params[:files]
-    return render json: { error: "No files uploaded" }, status: 400 unless uploaded_files
+    files_info = params[:files] || []
+    
+    if files_info.empty?
+      return render json: { error: "No files provided" }, status: 400
+    end
 
-    s3 = Aws::S3::Client.new(
+    s3 = Aws::S3::Resource.new(
       region: ENV["AWS_REGION"],
       access_key_id: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"]
     )
 
-    urls = []
+    bucket = s3.bucket(ENV["S3_BUCKET_NAME"])
 
-    Array(uploaded_files).each do |uploaded_file|
-      tempfile = uploaded_file.tempfile
-      content_type = uploaded_file.content_type
-      filename = uploaded_file.original_filename
+    presigned_data = files_info.map do |file_info|
+      file_name = file_info['name'] || file_info[:name]
+      file_type = file_info['type'] || file_info[:type]
+      file_size = file_info['size'] || file_info[:size]
+      
+      unless file_name && file_type
+        next { error: "Missing file name or type" }
+      end
 
-      # Upload raw file to S3 immediately
-      s3.put_object(
-        bucket: ENV["S3_BUCKET_NAME"],
-        key: filename,
-        body: File.open(tempfile.path),
-        content_type: content_type
+      timestamp = Time.current.to_i
+      sanitized_name = file_name.gsub(/[^a-zA-Z0-9._-]/, '_')
+      unique_filename = "#{timestamp}_#{SecureRandom.hex(8)}_#{sanitized_name}"
+      
+      # ✅ Fixed: Remove expires_in and use expiration time
+      presigned_post = bucket.presigned_post(
+        key: unique_filename,
+        success_action_status: '201',
+        content_type: file_type,
+        content_length_range: 1..(10 * 1024 * 1024)
       )
 
-      # Enqueue background job for watermarking
-      WatermarkJob.perform_later(filename: filename, content_type: content_type)
-
-      url = "https://#{ENV['S3_BUCKET_NAME']}.s3.#{ENV['AWS_REGION']}.amazonaws.com/#{filename}"
-      urls << url
+      {
+        filename: unique_filename,
+        url: presigned_post.url,
+        fields: presigned_post.fields,
+        final_url: "https://#{ENV['S3_BUCKET_NAME']}.s3.#{ENV['AWS_REGION']}.amazonaws.com/#{unique_filename}"
+      }
     end
 
-    render json: { urls: urls }
+    valid_presigned_data = presigned_data.reject { |item| item.key?(:error) }
+    errors = presigned_data.select { |item| item.key?(:error) }
+
+    if valid_presigned_data.empty?
+      render json: { error: "No valid files to process", details: errors }, status: 400
+    else
+      render json: { presigned_urls: valid_presigned_data }
+    end
+
+  rescue Aws::S3::Errors::ServiceError => e
+    render json: { error: "AWS S3 Error: #{e.message}" }, status: 500
   rescue => e
-    render json: { error: e.message }, status: 500
+    render json: { error: "Server Error: #{e.message}" }, status: 500
   end
 end
