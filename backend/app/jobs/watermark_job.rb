@@ -16,7 +16,7 @@ class WatermarkJob < ApplicationJob
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"]
     )
 
-    temp_file = Tempfile.new
+    temp_file = Tempfile.new(['original', File.extname(filename)], binmode: true)
     s3.get_object(response_target: temp_file.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
 
     original = Vips::Image.new_from_file(temp_file.path, access: :sequential)
@@ -25,26 +25,41 @@ class WatermarkJob < ApplicationJob
     return unless File.exist?(watermark_path)
 
     watermark = Vips::Image.new_from_file(watermark_path.to_s)
-    watermark = watermark.resize(original.height.to_f / watermark.height)
+    
+    # Resize watermark to match original image dimensions exactly
+    watermark = watermark.resize(original.width.to_f / watermark.width)
+                        .resize(original.height.to_f / watermark.height)
+    
+    # Ensure watermark has alpha channel
     watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-    watermark = watermark * [1, 1, 1, 0.5] # 50% opacity for visibility
+    
+    # Apply opacity (adjust 0.5 to desired transparency level)
+    watermark = watermark * [1, 1, 1, 0.5]
 
-    composed = original.composite2(watermark, :over,
-      x: (original.width - watermark.width) / 2,
-      y: (original.height - watermark.height) / 2)
+    # Composite watermark over entire image (position 0,0 covers full image)
+    composed = original.composite2(watermark, :over, x: 0, y: 0)
 
-    output_path = temp_file.path
-    composed.write_to_file(output_path)
+    # Create output temp file
+    output_temp = Tempfile.new(['watermarked', File.extname(filename)], binmode: true)
+    composed.write_to_file(output_temp.path)
 
+    # Overwrite the original file in S3
     s3.put_object(
       bucket: ENV["S3_BUCKET_NAME"],
       key: filename,
-      body: File.open(output_path),
-      content_type: content_type
+      body: File.open(output_temp.path),
+      content_type: content_type,
+      metadata: {
+        'watermarked' => 'true',
+        'processed_at' => Time.current.iso8601
+      }
     )
 
+    # Cleanup
     temp_file.close
     temp_file.unlink
+    output_temp.close
+    output_temp.unlink
   end
 
   def watermark_video(filename, content_type)
@@ -55,22 +70,45 @@ class WatermarkJob < ApplicationJob
     )
 
     temp_input = Tempfile.new(['input', File.extname(filename)], binmode: true)
-    temp_output = Tempfile.new(['output', '.mp4'], binmode: true)
+    temp_output = Tempfile.new(['output', File.extname(filename)], binmode: true)
 
     s3.get_object(response_target: temp_input.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
 
     watermark_path = Rails.root.join("app/assets/images/video_watermark.png")
     return unless File.exist?(watermark_path)
 
-    system("ffmpeg -i #{Shellwords.escape(temp_input.path)} -i #{Shellwords.escape(watermark_path.to_s)} -filter_complex \"[1][0]scale2ref=w=iw:h=ih[wm][vid];[vid][wm]overlay=0:0\" -c:a copy #{Shellwords.escape(temp_output.path)} -y")
+    # FFmpeg command to scale watermark to full video dimensions and overlay
+    ffmpeg_cmd = [
+      "ffmpeg",
+      "-i", Shellwords.escape(temp_input.path),
+      "-i", Shellwords.escape(watermark_path.to_s),
+      "-filter_complex",
+      "\"[0:v][1:v]overlay=0:0:alpha=0.5\"",
+      "-c:a", "copy",
+      "-y",
+      Shellwords.escape(temp_output.path)
+    ].join(" ")
 
-    s3.put_object(
-      bucket: ENV["S3_BUCKET_NAME"],
-      key: filename,
-      body: File.open(temp_output.path),
-      content_type: content_type
-    )
+    success = system(ffmpeg_cmd)
+    
+    if success && File.exist?(temp_output.path) && File.size(temp_output.path) > 0
+      # Overwrite the original file in S3
+      s3.put_object(
+        bucket: ENV["S3_BUCKET_NAME"],
+        key: filename,
+        body: File.open(temp_output.path),
+        content_type: content_type,
+        metadata: {
+          'watermarked' => 'true',
+          'processed_at' => Time.current.iso8601
+        }
+      )
+    else
+      Rails.logger.error "FFmpeg failed to process video: #{filename}"
+      raise "Video watermarking failed"
+    end
 
+    # Cleanup
     temp_input.close
     temp_input.unlink
     temp_output.close
