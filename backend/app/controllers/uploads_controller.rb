@@ -1,8 +1,6 @@
 require 'aws-sdk-s3'
 
 class UploadsController < ApplicationController
-  skip_before_action :verify_authenticity_token
-
   def create
     file = params[:file]
     return render json: { error: "No file uploaded" }, status: 400 unless file
