@@ -2,19 +2,63 @@
 <html>
   <head>
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .brand {
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin: 20px 0;
+      }
+      .signature {
+        margin-top: 30px;
+        color: #666;
+      }
+      a {
+        color: #0066cc;
+      }
+    </style>
   </head>
   <body>
-    <h1>Hello, <%= @user.name || "there" %>!</h1>
-    <p>Thank you for visiting our studio this morning and congratulations again on your upcoming wedding! It was our pleasure to assist you and your mother with our new collection. Attached are PDF files to view your favorite looks:</p>
-    <p>To share a bit more information on our process: once you have made a decision on your look we will process payment in full, and set a time to record your measurements either in person or over a video call. All garments are made to order according to our standard US size scale. We suggest placing your order a minimum of 10 months prior to your event date: most garments take 6-7 months to produce by hand in our atelier & we aim to leave you with at least 12 weeks for alterations. Please note that almost all garments will require some form of alterations to perfect the fit. While you are not bound to do alterations with us, our In-House alterations are a flat rate of $1950 and cover two fittings & a final "try-on" where we mold the body, adjust length to your shoes, create a bustle if needed, and ultimately steam & professionally pack the gown. The $150 booking fee you paid for your appointment will apply towards your order as a credit.
-    You are welcome to reach out via email or my cell listed below with any questions.
-    I look forward to assisting you further through this special experience!</p>
-    <p><strong>Password to open the PDF:</strong> <%= @password %></p>
-    <p>studio reception: <a href="tel:+13232402006">323.240.2006</p>
-    <p>mobile: <a href="tel:+6466895552">646.689.5552</p>
-    <p>@daniellefrankelstudio</p>
-    <a href="http://daniellefrankelstudio.com/">daniellefrankelstudio.com</a>
-    <p>Best,</p>
-    <p>Rachel</p>
+  <p>Good afternoon <%= @user.name&.split(' ')&.first || "" %>,</p>
+    
+    <p>Thank you for visiting our studio this morning and congratulations again on your upcoming wedding! It was our pleasure to assist you and your mother with our new collection. Below is link & login information to access your personalized portal to view your favorite looks:</p>
+    
+    <p><a href="https://df-pf.vercel.app/user/<%= @user.id %>">View your account</a></p>
+    
+    <p>To share a bit more information on our process: once you have made a decision on your look we will process payment in full, and set a time to record your measurements either in person or over a video call. All garments are made to order according to our standard US size scale. We suggest placing your order a minimum of 10 months prior to your event date: most garments take 6-7 months to produce by hand in our atelier & we aim to leave you with at least 12 weeks for alterations. Please note that almost all garments will require some form of alterations to perfect the fit. While you are not bound to do alterations with us, our In-House alterations are a flat rate of $1950 and cover two fittings & a final "try-on" where we mold the body, adjust length to your shoes, create a bustle if needed, and ultimately steam & professionally pack the gown. The $150 booking fee you paid for your appointment will apply towards your order as a credit.</p>
+    
+    <p>You are welcome to reach out via email or my cell listed below with any questions.</p>
+    
+    <p>I look forward to assisting you further through this special experience!</p>
+    
+    <div class="signature">
+      <p>My best,<br>
+      Rachel<br>
+      --</p>
+      
+      <div class="brand">
+        <%= image_tag attachments['logo.png'].url, alt: "Danielle Frankel", style: "max-width: 200px; height: auto;" %>
+      </div>
+      
+      <p>Rachel Siekman<br>
+      General Manager</p>
+      
+      <p>260 West 39th street | Floor 14<br>
+      New York | New York 10018</p>
+      
+      <p>studio reception: 323.240.2006<br>
+      mobile: 646.689.5552</p>
+      
+      <p>@daniellefrankelstudio<br>
+      <a href="http://daniellefrankelstudio.com">daniellefrankelstudio.com</a></p>
+    </div>
   </body>
 </html>

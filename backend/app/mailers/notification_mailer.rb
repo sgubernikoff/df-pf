@@ -6,10 +6,12 @@ class NotificationMailer < ApplicationMailer
     @visit = Visit.find(params[:visit_id])
     @password = params[:password] || "No password provided"
     @url = "localhost:5173/visit/#{@visit.id}"
-
+  
+    # Attach the logo
+    attachments.inline['logo.png'] = File.read(Rails.root.join('app', 'assets', 'images', 'DanielleFrankelMainLogo.jpg'))
+  
     if @visit.visit_pdf.attached?
       filename = "#{@visit.dress.name}-#{@user.name.parameterize}-#{@visit.created_at.to_date}.pdf"
-
       attachments[filename] = {
         mime_type: 'application/pdf',
         content: @visit.visit_pdf.download
