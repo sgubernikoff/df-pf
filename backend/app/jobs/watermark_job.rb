@@ -33,15 +33,17 @@ class WatermarkJob < ApplicationJob
       x: (original.width - watermark.width) / 2,
       y: (original.height - watermark.height) / 2)
 
-    composed.write_to_file(temp_file.path)
+    output_path = "#{temp_file.path}.jpg"
+    composed.write_to_file(output_path)
 
     s3.put_object(
       bucket: ENV["S3_BUCKET_NAME"],
       key: filename,
-      body: File.open(temp_file.path),
+      body: File.open(output_path),
       content_type: content_type
     )
 
+    File.delete(output_path) if File.exist?(output_path)
     temp_file.close
     temp_file.unlink
   end
