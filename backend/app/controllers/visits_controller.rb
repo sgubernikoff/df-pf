@@ -15,15 +15,22 @@ class VisitsController < ApplicationController
     unless current_user.is_admin || @visit.user_id == current_user.id
       return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
     end
-
-    if @visit.visit_pdf.attached?
-      base64_pdf = Base64.strict_encode64(@visit.visit_pdf.download)
+  
+    if @visit.images.attached?
+      images_data = @visit.images.map do |image|
+        {
+          id: image.id,
+          filename: image.filename.to_s,
+          url: rails_blob_url(image)  # This works with S3
+        }
+      end
+      
       render json: {
-        pdf_base64: "data:application/pdf;base64,#{base64_pdf}",
+        images: images_data,
         user_id: @visit.user_id
       }
     else
-      render json: { error: "PDF not available yet.", user_id: @visit.user_id }, status: :not_found
+      render json: { error: "Images not available yet.", user_id: @visit.user_id }, status: :not_found
     end
   end
 

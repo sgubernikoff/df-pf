@@ -57,20 +57,20 @@ export default function Visit() {
 function VisitGridItem({ v }) {
   const isProcessing = !v?.attributes?.isPdfReady;
   const product = v.attributes?.product || {};
-  console.log("Product debug:", product);
-
   return (
     <div className="user-dress-container">
-      <div className="dress-info">
-        <p className="dress-name">{product.title || "missing shopify data"}</p>
-        <p className="dress-price">{v.attributes.price}</p>
-      </div>
       <Link
         to={`/visit/${v.attributes?.id}`}
         onClick={(e) => {
-          if (isProcessing) e.preventDefault();
+          // if (isProcessing) e.preventDefault();
         }}
       >
+        <div className="dress-info">
+          <p className="dress-name">
+            {product.title || "missing shopify data"}
+          </p>
+          <p className="dress-price">{v.attributes.price}</p>
+        </div>
         <div
           className={`hover-scale-wrapper dress-image-wrapper${
             isProcessing ? " processing" : ""
