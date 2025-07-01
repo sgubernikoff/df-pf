@@ -44,16 +44,11 @@ export default function Visit() {
   console.log(data);
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "1rem",
-        padding: "4rem",
-        justifyItems: "center",
-        alignItems: "center",
-      }}
-    >
+    <div className="user-visits-container">
+      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+        <p>{data.product?.title || "Untitled Dress"}</p>
+        <p>{data.product?.price ? `$${data.product.price}` : ""}</p>
+      </div>
       {data.images?.map((image) => (
         <img
           key={image.id}
