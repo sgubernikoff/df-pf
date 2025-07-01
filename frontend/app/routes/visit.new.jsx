@@ -300,7 +300,7 @@ export default function NewVisit() {
             type="file"
             name="visit[images][]"
             multiple
-            accept="image/*"
+            accept="image/*,video/*"
             disabled={uploading}
           />
         </label>
