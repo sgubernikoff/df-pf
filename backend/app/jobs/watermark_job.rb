@@ -61,8 +61,13 @@ class WatermarkJob < ApplicationJob
       temp_file = Tempfile.new(['original', File.extname(filename)], binmode: true)
       s3_client.get_object(response_target: temp_file.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
 
-      # Process image
-      original = Vips::Image.new_from_file(temp_file.path, access: :sequential)
+      if File.extname(filename).downcase == '.heic'
+        converted_path = temp_file.path.sub(/\.heic\z/i, '.jpg')
+        system("magick", "convert", temp_file.path, converted_path)
+        temp_file = File.open(converted_path, 'rb')
+      end
+
+      original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
       
       unless File.exist?(watermark_path)
@@ -110,7 +115,7 @@ class WatermarkJob < ApplicationJob
       Rails.logger.info "Successfully watermarked image: #{filename}"
       
       # Clean up backup after successful processing (optional)
-      # delete_backup(backup_key) if backup_key
+      delete_backup(backup_key) if backup_key
 
     rescue => e
       Rails.logger.error "Image watermarking failed for #{filename}: #{e.message}"
@@ -203,6 +208,7 @@ class WatermarkJob < ApplicationJob
       # visit = Visit.joins(video_attachment: :blob).find_by(active_storage_blobs: { filename: blob.filename.to_s })
       # visit.video.attach(blob) if visit
 
+      delete_backup(backup_key) if backup_key
     rescue => e
       Rails.logger.error "Video watermarking failed for #{filename}: #{e.message}"
       
