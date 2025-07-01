@@ -63,7 +63,13 @@ class WatermarkJob < ApplicationJob
 
       if File.extname(filename).downcase == '.heic'
         converted_path = temp_file.path.sub(/\.heic\z/i, '.jpg')
-        system("magick", "convert", temp_file.path, converted_path)
+        Rails.logger.info "Converting HEIC to JPEG: #{temp_file.path} -> #{converted_path}"
+        success = system("magick", "convert", temp_file.path, converted_path)
+
+        unless success && File.exist?(converted_path)
+          raise "HEIC to JPEG conversion failed for #{filename} using ImageMagick"
+        end
+
         temp_file = File.open(converted_path, 'rb')
       end
 
