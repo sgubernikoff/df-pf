@@ -170,7 +170,7 @@ class WatermarkJob < ApplicationJob
         "ffmpeg",
         "-i", temp_input.path,
         "-i", watermark_path.to_s,
-        "-filter_complex", "[0:v][1:v]overlay=0:0:alpha=0.5",
+        "-filter_complex", "[1][0]scale2ref=w=iw*0.4:h=ow/mdar[wm][vid];[vid][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2",
         "-c:a", "copy",
         "-y",
         temp_output.path
