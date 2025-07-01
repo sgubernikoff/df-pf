@@ -63,7 +63,7 @@ function VisitGridItem({ v }) {
         style={{ textDecoration: "none" }}
         to={`/visit/${v.attributes?.id}`}
         onClick={(e) => {
-          // if (isProcessing) e.preventDefault();
+          if (isProcessing) e.preventDefault();
         }}
       >
         <div className="dress-info">
