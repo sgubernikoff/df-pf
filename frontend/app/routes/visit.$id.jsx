@@ -45,7 +45,9 @@ export default function Visit() {
 
   return (
     <>
-      <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+      <div
+        style={{ textAlign: "center", marginBottom: "2rem", marginTop: "6rem" }}
+      >
         <p>{data.product?.title || "Untitled Dress"}</p>
         <p>{data.product?.price ? `$${data.product.price}` : ""}</p>
       </div>
