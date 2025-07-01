@@ -245,6 +245,13 @@ class Visit < ApplicationRecord
         'backup_key' => backup_key || 'none'
       }
     )
+    # Attach the new .mp4 video to the Visit using ActiveStorage
+    images.attach(
+      io: File.open(temp_output.path),
+      filename: output_filename,
+      content_type: "video/mp4",
+      identify: false
+    )
     Rails.logger.info "Successfully watermarked and converted video: #{output_filename}"
   ensure
     temp_output.close if temp_output
