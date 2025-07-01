@@ -200,7 +200,7 @@ class WatermarkJob < ApplicationJob
       )
 
       # Attach the blob to the Visit model if found
-      visit = Visit.find_by(filename: filename)
+      visit = Visit.joins(:video_attachment).where(active_storage_attachments: { blob_id: blob.id }).first
       visit.video.attach(blob) if visit
 
     rescue => e
