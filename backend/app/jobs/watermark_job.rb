@@ -178,6 +178,23 @@ class WatermarkJob < ApplicationJob
       )
       Rails.logger.info "Successfully watermarked and converted video to: #{output_filename}"
 
+      # Attach the new .mp4 blob to ActiveStorage if applicable
+      blob = ActiveStorage::Blob.create_and_upload!(
+        key: output_filename,
+        io: File.open(temp_output.path),
+        filename: File.basename(output_filename),
+        content_type: "video/mp4",
+        metadata: {
+          watermarked: 'true',
+          processed_at: Time.current.iso8601
+        }
+      )
+
+      # If your model should be updated here, fetch and attach it:
+      # Example (you'll need to adjust based on how you associate blobs with models):
+      # visit = Visit.find_by_filename(filename)
+      # visit.video.attach(blob)
+
     rescue => e
       Rails.logger.error "Video watermarking failed for #{filename}: #{e.message}"
       
