@@ -177,6 +177,9 @@ class WatermarkJob < ApplicationJob
         }
       )
       Rails.logger.info "Successfully watermarked and converted video to: #{output_filename}"
+      # Delete the original video after successful watermarking
+      s3_client.delete_object(bucket: ENV["S3_BUCKET_NAME"], key: filename)
+      Rails.logger.info "Deleted original video: #{filename}"
 
       # Attach the new .mp4 blob to ActiveStorage if applicable
       blob = ActiveStorage::Blob.create_and_upload!(
