@@ -62,15 +62,17 @@ class WatermarkJob < ApplicationJob
       s3_client.get_object(response_target: temp_file.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
 
       if File.extname(filename).downcase == '.heic'
-        converted_path = temp_file.path.sub(/\.heic\z/i, '.jpg')
-        Rails.logger.info "Converting HEIC to JPEG: #{temp_file.path} -> #{converted_path}"
-        success = system("magick", "convert", temp_file.path, converted_path)
+        Rails.logger.info "Converting HEIC to JPEG using MiniMagick: #{temp_file.path}"
+        image = MiniMagick::Image.open(temp_file.path)
+        image.auto_orient
+        image.strip
+        image.rotate(90) if image[:width] > image[:height]
 
-        unless success && File.exist?(converted_path)
-          raise "HEIC to JPEG conversion failed for #{filename} using ImageMagick"
-        end
+        converted = Tempfile.new(['converted', '.jpg'], binmode: true)
+        image.format("jpg")
+        image.write(converted.path)
 
-        temp_file = File.open(converted_path, 'rb')
+        temp_file = File.open(converted.path, 'rb')
       end
 
       original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
