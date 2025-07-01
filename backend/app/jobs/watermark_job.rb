@@ -140,7 +140,7 @@ class WatermarkJob < ApplicationJob
       s3_client.get_object(response_target: temp_input.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
       Rails.logger.info "Downloaded original video: #{filename}"
 
-      output_filename = filename.sub(/\.\w+$/, '.mp4')
+      output_filename = filename
       temp_output = Tempfile.new(['output', '.mp4'], binmode: true)
 
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
@@ -184,29 +184,24 @@ class WatermarkJob < ApplicationJob
       )
       Rails.logger.info "Uploaded watermarked video as #{output_filename}"
       Rails.logger.info "Successfully watermarked and converted video to: #{output_filename}"
-      # Delete the original video after successful watermarking
-      s3_client.delete_object(bucket: ENV["S3_BUCKET_NAME"], key: filename)
-      Rails.logger.info "Deleted original video: #{filename}"
+      # The original video is now overwritten; do not delete it.
 
       Rails.logger.info "Attaching new .mp4 blob to ActiveStorage: #{output_filename}"
-      # Generate a unique key for the watermarked file to avoid duplicate keys
-      unique_key = "#{File.basename(output_filename, '.*')}_#{SecureRandom.uuid}.mp4"
       # Attach the new .mp4 blob to ActiveStorage if applicable
       blob = ActiveStorage::Blob.create_and_upload!(
         io: File.open(temp_output.path),
-        filename: unique_key,
+        filename: File.basename(output_filename),
         content_type: "video/mp4",
-        key: unique_key,
+        key: SecureRandom.uuid,
         metadata: {
           watermarked: 'true',
           processed_at: Time.current.iso8601
         }
       )
 
-      # If your model should be updated here, fetch and attach it:
-      # Example (you'll need to adjust based on how you associate blobs with models):
-      # visit = Visit.find_by_filename(filename)
-      # visit.video.attach(blob)
+      # Attach the blob to the Visit model if found
+      visit = Visit.find_by(filename: filename)
+      visit.video.attach(blob) if visit
 
     rescue => e
       Rails.logger.error "Video watermarking failed for #{filename}: #{e.message}"
