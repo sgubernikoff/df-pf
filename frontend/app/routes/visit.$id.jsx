@@ -53,17 +53,35 @@ export default function Visit() {
       </div>
       <div className="user-visits-container">
         {data.images?.map((image) => (
-          <img
-            key={image.id}
-            src={image.url}
-            alt={image.filename}
-            style={{
-              width: "100%",
-              maxWidth: "100%",
-              height: "auto",
-              objectFit: "cover",
-            }}
-          />
+          <div key={image.id}>
+            {[".mov", ".mp4"].some((ext) =>
+              image.filename.toLowerCase().endsWith(ext)
+            ) ? (
+              <video
+                controls
+                style={{
+                  width: "100%",
+                  maxWidth: "100%",
+                  height: "auto",
+                  objectFit: "cover",
+                }}
+              >
+                <source src={image.url} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img
+                src={image.url}
+                alt={image.filename}
+                style={{
+                  width: "100%",
+                  maxWidth: "100%",
+                  height: "auto",
+                  objectFit: "cover",
+                }}
+              />
+            )}
+          </div>
         ))}
       </div>
     </>

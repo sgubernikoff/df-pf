@@ -135,11 +135,12 @@ class WatermarkJob < ApplicationJob
       backup_key = create_backup(filename)
       
       temp_input = Tempfile.new(['input', File.extname(filename)], binmode: true)
-      temp_output = Tempfile.new(['output', File.extname(filename)], binmode: true)
+      output_filename = filename.sub(/\.\w+$/, '.mp4')
+      temp_output = Tempfile.new(['output', '.mp4'], binmode: true)
 
       s3_client.get_object(response_target: temp_input.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
 
-      watermark_path = Rails.root.join("app/assets/images/video_watermark.png")
+      watermark_path = Rails.root.join("app/assets/images/watermark2.png")
       unless File.exist?(watermark_path)
         Rails.logger.error "Video watermark file not found: #{watermark_path}"
         return
@@ -166,17 +167,16 @@ class WatermarkJob < ApplicationJob
       # Upload watermarked version
       s3_client.put_object(
         bucket: ENV["S3_BUCKET_NAME"],
-        key: filename,
+        key: output_filename,
         body: File.open(temp_output.path),
-        content_type: content_type,
+        content_type: "video/mp4",
         metadata: {
           'watermarked' => 'true',
           'processed_at' => Time.current.iso8601,
           'backup_key' => backup_key || 'none'
         }
       )
-
-      Rails.logger.info "Successfully watermarked video: #{filename}"
+      Rails.logger.info "Successfully watermarked and converted video to: #{output_filename}"
 
     rescue => e
       Rails.logger.error "Video watermarking failed for #{filename}: #{e.message}"

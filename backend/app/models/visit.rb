@@ -211,4 +211,43 @@ class Visit < ApplicationRecord
     Rails.logger.error("PDF generation error for Visit #{id}: #{e.class} - #{e.message}")
     false
   end
+
+  def watermark_video(temp_input, watermark_path, filename, s3_client, backup_key = nil)
+    # Output filename: replace .mov (or any extension) with .mp4
+    output_filename = filename.sub(/\.\w+$/, '.mp4')
+    temp_output = Tempfile.new(['output', '.mp4'], binmode: true)
+
+    ffmpeg_cmd = [
+      "ffmpeg",
+      "-i", temp_input.path,
+      "-i", watermark_path.to_s,
+      "-filter_complex", "[0:v][1:v]scale=iw:ih[wm];[0:v][wm]overlay=0:0",
+      "-c:v", "libx264",
+      "-preset", "fast",
+      "-crf", "23",
+      "-c:a", "aac",
+      "-movflags", "+faststart",
+      "-y",
+      temp_output.path
+    ]
+
+    system(*ffmpeg_cmd)
+
+    # Upload the new .mp4 to S3 with the new key
+    s3_client.put_object(
+      bucket: ENV["S3_BUCKET_NAME"],
+      key: output_filename,
+      body: File.open(temp_output.path),
+      content_type: "video/mp4",
+      metadata: {
+        'watermarked' => 'true',
+        'processed_at' => Time.current.iso8601,
+        'backup_key' => backup_key || 'none'
+      }
+    )
+    Rails.logger.info "Successfully watermarked and converted video: #{output_filename}"
+  ensure
+    temp_output.close if temp_output
+    temp_output.unlink if temp_output
+  end
 end
