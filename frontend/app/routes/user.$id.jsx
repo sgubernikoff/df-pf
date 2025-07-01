@@ -55,7 +55,7 @@ export default function Visit() {
 }
 
 function VisitGridItem({ v }) {
-  const isProcessing = !v?.attributes?.isPdfReady;
+  const isProcessing = !v?.attributes?.processed;
   const product = v.attributes?.product || {};
   return (
     <div className="user-dress-container">
