@@ -72,7 +72,7 @@ class WatermarkJob < ApplicationJob
         image.format("jpg")
         image.write(converted.path)
 
-        # Overwrite temp_file with JPEG path and update content_type
+        temp_file.close
         temp_file = File.open(converted.path, 'rb')
         content_type = 'image/jpeg'
       end
