@@ -102,7 +102,11 @@ export function ResendEmailButton({ visitId }) {
   const fetcher = useFetcher();
 
   return (
-    <fetcher.Form method="post" action="/resend-email">
+    <fetcher.Form
+      method="post"
+      action="/resend-email"
+      style={{ marginTop: "1.5rem" }}
+    >
       <input type="hidden" name="visitId" value={visitId} />
       <button type="submit" disabled={fetcher.state !== "idle"}>
         {fetcher.state === "submitting" ? "Sending..." : "Resend Email"}
