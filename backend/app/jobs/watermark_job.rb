@@ -188,20 +188,20 @@ class WatermarkJob < ApplicationJob
 
       Rails.logger.info "Attaching new .mp4 blob to ActiveStorage: #{output_filename}"
       # Attach the new .mp4 blob to ActiveStorage if applicable
-      blob = ActiveStorage::Blob.create_and_upload!(
-        io: File.open(temp_output.path),
-        filename: File.basename(output_filename),
-        content_type: "video/mp4",
-        key: SecureRandom.uuid,
-        metadata: {
-          watermarked: 'true',
-          processed_at: Time.current.iso8601
-        }
-      )
+      # blob = ActiveStorage::Blob.create_and_upload!(
+      #   io: File.open(temp_output.path),
+      #   filename: File.basename(output_filename),
+      #   content_type: "video/mp4",
+      #   key: SecureRandom.uuid,
+      #   metadata: {
+      #     watermarked: 'true',
+      #     processed_at: Time.current.iso8601
+      #   }
+      # )
 
-      # Attach the blob to the Visit model if found
-      visit = Visit.joins(video_attachment: :blob).find_by(active_storage_blobs: { filename: blob.filename.to_s })
-      visit.video.attach(blob) if visit
+      # # Attach the blob to the Visit model if found
+      # visit = Visit.joins(video_attachment: :blob).find_by(active_storage_blobs: { filename: blob.filename.to_s })
+      # visit.video.attach(blob) if visit
 
     rescue => e
       Rails.logger.error "Video watermarking failed for #{filename}: #{e.message}"
