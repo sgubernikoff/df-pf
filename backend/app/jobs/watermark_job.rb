@@ -88,7 +88,7 @@ class WatermarkJob < ApplicationJob
       watermark = Vips::Image.new_from_file(watermark_path.to_s)
       
       if File.extname(filename).downcase == '.heic'
-        watermark = watermark.rot180
+        watermark = watermark.flip
       end
       
       # Resize watermark to match original image dimensions exactly
@@ -174,7 +174,7 @@ class WatermarkJob < ApplicationJob
         "ffmpeg",
         "-i", temp_input.path,
         "-i", watermark_path.to_s,
-        "-filter_complex", "[1:v]hflip,vflip,scale=iw:ih[wm];[0:v][wm]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2",
+        "-filter_complex", "[1:v]vflip,scale=iw*0.3:ih*0.3,tile=ceil(iw/ow)*ceil(ih/oh)[wm];[0:v][wm]overlay=shortest=1",
         "-c:a", "copy",
         "-y",
         temp_output.path
