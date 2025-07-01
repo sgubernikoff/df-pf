@@ -1,3 +1,4 @@
+require 'securerandom'
 class WatermarkJob < ApplicationJob
   queue_as :default
 
@@ -188,12 +189,14 @@ class WatermarkJob < ApplicationJob
       Rails.logger.info "Deleted original video: #{filename}"
 
       Rails.logger.info "Attaching new .mp4 blob to ActiveStorage: #{output_filename}"
+      # Generate a unique key for the watermarked file to avoid duplicate keys
+      unique_key = "#{File.basename(output_filename, '.*')}_#{SecureRandom.uuid}.mp4"
       # Attach the new .mp4 blob to ActiveStorage if applicable
       blob = ActiveStorage::Blob.create_and_upload!(
-        key: output_filename,
         io: File.open(temp_output.path),
-        filename: File.basename(output_filename),
+        filename: unique_key,
         content_type: "video/mp4",
+        key: unique_key,
         metadata: {
           watermarked: 'true',
           processed_at: Time.current.iso8601
