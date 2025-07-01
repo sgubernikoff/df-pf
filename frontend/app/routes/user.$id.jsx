@@ -60,6 +60,7 @@ function VisitGridItem({ v }) {
   return (
     <div className="user-dress-container">
       <Link
+        style={{ textDecoration: "none" }}
         to={`/visit/${v.attributes?.id}`}
         onClick={(e) => {
           // if (isProcessing) e.preventDefault();
