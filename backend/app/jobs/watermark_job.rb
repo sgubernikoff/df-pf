@@ -72,7 +72,9 @@ class WatermarkJob < ApplicationJob
         image.format("jpg")
         image.write(converted.path)
 
+        # Overwrite temp_file with JPEG path and update content_type
         temp_file = File.open(converted.path, 'rb')
+        content_type = 'image/jpeg'
       end
 
       original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
@@ -99,7 +101,7 @@ class WatermarkJob < ApplicationJob
       composed = original.composite2(watermark, :over, x: 0, y: 0)
 
       # Save processed image
-      output_temp = Tempfile.new(['watermarked', File.extname(filename)], binmode: true)
+      output_temp = Tempfile.new(['watermarked', '.jpg'], binmode: true)
       composed.write_to_file(output_temp.path)
 
       # Validate the output file
