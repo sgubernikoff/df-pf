@@ -1,5 +1,4 @@
 import { useLoaderData, redirect } from "@remix-run/react";
-import { enrichUserWithShopifyVisitProducts } from "../utils/shopifyClient.server";
 // frontend/app/routes/visit.jsx
 export async function loader({ params, request }) {
   const cookieHeader = request.headers.get("cookie");
@@ -37,10 +36,7 @@ export async function loader({ params, request }) {
     throw new Response("Failed to fetch PDF", { status: res.status });
   }
 
-  const rawData = await res.json();
-  const enriched = await enrichUserWithShopifyVisitProducts(rawData);
-  console.log("Enriched visit data:", enriched);
-  return enriched;
+  return await res.json();
 }
 
 export default function Visit() {
