@@ -88,7 +88,7 @@ class WatermarkJob < ApplicationJob
       watermark = Vips::Image.new_from_file(watermark_path.to_s)
       
       if File.extname(filename).downcase == '.heic'
-        watermark = watermark.flip
+        watermark = watermark.flip(:horizontal)
       end
       
       # Resize watermark to match original image dimensions exactly
