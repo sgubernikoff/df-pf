@@ -43,7 +43,8 @@ export async function loader({ request }) {
   if (!current_user.data.is_admin)
     return redirect(`/user/${current_user.data.id}`);
 
-  return json({ user: current_user });
+  // return json({ user: current_user });
+  return redirect("/visit/new");
 }
 
 export async function action({ request }) {
