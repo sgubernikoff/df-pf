@@ -133,18 +133,21 @@ class WatermarkJob < ApplicationJob
     begin
       # Create backup first
       backup_key = create_backup(filename)
+      Rails.logger.info "Created backup for #{filename}: #{backup_key}"
       
       temp_input = Tempfile.new(['input', File.extname(filename)], binmode: true)
+      s3_client.get_object(response_target: temp_input.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
+      Rails.logger.info "Downloaded original video: #{filename}"
+
       output_filename = filename.sub(/\.\w+$/, '.mp4')
       temp_output = Tempfile.new(['output', '.mp4'], binmode: true)
-
-      s3_client.get_object(response_target: temp_input.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
 
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
       unless File.exist?(watermark_path)
         Rails.logger.error "Video watermark file not found: #{watermark_path}"
         return
       end
+      Rails.logger.info "Using watermark file at: #{watermark_path}"
 
       # More robust FFmpeg command with error handling
       ffmpeg_cmd = [
@@ -156,6 +159,8 @@ class WatermarkJob < ApplicationJob
         "-y",
         temp_output.path
       ]
+
+      Rails.logger.info "Executing FFmpeg command: #{ffmpeg_cmd.join(' ')}"
 
       # Execute FFmpeg with proper error handling
       result = system(*ffmpeg_cmd)
@@ -176,11 +181,13 @@ class WatermarkJob < ApplicationJob
           'backup_key' => backup_key || 'none'
         }
       )
+      Rails.logger.info "Uploaded watermarked video as #{output_filename}"
       Rails.logger.info "Successfully watermarked and converted video to: #{output_filename}"
       # Delete the original video after successful watermarking
       s3_client.delete_object(bucket: ENV["S3_BUCKET_NAME"], key: filename)
       Rails.logger.info "Deleted original video: #{filename}"
 
+      Rails.logger.info "Attaching new .mp4 blob to ActiveStorage: #{output_filename}"
       # Attach the new .mp4 blob to ActiveStorage if applicable
       blob = ActiveStorage::Blob.create_and_upload!(
         key: output_filename,
