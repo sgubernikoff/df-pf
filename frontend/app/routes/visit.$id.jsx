@@ -41,27 +41,29 @@ export async function loader({ params, request }) {
 
 export default function Visit() {
   const data = useLoaderData();
-  console.log(data);
+  console.log("Visit data:", data);
 
   return (
-    <div className="user-visits-container">
+    <>
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
         <p>{data.product?.title || "Untitled Dress"}</p>
         <p>{data.product?.price ? `$${data.product.price}` : ""}</p>
       </div>
-      {data.images?.map((image) => (
-        <img
-          key={image.id}
-          src={image.url}
-          alt={image.filename}
-          style={{
-            width: "100%",
-            maxWidth: "100%",
-            height: "auto",
-            objectFit: "cover",
-          }}
-        />
-      ))}
-    </div>
+      <div className="user-visits-container">
+        {data.images?.map((image) => (
+          <img
+            key={image.id}
+            src={image.url}
+            alt={image.filename}
+            style={{
+              width: "100%",
+              maxWidth: "100%",
+              height: "auto",
+              objectFit: "cover",
+            }}
+          />
+        ))}
+      </div>
+    </>
   );
 }
