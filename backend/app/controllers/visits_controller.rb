@@ -18,6 +18,7 @@ class VisitsController < ApplicationController
     puts "*****************************not attached*****************************"
     if @visit.images.attached?
       puts "*****************************attached*****************************"
+      puts @visit
       images_data = @visit.images.map do |image|
         {
           id: image.id,
@@ -28,7 +29,9 @@ class VisitsController < ApplicationController
       
       render json: {
         images: images_data,
-        user_id: @visit.user_id
+        user_id: @visit.user_id,
+        price: @visit.price,
+        dress_name: @visit.dress_name
       }
     else
       render json: { error: "Images not available yet.", user_id: @visit.user_id }, status: :not_found
@@ -128,7 +131,7 @@ class VisitsController < ApplicationController
     )
 
     if @visit.save
-      @visit.update(dress_id: @dress.id, shopify_dress_id: dress_data["id"], price:dress_data["price"]) if @dress.save
+      @visit.update(dress_id: @dress.id, shopify_dress_id: dress_data["id"], price:dress_data["price"],dress_name:dress_data["title"]) if @dress.save
 
       respond_to do |format|
         format.html { redirect_to @visit, notice: 'Visit was successfully created.' }

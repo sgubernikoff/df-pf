@@ -48,8 +48,8 @@ export default function Visit() {
       <div
         style={{ textAlign: "center", marginBottom: "2rem", marginTop: "6rem" }}
       >
-        <p>{data.product?.title || "Untitled Dress"}</p>
-        <p>{data.product?.price ? `$${data.product.price}` : ""}</p>
+        <p>{data.dress_name || "Untitled Dress"}</p>
+        <p>{data.price || ""}</p>
       </div>
       <div className="user-visits-container">
         {data.images?.map((image) => (
