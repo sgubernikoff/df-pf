@@ -43,5 +43,30 @@ export default function Visit() {
   const data = useLoaderData();
   console.log(data);
 
-  return <div></div>;
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: "1rem",
+        padding: "4rem",
+        justifyItems: "center",
+        alignItems: "center",
+      }}
+    >
+      {data.images?.map((image) => (
+        <img
+          key={image.id}
+          src={image.url}
+          alt={image.filename}
+          style={{
+            width: "100%",
+            maxWidth: "100%",
+            height: "auto",
+            objectFit: "cover",
+          }}
+        />
+      ))}
+    </div>
+  );
 }
