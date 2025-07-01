@@ -64,6 +64,7 @@ export default function Visit() {
                   maxWidth: "100%",
                   height: "auto",
                   objectFit: "cover",
+                  aspectRatio: "1/1.333333",
                 }}
               >
                 <source src={image.url} type="video/mp4" />
