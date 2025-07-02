@@ -17,10 +17,7 @@ class WatermarkJob < ApplicationJob
       Rails.logger.warn "Unsupported content type for watermarking: #{content_type}"
     end
 
-    visit = Visit.find(visit_id)
-    if visit.all_images_watermarked?
-      visit.mark_ready!
-    end
+    WatermarkFinalizerJob.perform_later(visit_id)
   rescue => e
     Rails.logger.error "Watermarking failed for #{filename}: #{e.message}"
     # Optionally notify error tracking service
@@ -81,10 +78,9 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.rot90
 
       # Resize watermark to fill the entire original image (scale width and height independently)
-      watermark = watermark.resize(
-        original.width.to_f / watermark.width,
-        original.height.to_f / watermark.height
-      )
+      scale_x = original.width.to_f / watermark.width
+      scale_y = original.height.to_f / watermark.height
+      watermark = watermark.resize(scale_x).resize(scale_y, :vscale)
 
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
@@ -272,5 +268,17 @@ class WatermarkJob < ApplicationJob
     File.delete(path) if path && File.exist?(path)
   rescue => e
     Rails.logger.warn "Failed to cleanup temp file: #{e.message}"
+  end
+end
+
+# This job is responsible for finalizing the watermarking process for a Visit.
+class WatermarkFinalizerJob < ApplicationJob
+  queue_as :default
+
+  def perform(visit_id)
+    visit = Visit.find(visit_id)
+    return unless visit.all_images_watermarked?
+
+    visit.mark_ready!
   end
 end
