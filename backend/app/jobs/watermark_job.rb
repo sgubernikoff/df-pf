@@ -179,7 +179,7 @@ class WatermarkJob < ApplicationJob
         "ffmpeg",
         "-i", temp_input.path,
         "-i", watermark_path.to_s,
-        "-filter_complex", "[1:v]scale=iw/2.5:-1,format=rgba,colorchannelmixer=aa=0.70,transpose=1[wm];[0:v][wm]overlay=0:0:format=auto,format=yuv420p",
+        "-filter_complex", "[1:v]scale=iw/2.5:-1,format=rgba,colorchannelmixer=aa=1.50,transpose=1[wm];[0:v][wm]overlay=0:0:format=auto,format=yuv420p",
         "-c:a", "copy",
         "-y",
         temp_output.path
