@@ -78,8 +78,8 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.rot90
 
       # Resize watermark to fill the entire original image (scale width and height independently)
-      tiles_x = (original.width.to_f / watermark.width).ceil
-      tiles_y = (original.height.to_f / watermark.height).ceil
+      tiles_x = (original.width.to_f / watermark.width).ceil + 1
+      tiles_y = (original.height.to_f / watermark.height).ceil + 1
       replicated = watermark.replicate(tiles_y, tiles_x)
       crop_width = [replicated.width, original.width].min
       crop_height = [replicated.height, original.height].min
