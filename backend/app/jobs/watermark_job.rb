@@ -1,6 +1,3 @@
-
-
-
 require 'securerandom'
 class WatermarkJob < ApplicationJob
   queue_as :default
@@ -80,8 +77,8 @@ class WatermarkJob < ApplicationJob
       # Rotate watermark 90 degrees
       watermark = watermark.rot90
 
-      # Set consistent scaling factor to ensure similar watermark size (approx 300px) across image formats
-      fixed_tile_size = 300.0
+      # Set consistent scaling factor to ensure similar watermark size (approx 900px) across image formats
+      fixed_tile_size = 900.0
       scale = fixed_tile_size / [watermark.width, watermark.height].max.to_f
       watermark = watermark.resize(scale)
 
