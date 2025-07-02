@@ -80,7 +80,7 @@ class WatermarkJob < ApplicationJob
       # Resize watermark to fill the entire original image (scale width and height independently)
       scale_x = original.width.to_f / watermark.width
       scale_y = original.height.to_f / watermark.height
-      watermark = watermark.resize(scale_x).resize(scale_y, :vscale)
+      watermark = watermark.resize(scale_x, vscale: scale_y)
 
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
