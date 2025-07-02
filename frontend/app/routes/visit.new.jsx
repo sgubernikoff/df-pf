@@ -14,7 +14,7 @@ export async function loader({ request }) {
   if (!token.includes("Bearer")) return redirect("/login");
 
   const shopifyData = await fetchAllProductsFromCollection("bridal");
-  const res = await fetch("https://df-pf.onrender.com/current_user", {
+  const res = await fetch("http://localhost:3000/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -184,33 +184,6 @@ export default function NewVisit() {
         input.value = JSON.stringify(result);
         form.appendChild(input);
       });
-
-      // 4. Queue watermarking jobs for each uploaded file via Remix API route
-      const watermarkPromises = presigned_urls.map(async (presigned) => {
-        try {
-          const response = await fetch("/api/watermark", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ filename: presigned.filename }),
-          });
-
-          if (!response.ok) {
-            console.error(`Watermark queue failed for ${presigned.filename}`);
-          }
-
-          return response.json();
-        } catch (error) {
-          console.error(
-            `Watermark queue error for ${presigned.filename}:`,
-            error
-          );
-        }
-      });
-
-      // Don't wait for watermarking to complete, but handle any errors gracefully
-      Promise.all(watermarkPromises).catch(console.error);
 
       // Remove file input and submit
       fileInput.remove();

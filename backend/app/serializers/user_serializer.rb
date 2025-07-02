@@ -5,6 +5,6 @@ class UserSerializer
   attributes :id, :email, :name, :is_admin, :visits
 
   attribute :visits do |user|
-    VisitSerializer.new(user.visits.all).serializable_hash
+    VisitSerializer.new(user.visits.order(id: :desc)).serializable_hash
   end
 end

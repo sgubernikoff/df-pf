@@ -12,13 +12,6 @@ class Visit < ApplicationRecord
 
   validates :user_id, presence: true
 
-  after_commit :start_watermark_monitoring, on: :create
-
-  def start_watermark_monitoring
-    Rails.logger.info("Starting Watermark Monitoring for Visit #{id}")
-    StartWatermarkMonitoringJob.perform_later(id)
-  end
-
   def convert_heic_to_jpg(tempfile)
     image = MiniMagick::Image.open(tempfile.path)
     image.auto_orient
