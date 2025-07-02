@@ -78,7 +78,10 @@ class WatermarkJob < ApplicationJob
       end
 
       original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
-      # Skip colourspace conversion to avoid 'multiband' to 'srgb' error
+      if original.interpretation == :multiband
+        Rails.logger.info "Converting multiband image to sRGB to avoid Vips error"
+        original = original.colourspace('srgb')
+      end
 
       # Rotate and prepare the watermark for all image types
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
