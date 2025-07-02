@@ -78,9 +78,10 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.rot90
 
       # Resize watermark to fill the entire original image (scale width and height independently)
-      scale_x = original.width.to_f / watermark.width
-      scale_y = original.height.to_f / watermark.height
-      watermark = watermark.resize(scale_x, vscale: scale_y)
+      tiles_x = (original.width.to_f / watermark.width).ceil
+      tiles_y = (original.height.to_f / watermark.height).ceil
+      tiled = watermark.tile(tiles_x, tiles_y)
+      watermark = tiled.crop(0, 0, original.width, original.height)
 
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
