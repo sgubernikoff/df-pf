@@ -77,15 +77,10 @@ class WatermarkJob < ApplicationJob
       # Rotate watermark 90 degrees
       watermark = watermark.rot90
 
-      # Set consistent scaling factor to ensure similar watermark size across image formats
-      target_tile_size = [original.width, original.height].min / 5.0
-      scale = target_tile_size / [watermark.width, watermark.height].max.to_f
-      watermark = watermark.resize(scale)
-
       # Add spacing around watermark to prevent overlap
       watermark = watermark.embed(40, 40, watermark.width + 80, watermark.height + 80, extend: :background)
 
-      # Tile the watermark across the original image
+      # Resize watermark to fill the entire original image (scale width and height independently)
       tiles_x = (original.width.to_f / watermark.width).ceil + 1
       tiles_y = (original.height.to_f / watermark.height).ceil + 1
       replicated = watermark.replicate(tiles_y, tiles_x)
