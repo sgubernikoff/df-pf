@@ -17,6 +17,7 @@ class WatermarkJob < ApplicationJob
       Rails.logger.warn "Unsupported content type for watermarking: #{content_type}"
     end
 
+    WatermarkFinalizerJob.perform_later(visit_id)
   rescue => e
     Rails.logger.error "Watermarking failed for #{filename}: #{e.message}"
     # Optionally notify error tracking service
