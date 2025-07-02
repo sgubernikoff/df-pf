@@ -83,7 +83,11 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.resize(scale)
 
       # Add spacing around watermark to prevent overlap
-      watermark = watermark.embed(40, 40, watermark.width + 40, watermark.height + 40, extend: :background)
+      if content_type.include?('heic')
+        watermark = watermark.embed(60, 80, watermark.width + 80, watermark.height + 160, extend: :background)
+      else
+        watermark = watermark.embed(40, 40, watermark.width + 60, watermark.height + 80, extend: :background)
+      end
 
       # Tile the watermark across the original image
       tiles_x = (original.width.to_f / watermark.width).ceil + 1
