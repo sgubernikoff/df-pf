@@ -80,9 +80,11 @@ class WatermarkJob < ApplicationJob
       # Rotate watermark 90 degrees
       watermark = watermark.rot90
 
-      # Resize watermark to fill the entire original image
-      scale_factor = [original.width.to_f / watermark.width, original.height.to_f / watermark.height].min
-      watermark = watermark.resize(scale_factor)
+      # Resize watermark to fill the entire original image (scale width and height independently)
+      watermark = watermark.resize(
+        original.width.to_f / watermark.width,
+        original.height.to_f / watermark.height
+      )
 
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
