@@ -78,7 +78,7 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.rot90
 
       # Set consistent scaling factor to ensure similar watermark size (approx 900px) across image formats
-      fixed_tile_size = content_type.include?('heic') ? 2000.0 : 1000.0
+      fixed_tile_size = content_type.include?('heic') ? 3750.0 : 1500.0
       scale = fixed_tile_size / [watermark.width, watermark.height].max.to_f
       watermark = watermark.resize(scale)
 
