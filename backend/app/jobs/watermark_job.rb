@@ -78,12 +78,12 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.rot90
 
       # Set consistent scaling factor to ensure similar watermark size (approx 900px) across image formats
-      fixed_tile_size = 900.0
+      fixed_tile_size = content_type.include?('heic') ? 2000.0 : 1000.0
       scale = fixed_tile_size / [watermark.width, watermark.height].max.to_f
       watermark = watermark.resize(scale)
 
       # Add spacing around watermark to prevent overlap
-      watermark = watermark.embed(40, 40, watermark.width + 80, watermark.height + 80, extend: :background)
+      watermark = watermark.embed(40, 40, watermark.width + 40, watermark.height + 40, extend: :background)
 
       # Tile the watermark across the original image
       tiles_x = (original.width.to_f / watermark.width).ceil + 1
