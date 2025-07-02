@@ -494,6 +494,7 @@ textarea {
   }
   .header-left > button {
     display: block;
+    border: none;
   }
   .mobile-menu {
     position: absolute;
