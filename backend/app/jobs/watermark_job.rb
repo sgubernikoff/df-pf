@@ -116,6 +116,8 @@ class WatermarkJob < ApplicationJob
         end
       end
 
+      # Ensure original is in sRGB color space if it has more than 3 bands (e.g., HEIC with alpha/multiband)
+      original = original.colourspace('srgb') if original.bands > 3
       # Composite the tiled watermark over the original image
       composed = original.composite2(watermark_canvas, :over, x: 0, y: 0)
 
