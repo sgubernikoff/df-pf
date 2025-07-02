@@ -78,8 +78,9 @@ class WatermarkJob < ApplicationJob
       end
 
       original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
+
+      # Rotate and prepare the watermark for all image types
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
-      
       unless File.exist?(watermark_path)
         Rails.logger.error "Watermark file not found: #{watermark_path}"
         return
@@ -87,21 +88,20 @@ class WatermarkJob < ApplicationJob
 
       watermark = Vips::Image.new_from_file(watermark_path.to_s)
 
-      if File.extname(filename).downcase=='.heic'
-        watermark= watermark.rot90
-      end
-      
-      # Resize watermark to match original image dimensions exactly
+      # Rotate watermark 90 degrees
+      watermark = watermark.rot90
+
+      # Resize watermark to fill the entire original image
       watermark = watermark.resize(original.width.to_f / watermark.width)
-                          .resize(original.height.to_f / watermark.height)
-      
+                       .resize(original.height.to_f / watermark.height)
+
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
-      
-      # Apply opacity (adjust 0.3 for less opacity, 0.7 for more)
+
+      # Set opacity (e.g., 2.0 for strong visibility)
       watermark = watermark * [1, 1, 1, 2]
 
-      # Composite watermark over entire image
+      # Composite watermark over the entire image
       composed = original.composite2(watermark, :over, x: 0, y: 0)
 
       # Save processed image
@@ -174,7 +174,7 @@ class WatermarkJob < ApplicationJob
         "ffmpeg",
         "-i", temp_input.path,
         "-i", watermark_path.to_s,
-        "-filter_complex", "[1:v]transpose=1[wm];[0:v][wm]overlay=0:0:alpha=0.5",
+        "-filter_complex", "[1:v]scale=iw/2:-1,transpose=1[wm];[0:v][wm]overlay=0:0:format=auto,format=yuv420p",
         "-c:a", "copy",
         "-y",
         temp_output.path
