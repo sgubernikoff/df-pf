@@ -79,12 +79,6 @@ class WatermarkJob < ApplicationJob
 
       original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
 
-      begin
-        original = original.colourspace('srgb')
-      rescue Vips::Error => e
-        Rails.logger.warn "Skipping colourspace conversion: #{e.message}"
-      end
-
       # Rotate and prepare the watermark for all image types
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
       unless File.exist?(watermark_path)
@@ -94,35 +88,21 @@ class WatermarkJob < ApplicationJob
 
       watermark = Vips::Image.new_from_file(watermark_path.to_s)
 
-      # Rotate watermark 90 degrees once
+      # Rotate watermark 90 degrees
       watermark = watermark.rot90
+
+      # Resize watermark to fill the entire original image
+      watermark = watermark.resize(original.width.to_f / watermark.width)
+                       .resize(original.height.to_f / watermark.height)
 
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
 
-      # Scale watermark to ~40% of the original image width
-      scale = (original.width * 0.4) / watermark.width
-      watermark = watermark.resize(scale)
+      # Set opacity (e.g., 2.0 for strong visibility)
+      watermark = watermark * [1, 1, 1, 2]
 
-      # Adjust opacity to match HEIC (keep current visible strength)
-      watermark = watermark * [1, 1, 1, 0.3]
-
-      # Tile watermark across image
-      tiles_x = (original.width / watermark.width.to_f).ceil + 1
-      tiles_y = (original.height / watermark.height.to_f).ceil + 1
-
-      # Create a blank watermark canvas
-      watermark_canvas = Vips::Image.black(original.width, original.height).bandjoin([0, 0, 0, 0])
-
-      tiles_y.times do |y|
-        tiles_x.times do |x|
-          x_offset = (x * watermark.width).to_i
-          y_offset = (y * watermark.height).to_i
-          watermark_canvas = watermark_canvas.composite2(watermark, :over, x: x_offset, y: y_offset)
-        end
-      end
-      # Composite the tiled watermark over the original image
-      composed = original.composite2(watermark_canvas, :over, x: 0, y: 0)
+      # Composite watermark over the entire image
+      composed = original.composite2(watermark, :over, x: 0, y: 0)
 
       # Save processed image
       output_temp = Tempfile.new(['watermarked', '.jpg'], binmode: true)
@@ -295,9 +275,9 @@ class WatermarkJob < ApplicationJob
 
   def cleanup_temp_file(temp_file)
     return unless temp_file
-
-    temp_file.close unless temp_file.closed? rescue nil
-    temp_file.unlink if temp_file.respond_to?(:unlink) && File.exist?(temp_file.path)
+    
+    temp_file.close unless temp_file.closed?
+    temp_file.unlink if File.exist?(temp_file.path)
   rescue => e
     Rails.logger.warn "Failed to cleanup temp file: #{e.message}"
   end
