@@ -78,7 +78,7 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.rot90
 
       # Add spacing around watermark to prevent overlap
-      watermark = watermark.embed(20, 20, watermark.width + 40, watermark.height + 40, extend: :background)
+      watermark = watermark.embed(40, 40, watermark.width + 80, watermark.height + 80, extend: :background)
 
       # Resize watermark to fill the entire original image (scale width and height independently)
       tiles_x = (original.width.to_f / watermark.width).ceil + 1
@@ -95,7 +95,7 @@ class WatermarkJob < ApplicationJob
       watermark = watermark * [1, 1, 1, 2]
 
       # Composite watermark over the entire image, shifted slightly to the right
-      composed = original.composite2(watermark, :over, x: 10, y: 0)
+      composed = original.composite2(watermark, :over, x: 20, y: 10)
 
       # Save processed image
       output_temp = Tempfile.new(['watermarked', '.jpg'], binmode: true)
