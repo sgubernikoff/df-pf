@@ -497,6 +497,7 @@ textarea {
     border: none;
     background-color: none;
     color: black;
+    font-size: 20px;
   }
   .mobile-menu {
     position: absolute;
