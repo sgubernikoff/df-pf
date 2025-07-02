@@ -1,3 +1,6 @@
+
+
+
 require 'securerandom'
 class WatermarkJob < ApplicationJob
   queue_as :default
@@ -77,10 +80,15 @@ class WatermarkJob < ApplicationJob
       # Rotate watermark 90 degrees
       watermark = watermark.rot90
 
+      # Set consistent scaling factor to ensure similar watermark size (approx 300px) across image formats
+      fixed_tile_size = 300.0
+      scale = fixed_tile_size / [watermark.width, watermark.height].max.to_f
+      watermark = watermark.resize(scale)
+
       # Add spacing around watermark to prevent overlap
       watermark = watermark.embed(40, 40, watermark.width + 80, watermark.height + 80, extend: :background)
 
-      # Resize watermark to fill the entire original image (scale width and height independently)
+      # Tile the watermark across the original image
       tiles_x = (original.width.to_f / watermark.width).ceil + 1
       tiles_y = (original.height.to_f / watermark.height).ceil + 1
       replicated = watermark.replicate(tiles_y, tiles_x)
