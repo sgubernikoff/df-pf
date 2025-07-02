@@ -460,7 +460,10 @@ textarea {
   align-items: center;
   z-index: 2;
 }
-
+.mobile-menu,
+.header-left > button {
+  display: none;
+}
 @media (max-width: 600px) {
   input,
   textarea {
@@ -486,8 +489,34 @@ textarea {
     padding: 2.75rem 1rem;
   }
 
-  .header-left {
+  .auth > .visits-link {
     display: none;
+  }
+  .header-left > button {
+    display: block;
+  }
+  .mobile-menu {
+    position: absolute;
+    top: 67px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease-in-out;
+  }
+  .mobile-menu.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mobile-menu > .visits-link {
+    font-size: 24px;
   }
   .logo img {
     max-width: 50vw;

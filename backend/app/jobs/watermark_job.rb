@@ -2,7 +2,7 @@ require 'securerandom'
 class WatermarkJob < ApplicationJob
   queue_as :default
 
-  def perform(filename:, content_type: nil)
+  def perform(filename:, visit_id:, content_type: nil)
     # Get content_type from S3 if not provided
     content_type ||= get_content_type_from_s3(filename)
     
@@ -15,6 +15,11 @@ class WatermarkJob < ApplicationJob
       watermark_video(filename, content_type)
     else
       Rails.logger.warn "Unsupported content type for watermarking: #{content_type}"
+    end
+
+    visit = Visit.find(visit_id)
+    if visit.all_images_watermarked?
+      visit.mark_ready!
     end
   rescue => e
     Rails.logger.error "Watermarking failed for #{filename}: #{e.message}"
