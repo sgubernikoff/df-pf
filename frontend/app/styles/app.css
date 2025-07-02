@@ -482,11 +482,15 @@ textarea {
     color: black !important;
   }
 
+  .header {
+    padding: 2.75rem 1rem;
+  }
+
   .header-left {
     display: none;
   }
   .logo img {
-    max-width: 35vw;
+    max-width: 50vw;
   }
   .form-create-page {
     width: 100%;
