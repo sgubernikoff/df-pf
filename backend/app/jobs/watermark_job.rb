@@ -66,23 +66,7 @@ class WatermarkJob < ApplicationJob
       temp_file = Tempfile.new(['original', File.extname(filename)], binmode: true)
       s3_client.get_object(response_target: temp_file.path, bucket: ENV["S3_BUCKET_NAME"], key: filename)
 
-      if File.extname(filename).downcase == '.heic'
-        Rails.logger.info "Converting HEIC to JPEG using MiniMagick: #{temp_file.path}"
-        image = MiniMagick::Image.open(temp_file.path)
-        image.auto_orient
-        image.strip
-        image.rotate(90) if image[:width] > image[:height]
-
-        converted = Tempfile.new(['converted', '.jpg'], binmode: true)
-        image.format("jpg")
-        image.write(converted.path)
-
-        temp_file.close
-        temp_file = File.open(converted.path, 'rb')
-        content_type = 'image/jpeg'
-      end
-
-      original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
+      original = Vips::Image.new_from_file(temp_file.path, access: :sequential)
 
       # Rotate and prepare the watermark for all image types
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
@@ -97,8 +81,8 @@ class WatermarkJob < ApplicationJob
       watermark = watermark.rot90
 
       # Resize watermark to fill the entire original image
-      watermark = watermark.resize(original.width.to_f / watermark.width)
-                       .resize(original.height.to_f / watermark.height)
+      scale_factor = [original.width.to_f / watermark.width, original.height.to_f / watermark.height].min
+      watermark = watermark.resize(scale_factor)
 
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
@@ -280,9 +264,10 @@ class WatermarkJob < ApplicationJob
 
   def cleanup_temp_file(temp_file)
     return unless temp_file
-    
+
+    path = temp_file.respond_to?(:path) ? temp_file.path : nil
     temp_file.close unless temp_file.closed?
-    temp_file.unlink if File.exist?(temp_file.path)
+    File.delete(path) if path && File.exist?(path)
   rescue => e
     Rails.logger.warn "Failed to cleanup temp file: #{e.message}"
   end
