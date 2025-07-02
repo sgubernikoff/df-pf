@@ -77,6 +77,9 @@ class WatermarkJob < ApplicationJob
       # Rotate watermark 90 degrees
       watermark = watermark.rot90
 
+      # Add spacing around watermark to prevent overlap
+      watermark = watermark.embed(10, 10, watermark.width + 20, watermark.height + 20, extend: :white)
+
       # Resize watermark to fill the entire original image (scale width and height independently)
       tiles_x = (original.width.to_f / watermark.width).ceil + 1
       tiles_y = (original.height.to_f / watermark.height).ceil + 1
