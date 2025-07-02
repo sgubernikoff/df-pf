@@ -81,7 +81,9 @@ class WatermarkJob < ApplicationJob
       tiles_x = (original.width.to_f / watermark.width).ceil
       tiles_y = (original.height.to_f / watermark.height).ceil
       replicated = watermark.replicate(tiles_y, tiles_x)
-      watermark = replicated.crop(0, 0, original.width, original.height)
+      crop_width = [replicated.width, original.width].min
+      crop_height = [replicated.height, original.height].min
+      watermark = replicated.crop(0, 0, crop_width, crop_height)
 
       # Ensure watermark has alpha channel
       watermark = watermark.bandjoin(255) unless watermark.has_alpha?
