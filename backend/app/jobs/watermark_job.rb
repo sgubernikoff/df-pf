@@ -116,8 +116,11 @@ class WatermarkJob < ApplicationJob
         end
       end
 
-      # Ensure original is in sRGB color space if it has more than 3 bands (e.g., HEIC with alpha/multiband)
-      original = original.colourspace('srgb') if original.bands > 3
+      if original.bands > 3
+        # Drop extra bands to avoid vips_colourspace multiband error
+        original = original.extract_band(0, n: 3) rescue original
+      end
+      original = original.colourspace('srgb')
       # Composite the tiled watermark over the original image
       composed = original.composite2(watermark_canvas, :over, x: 0, y: 0)
 
@@ -292,9 +295,9 @@ class WatermarkJob < ApplicationJob
 
   def cleanup_temp_file(temp_file)
     return unless temp_file
-    
-    temp_file.close unless temp_file.closed?
-    temp_file.unlink if File.exist?(temp_file.path)
+
+    temp_file.close unless temp_file.closed? rescue nil
+    temp_file.unlink if temp_file.respond_to?(:unlink) && File.exist?(temp_file.path)
   rescue => e
     Rails.logger.warn "Failed to cleanup temp file: #{e.message}"
   end
