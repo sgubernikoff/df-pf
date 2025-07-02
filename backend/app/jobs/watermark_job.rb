@@ -95,7 +95,7 @@ class WatermarkJob < ApplicationJob
       watermark = watermark * [1, 1, 1, 2]
 
       # Composite watermark over the entire image, shifted slightly to the right
-      composed = original.composite2(watermark, :over, x: 1000, y: 100)
+      composed = original.composite2(watermark.crop(40, 0, watermark.width - 40, watermark.height), :over)
 
       # Save processed image
       output_temp = Tempfile.new(['watermarked', '.jpg'], binmode: true)
