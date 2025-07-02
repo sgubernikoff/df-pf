@@ -78,6 +78,7 @@ class WatermarkJob < ApplicationJob
       end
 
       original = Vips::Image.new_from_file(temp_file.respond_to?(:path) ? temp_file.path : temp_file, access: :sequential)
+      # Skip colourspace conversion to avoid 'multiband' to 'srgb' error
 
       # Rotate and prepare the watermark for all image types
       watermark_path = Rails.root.join("app/assets/images/watermark2.png")
@@ -115,12 +116,6 @@ class WatermarkJob < ApplicationJob
           watermark_canvas = watermark_canvas.composite2(watermark, :over, x: x_offset, y: y_offset)
         end
       end
-
-      if original.bands > 3
-        # Drop extra bands to avoid vips_colourspace multiband error
-        original = original.extract_band(0, n: 3) rescue original
-      end
-      original = original.colourspace('srgb')
       # Composite the tiled watermark over the original image
       composed = original.composite2(watermark_canvas, :over, x: 0, y: 0)
 
