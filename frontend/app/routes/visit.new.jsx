@@ -216,7 +216,7 @@ export default function NewVisit() {
         {showManualEntry ? (
           <>
             <label>
-              Customer Name:
+              Client Name:
               <input
                 type="text"
                 name="visit[customer_name]"
@@ -226,7 +226,7 @@ export default function NewVisit() {
               />
             </label>
             <label>
-              Customer Email:
+              Client Email:
               <input
                 type="email"
                 name="visit[customer_email]"
