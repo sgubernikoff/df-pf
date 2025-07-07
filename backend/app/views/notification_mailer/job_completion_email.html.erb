@@ -16,6 +16,7 @@
         font-weight: bold;
         letter-spacing: 2px;
         margin: 20px 0;
+        text-align: left;
       }
       .signature {
         margin-top: 30px;
@@ -24,10 +25,17 @@
       a {
         color: #0066cc;
       }
+      .logo {
+        width: 50%;
+        height: auto;
+        display: block;
+        margin: 0;
+        margin-left: -10px;
+      }
     </style>
   </head>
   <body>
-  <p>Good afternoon <%= @user.name&.split(' ')&.first || "" %>,</p>
+    <p>Good afternoon <%= @user.name&.split(' ')&.first || "" %>,</p>
     
     <p>Thank you for visiting our studio this morning and congratulations again on your upcoming wedding! It was our pleasure to assist you and your mother with our new collection. Below is link & login information to access your personalized portal to view your favorite looks:</p>
     
@@ -52,7 +60,7 @@
       --</p>
       
       <div class="brand">
-        <%= image_tag attachments['logo.png'].url, alt: "Danielle Frankel", style: "max-width: 200px; height: auto;" %>
+        <%= image_tag attachments['logo.png'].url, alt: "Danielle Frankel", class: "logo"%>
       </div>
       
       <p>Rachel Siekman<br>
