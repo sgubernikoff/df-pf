@@ -9,6 +9,7 @@ class CustomDeviseMailer < ApplicationMailer
     @token = token
     @reset_url = build_reset_url(token)
     opts[:subject] = "Set up your password"
+    attachments.inline['logo.png'] = File.read(Rails.root.join('app', 'assets', 'images', 'DanielleFrankelMainLogo.jpg'))
     mail(to: record.email, subject: opts[:subject])
   end
 
@@ -18,6 +19,7 @@ class CustomDeviseMailer < ApplicationMailer
     @reset_url = build_reset_url(token)
     @user = record
     opts[:subject] = "Reset your password"
+    attachments.inline['logo.png'] = File.read(Rails.root.join('app', 'assets', 'images', 'DanielleFrankelMainLogo.jpg'))
     mail(to: record.email, subject: opts[:subject])
   end
 
