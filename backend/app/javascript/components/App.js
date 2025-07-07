@@ -118,7 +118,7 @@ const VisitsForm = () => {
       <h2>New Visit</h2>
 
       <label>
-        Customer Name:
+        Client Name:
         <input
           type="text"
           value={customerName}
@@ -130,7 +130,7 @@ const VisitsForm = () => {
       <br />
 
       <label>
-        Customer Email:
+        Client Email:
         <input
           type="email"
           value={customerEmail}

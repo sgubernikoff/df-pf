@@ -210,7 +210,7 @@ export default function NewVisit() {
           type="button"
           onClick={() => setShowManualEntry(!showManualEntry)}
         >
-          {showManualEntry ? "Search For User" : "Create New User"}
+          {showManualEntry ? "Search For Client" : "Create New Client"}
         </button>
 
         {showManualEntry ? (

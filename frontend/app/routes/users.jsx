@@ -138,7 +138,7 @@ export default function AdminUsersPage() {
         type="text"
         value={userQuery}
         onChange={(e) => setUserQuery(e.target.value)}
-        placeholder="Search for users..."
+        placeholder="Search for clients..."
         style={{
           padding: "8px",
           border: "1px solid #ddd",

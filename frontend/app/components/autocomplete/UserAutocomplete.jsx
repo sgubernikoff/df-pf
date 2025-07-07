@@ -30,7 +30,7 @@ export default function UserAutocomplete({
   return (
     <>
       <AutocompleteInput
-        label="Search for User:"
+        label="Search for Client:"
         value={userQuery}
         onChange={(val) => {
           setUserQuery(val);
