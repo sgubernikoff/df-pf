@@ -4,6 +4,8 @@ import logo from "../styles/DanielleFrankelMainLogo.jpg";
 import "../styles/app.css";
 import { useContext } from "react";
 import { AuthContext } from "../context/auth";
+import { NavLink, useLocation } from "@remix-run/react";
+import { useEffect } from "react";
 
 export default function Header() {
   const { user, logout } = useContext(AuthContext);
@@ -11,6 +13,8 @@ export default function Header() {
   function toggleIsOpen() {
     setIsOpen(!open);
   }
+  const { pathname } = useLocation();
+  useEffect(() => setIsOpen(false), [pathname]);
 
   return (
     <>
@@ -19,27 +23,34 @@ export default function Header() {
           {user?.is_admin && <button onClick={toggleIsOpen}>☰</button>}
         </div>
         <div className="logo">
-          <a href="/" className="logo-link">
+          <NavLink to="/" className="logo-link">
             <img src={logo} alt="Logo" className="logo-img" />
-          </a>
+          </NavLink>
         </div>
         <div className="auth">
           {user?.is_admin && (
             <>
-              <a
-                href="/visit/new"
+              <NavLink
+                to="/admin/new"
+                className="visits-link"
+                style={{ color: "black", textDecoration: "none" }}
+              >
+                New Salesperson
+              </NavLink>
+              <NavLink
+                to="/visit/new"
                 className="visits-link"
                 style={{ color: "black", textDecoration: "none" }}
               >
                 New Visit
-              </a>
-              <a
-                href="/users"
+              </NavLink>
+              <NavLink
+                to="/users"
                 className="visits-link"
                 style={{ color: "black", textDecoration: "none" }}
               >
                 Users
-              </a>
+              </NavLink>
             </>
           )}
           {user ? (
@@ -68,20 +79,27 @@ export default function Header() {
 function MobileMenu({ open }) {
   return (
     <div className={`mobile-menu ${open ? "is-open" : ""}`}>
-      <a
-        href="/visit/new"
+      <NavLink
+        to="/visit/new"
         className="visits-link"
         style={{ color: "black", textDecoration: "none" }}
       >
         New Visit
-      </a>
-      <a
-        href="/users"
+      </NavLink>
+      <NavLink
+        to="/users"
         className="visits-link"
         style={{ color: "black", textDecoration: "none" }}
       >
         Users
-      </a>
+      </NavLink>
+      <NavLink
+        to="/admin/new"
+        className="visits-link"
+        style={{ color: "black", textDecoration: "none" }}
+      >
+        New Salesperson
+      </NavLink>
     </div>
   );
 }
