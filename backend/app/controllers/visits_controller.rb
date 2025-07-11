@@ -12,7 +12,7 @@ class VisitsController < ApplicationController
 
   def show
     @visit = Visit.find(params[:id])
-    unless current_user.is_admin || @visit.user_id == current_user.id
+    unless (current_user.is_admin && @visit.user.salesperson == current_user) || @visit.user_id == current_user.id
       return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
     end
     puts "*****************************not attached*****************************"
@@ -63,6 +63,17 @@ class VisitsController < ApplicationController
       user.send_reset_password_instructions if user.save
     end
 
+    if user.save
+      assignmnet = UserAssignment.create!(
+          salesperson: current_user,
+          client: user
+        )
+      unless assignment&.persisted?
+        puts assignment.errors.full_messages
+        return render json: { error: "User could not be assigned to salesperson" }, status: :unprocessable_entity
+      end
+    end
+
     unless user&.persisted?
       puts user.errors.full_messages
       return render json: { error: "User could not be created or found" }, status: :unprocessable_entity
@@ -90,11 +101,12 @@ class VisitsController < ApplicationController
   end
 
   def resend_email
-    unless current_user.is_admin
+    @visit = Visit.find_by(id: params[:id])
+
+    unless current_user.is_admin && @visit.user.salesperson == current_user
       return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
     end
 
-    @visit = Visit.find_by(id: params[:id])
     respond_to do |format|
       if @visit.nil?
         format.json { render json: { error: "Visit not found" }, status: :not_found }

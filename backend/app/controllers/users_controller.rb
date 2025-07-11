@@ -14,7 +14,7 @@ def index
   page = params[:page].to_i > 0 ? params[:page].to_i : 1
   per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 20
 
-  @users = User.where(is_admin: false).order(created_at: :desc).page(page).per(per_page)
+  @users = current_user.clients.order(created_at: :desc).page(page).per(per_page)
 
   render json: {
     users: UserSerializer.new(@users).serializable_hash,
@@ -35,7 +35,7 @@ end
       return render json: []
     end
 
-    @users = User.where("name ILIKE ? AND is_admin = ?", "%#{query}%", false).limit(10)
+    @users = current_user.clients.where("name ILIKE ? AND is_admin = ?", "%#{query}%", false).limit(10)
 
 
     render json: UserSerializer.new(@users).serializable_hash
@@ -48,8 +48,10 @@ end
       @user = User.find_by(id: params[:id])
       return render_not_found unless @user
     end
-  
-    render json: UserSerializer.new(@user).serializable_hash
+
+    unless @user.salesperson == current_user
+      return render json: UserSerializer.new(@user).serializable_hash
+    else return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
   end
 
   def show_me
