@@ -5,16 +5,17 @@ class ImageAttachmentJob < ApplicationJob
         visit = Visit.find(visit_id)
         image_urls = Array(image_urls_param).reject { |url| url == "undefined" }
         
-        image_urls.each do |json_string|
-            attach_image_to_visit(visit, json_string)
-        end
+        image_urls.each_with_index do |json_string, index|
+            is_last = (index == image_urls.length - 1)
+            attach_image_to_visit(visit, json_string, is_last)
+          end
     rescue => e
         Rails.logger.error("ImageAttachmentJob failed for visit #{visit_id}: #{e.message}")
     end
     
     private
     
-    def attach_image_to_visit(visit, json_string)
+    def attach_image_to_visit(visit, json_string,is_last)
         metadata = JSON.parse(json_string)
 
         puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -34,7 +35,7 @@ class ImageAttachmentJob < ApplicationJob
         blob.update!(metadata: { analyzed: true, identified: true })
         
         visit.images.attach(blob)
-        WatermarkJob.perform_later(filename: metadata['key'], visit_id: visit.id)
+        WatermarkJob.perform_later(filename: metadata['key'], visit_id: visit.id,is_last:is_last)
         Rails.logger.info("Successfully attached #{metadata['filename']} to visit #{visit.id}")
     rescue JSON::ParserError => e
         Rails.logger.error("JSON Parse Error for #{json_string}: #{e.message}")
