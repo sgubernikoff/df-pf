@@ -14,14 +14,15 @@ export async function loader({ params, request }) {
     // redirect to login or return null
     return redirect("/login");
   }
-  // Here, you'll dynamically generate the URL to the PDF based on the visit ID.
+
   const res = await fetch(`https://df-pf.onrender.com/users/${params.id}`, {
     headers: {
       Authorization: token,
     },
   });
   if (!res.ok) {
-    return redirect("/login");
+    if (isAdmin) return redirect("/users");
+    else return redirect("/login");
   }
   const { data } = await res.json();
   if (data.attributes.id != params.id)

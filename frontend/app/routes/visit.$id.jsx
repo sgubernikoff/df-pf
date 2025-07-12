@@ -23,8 +23,11 @@ export async function loader({ params, request }) {
     const json = await res.json().catch(() => ({}));
     // If unauthorized, redirect to current user's page
     if (res.status === 401 || res.status === 403) {
-      const currentUserId = json.user_id || "current"; // fallback just in case
-      return redirect(`/user/${currentUserId}`);
+      if (isAdmin) return redirect("/users");
+      else {
+        const currentUserId = json.user_id || "current"; // fallback just in case
+        return redirect(`/user/${currentUserId}`);
+      }
     }
 
     // If other error and we know the visit's user, redirect there

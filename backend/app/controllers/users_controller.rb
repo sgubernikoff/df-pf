@@ -42,14 +42,10 @@ class UsersController < ApplicationController
   def show
     if current_user.is_admin
       @user = User.find_by(id: params[:id])
-      return render_not_found unless @user
+      return render json: { error: "Unauthorized", current_user: current_user }, status: :unauthorized unless @user.salesperson == current_user
     end
 
-    if @user.salesperson == current_user
-      render json: UserSerializer.new(@user).serializable_hash
-    else
-      render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
-    end
+    render json: UserSerializer.new(@user).serializable_hash
   end
 
   def show_me

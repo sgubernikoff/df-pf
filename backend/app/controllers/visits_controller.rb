@@ -60,17 +60,16 @@ class VisitsController < ApplicationController
         password_confirmation: password,
         is_admin: false
       )
-      user.send_reset_password_instructions if user.save
-    end
-
-    if user.save
-      assignmnet = UserAssignment.create!(
-          salesperson: current_user,
-          client: user
-        )
-      unless assignment&.persisted?
-        puts assignment.errors.full_messages
-        return render json: { error: "User could not be assigned to salesperson" }, status: :unprocessable_entity
+      if user.save
+        user.send_reset_password_instructions
+        assignmnet = UserAssignment.create!(
+            salesperson: current_user,
+            client: user
+          )
+        unless assignment&.persisted?
+          puts assignment.errors.full_messages
+          return render json: { error: "User could not be assigned to salesperson" }, status: :unprocessable_entity
+        end
       end
     end
 
