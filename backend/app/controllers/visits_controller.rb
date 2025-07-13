@@ -62,7 +62,7 @@ class VisitsController < ApplicationController
       )
       if user.save
         user.send_reset_password_instructions
-        assignmnet = UserAssignment.create!(
+        assignment = UserAssignment.create!(
             salesperson: current_user,
             client: user
           )
