@@ -21,7 +21,7 @@ export async function loader({ request }) {
       credentials: "include",
     },
   });
-  if (!res.ok) redirect("/login");
+  if (!res.ok) return redirect("/login");
   const current_user = await res.json();
   if (!current_user.data.is_admin)
     return redirect(`/user/${current_user.data.id}`);
@@ -52,7 +52,7 @@ export async function action({ request }) {
   formData.set("visit[selected_dress]", JSON.stringify(parsedDress));
   formData.delete("price-override");
 
-  const res = await fetch("https://df-pf.onrender.com/visits", {
+  const res = await fetch("http://localhost:3000/visits", {
     method: "POST",
     body: formData,
     headers: { Authorization: token },

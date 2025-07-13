@@ -46,7 +46,7 @@ export async function action({ request }) {
   //     { status: 400 }
   //   );
 
-  const res = await fetch("https://df-pf.onrender.com/users", {
+  const res = await fetch("http://localhost:3000/users", {
     method: "POST",
     headers: {
       Authorization: token,
@@ -70,6 +70,7 @@ export async function action({ request }) {
 
 export default function Signup() {
   const data = useActionData();
+  console.log(data);
 
   return (
     <div className="form-create-page">
@@ -93,18 +94,18 @@ export default function Signup() {
             <input name="password_confirmation" type="password" />
           </label>
           <button type="submit">SIGN UP</button>
-          {data?.errors.name && (
+          {data?.errors?.name && (
             <p style={{ color: "red" }}>{`Name ${data.errors.name[0]}`}</p>
           )}
-          {data?.errors.email && (
+          {data?.errors?.email && (
             <p style={{ color: "red" }}>{`Email ${data.errors.email[0]}`}</p>
           )}
-          {data?.errors.password && (
+          {data?.errors?.password && (
             <p style={{ color: "red" }}>
               {`Password ${data.errors.password[0]}`}
             </p>
           )}
-          {data?.errors.password_confirmation && (
+          {data?.errors?.password_confirmation && (
             <p style={{ color: "red" }}>
               {`Password Confirmation ${data.errors.password_confirmation[0]}`}
             </p>
