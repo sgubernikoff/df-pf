@@ -109,11 +109,15 @@ class VisitsController < ApplicationController
     respond_to do |format|
       if @visit.nil?
         format.json { render json: { error: "Visit not found" }, status: :not_found }
-      elsif !@visit.visit_pdf.attached?
+      elsif !@visit.all_images_watermarked?
         format.json { render json: { error: "PDF not attached" }, status: :unprocessable_entity }
       else
         begin
-          NotificationMailer.job_completion_email(@visit.user, @visit.id, "Contact us for your password").deliver_later
+          NotificationMailer.with(
+            user: @visit.user,
+            visit_id: @visit.id,
+            cc_emails: []
+          ).job_completion_email.deliver_later
         rescue => e
           Rails.logger.error("Email enqueue failed: #{e.message}")
           format.json { render json: { error: "Failed to queue email" }, status: :internal_server_error }
