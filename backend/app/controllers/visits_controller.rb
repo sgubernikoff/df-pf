@@ -78,7 +78,7 @@ class VisitsController < ApplicationController
       return render json: { error: "User could not be created or found" }, status: :unprocessable_entity
     end
 
-    @visit = Visit.new(visit_params.except(:selected_dress, :customer_name, :customer_email, :image_urls))
+    @visit = Visit.new(visit_params.except(:selected_dress, :customer_name, :customer_email, :image_urls, :cc_emails))
     @visit.user = user
 
     dress_data = JSON.parse(visit_params[:selected_dress])
@@ -91,7 +91,7 @@ class VisitsController < ApplicationController
 
     if @visit.save
       @visit.update(dress_id: @dress.id, shopify_dress_id: dress_data["id"], price:dress_data["price"],dress_name:dress_data["title"]) if @dress.save
-      ImageAttachmentJob.perform_later(@visit.id, visit_params[:image_urls]) if visit_params[:image_urls].present?
+      ImageAttachmentJob.perform_later(@visit.id, visit_params[:image_urls],cc_emails: visit_params[:cc_emails]) if visit_params[:image_urls].present?
 
       render json: @visit, status: :created
     else
@@ -157,6 +157,7 @@ class VisitsController < ApplicationController
       :user_id,
       :customer_name,
       :customer_email,
+      :cc_emails,
       :notes,
       :selected_dress,
       image_urls: []

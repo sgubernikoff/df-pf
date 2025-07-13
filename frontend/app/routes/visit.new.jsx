@@ -78,6 +78,25 @@ export default function NewVisit() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState([]);
 
+  // New state for CC emails
+  const [ccEmails, setCcEmails] = useState([""]);
+
+  const addCcEmail = () => {
+    setCcEmails([...ccEmails, ""]);
+  };
+
+  const removeCcEmail = (index) => {
+    if (ccEmails.length > 1) {
+      setCcEmails(ccEmails.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateCcEmail = (index, value) => {
+    const updated = [...ccEmails];
+    updated[index] = value;
+    setCcEmails(updated);
+  };
+
   async function uploadFileToS3(file, presignedData, index) {
     const formData = new FormData();
 
@@ -138,6 +157,16 @@ export default function NewVisit() {
     const fileInput = form.querySelector('input[name="visit[images][]"]');
     const files = Array.from(fileInput.files);
 
+    // Add CC emails to form data
+    const validCcEmails = ccEmails.filter((email) => email.trim() !== "");
+    if (validCcEmails.length > 0) {
+      const ccEmailsInput = document.createElement("input");
+      ccEmailsInput.type = "hidden";
+      ccEmailsInput.name = "visit[cc_emails]";
+      ccEmailsInput.value = JSON.stringify(validCcEmails);
+      form.appendChild(ccEmailsInput);
+    }
+
     if (files.length === 0) {
       // No files to upload, submit directly
       fetcher.submit(form, { method: "post", encType: "multipart/form-data" });
@@ -146,7 +175,7 @@ export default function NewVisit() {
 
     setUploading(true);
     setUploadProgress(files.map((f) => ({ name: f.name, progress: 0 })));
-    console.log("1");
+
     try {
       // 1. Get presigned URLs for all files via Remix API route
       const filesInfo = files.map((file) => ({
@@ -154,7 +183,7 @@ export default function NewVisit() {
         type: file.type,
         size: file.size,
       }));
-      console.log("log2");
+
       const presignedResponse = await fetch("/api/upload", {
         method: "POST",
         headers: {
@@ -162,7 +191,6 @@ export default function NewVisit() {
         },
         body: JSON.stringify({ files: filesInfo }),
       });
-      console.log(presignedResponse);
 
       if (!presignedResponse.ok) {
         const errorData = await presignedResponse.json();
@@ -247,7 +275,13 @@ export default function NewVisit() {
 
         <label>
           Notes:
-          <textarea name="visit[notes]" />
+          <textarea
+            name="visit[notes]"
+            style={{
+              borderRadius: 0,
+              border: "1px solid black",
+            }}
+          />
         </label>
 
         <DressAutocomplete
@@ -263,8 +297,68 @@ export default function NewVisit() {
             type="number"
             placeholder="Optional — uses Shopify price if left blank"
             step="any"
+            style={{ borderRadius: "0", border: "1px solid black" }}
           />
         </label>
+
+        {/* CC Emails Section */}
+        <div style={{ marginBottom: "1rem" }}>
+          <label style={{ display: "block", marginBottom: "0.5rem" }}>
+            Extra Emails (Optional):
+          </label>
+          {ccEmails.map((email, index) => (
+            <div
+              key={index}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "0.5rem",
+                gap: "0.5rem",
+              }}
+            >
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => updateCcEmail(index, e.target.value)}
+                placeholder="Enter email address"
+                style={{
+                  flex: 1,
+                  padding: "0.5rem",
+                  border: "1px solid #ccc",
+                }}
+              />
+              {ccEmails.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeCcEmail(index)}
+                  style={{
+                    padding: "0.5rem 0.75rem",
+                    background: "transparent",
+                    color: "black",
+                    border: "1px solid black",
+                    cursor: "pointer",
+                  }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addCcEmail}
+            style={{
+              padding: "0.5rem 1rem",
+              background: "transparent",
+              color: "black",
+              border: "1px solid black",
+              cursor: "pointer",
+              fontSize: "0.9em",
+            }}
+          >
+            + Add Extra Email
+          </button>
+        </div>
 
         <label>
           Upload Images:

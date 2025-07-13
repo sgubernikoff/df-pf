@@ -33,10 +33,14 @@ class Visit < ApplicationRecord
     already_watermarked?(image.key)
   end
   
-  def mark_ready!
+  def mark_ready!(cc_emails: [])
     update!(processed: true)
     # Trigger your email/notifications here
-    NotificationMailer.with(user:user,visit_id:id).job_completion_email.deliver_later
+    NotificationMailer.with(
+      user: user,
+      visit_id: id,
+      cc_emails: cc_emails
+    ).job_completion_email.deliver_later
   end
 
   def s3_client

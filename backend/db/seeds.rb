@@ -69,6 +69,33 @@ admin_user = User.find_or_create_by(email: "admin@df.com") do |user|
 end
 puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m" if admin_user&.persisted?
 
+# Link clients to salesperson
+puts "\e[34mAssigning clients to salesperson...\e[0m"
+UserAssignment.create!(
+  salesperson: admin_user,
+  client: user1
+)
+puts "\e[32m✔ Assigned User: #{user1.name} to #{admin_user.name}\e[0m"
+UserAssignment.create!(
+  salesperson: admin_user,
+  client: user2
+)
+puts "\e[32m✔ Assigned User: #{user2.name} to #{admin_user.name}\e[0m"
+UserAssignment.create!(
+  salesperson: admin_user,
+  client: user3
+)
+puts "\e[32m✔ Assigned User: #{user3.name} to #{admin_user.name}\e[0m"
+UserAssignment.create!(
+  salesperson: admin_user,
+  client: user4
+)
+puts "\e[32m✔ Assigned User: #{user4.name} to #{admin_user.name}\e[0m"
+UserAssignment.create!(
+  salesperson: admin_user,
+  client: user5
+)
+puts "\e[32m✔ Assigned User: #{user5.name} to #{admin_user.name}\e[0m"
 
 # Create Dresses
 puts "\e[34mCreating Dresses...\e[0m"
