@@ -56,7 +56,7 @@
     
     <div class="signature">
       <p>My best,<br>
-      Rachel<br>
+      <%= @salesperson.name&.split(' ')&.first || "" %><br>
       --</p>
       
       <div class="brand">
