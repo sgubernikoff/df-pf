@@ -9,7 +9,7 @@ export async function loader({ request }) {
   const token = decodeURIComponent(cookies.token);
   if (!token.includes("Bearer")) return redirect("/login");
 
-  const res = await fetch("https://df-pf.onrender.com/current_user", {
+  const res = await fetch("http://localhost:3000/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -36,6 +36,9 @@ export async function action({ request }) {
   const form = await request.formData();
   const name = form.get("name");
   const email = form.get("email");
+  const phone = form.get("phone");
+  const title = form.get("title");
+  const office = form.get("office");
   const password = form.get("password");
   const password_confirmation = form.get("password_confirmation");
   const is_admin = true;
@@ -54,7 +57,16 @@ export async function action({ request }) {
       credentials: "include",
     },
     body: JSON.stringify({
-      user: { name, email, password, password_confirmation, is_admin },
+      user: {
+        name,
+        email,
+        phone,
+        title,
+        office,
+        password,
+        password_confirmation,
+        is_admin,
+      },
     }),
   });
 
@@ -86,6 +98,65 @@ export default function Signup() {
             <input name="email" className="sign-up-email-input" />
           </label>
           <label>
+            Phone
+            <input
+              name="phone"
+              className="sign-up-email-input"
+              placeholder="Use XXX.XXX.XXXX format..."
+            />
+          </label>
+          <label>
+            Title
+            <input name="title" className="sign-up-email-input" />
+          </label>
+          <div>
+            <label style={{ display: "block" }}>Office</label>
+            <div
+              style={{
+                border: "1px solid black",
+                padding: "12px",
+                height: "44px",
+                display: "flex",
+                alignItems: "center",
+                gap: "24px",
+                marginBottom: "10px",
+              }}
+            >
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="radio"
+                  name="office"
+                  value="NY"
+                  style={{ accentColor: "black", cursor: "pointer" }}
+                />
+                New York
+              </label>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="radio"
+                  name="office"
+                  value="LA"
+                  style={{ accentColor: "black", cursor: "pointer" }}
+                />
+                Los Angeles
+              </label>
+            </div>
+          </div>
+          <label>
             Password
             <input name="password" type="password" />
           </label>
@@ -99,6 +170,15 @@ export default function Signup() {
           )}
           {data?.errors?.email && (
             <p style={{ color: "red" }}>{`Email ${data.errors.email[0]}`}</p>
+          )}
+          {data?.errors?.phone && (
+            <p style={{ color: "red" }}>{`Phone ${data.errors.phone[0]}`}</p>
+          )}
+          {data?.errors?.title && (
+            <p style={{ color: "red" }}>{`Title ${data.errors.title[0]}`}</p>
+          )}
+          {data?.errors?.office && (
+            <p style={{ color: "red" }}>{`Office ${data.errors.office[0]}`}</p>
           )}
           {data?.errors?.password && (
             <p style={{ color: "red" }}>

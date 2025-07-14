@@ -15,10 +15,8 @@ class VisitsController < ApplicationController
     unless (current_user.is_admin && @visit.user.salesperson == current_user) || @visit.user_id == current_user.id
       return render json: { error: "Unauthorized", user_id: current_user.id }, status: :unauthorized
     end
-    puts "*****************************not attached*****************************"
+    
     if @visit.images.attached?
-      puts "*****************************attached*****************************"
-      puts @visit
       images_data = @visit.images.map do |image|
         {
           id: image.id,

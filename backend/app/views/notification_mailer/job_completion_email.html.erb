@@ -63,14 +63,13 @@
         <%= image_tag attachments['logo.png'].url, alt: "Danielle Frankel", class: "logo"%>
       </div>
       
-      <p>Rachel Siekman<br>
-      General Manager</p>
+      <p><%= @salesperson.name %><br>
+      <%= @salesperson.title %></p>
       
-      <p>260 West 39th street | Floor 14<br>
-      New York | New York 10018</p>
+      <p><%= @office_address.html_safe %></p>
       
       <p>studio reception: 323.240.2006<br>
-      mobile: 646.689.5552</p>
+      mobile: <%= @salesperson.phone %></p>
       
       <p>@daniellefrankelstudio<br>
       <a href="http://daniellefrankelstudio.com">daniellefrankelstudio.com</a></p>

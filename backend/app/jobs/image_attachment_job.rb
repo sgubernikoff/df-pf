@@ -18,10 +18,6 @@ class ImageAttachmentJob < ApplicationJob
     def attach_image_to_visit(visit, json_string,is_last,cc_emails:[])
         metadata = JSON.parse(json_string)
 
-        puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        puts metadata
-        puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-        
         blob = ActiveStorage::Blob.create!(
             key: metadata["key"],
             filename: metadata["filename"],
@@ -35,7 +31,8 @@ class ImageAttachmentJob < ApplicationJob
         blob.update!(metadata: { analyzed: true, identified: true })
         
         visit.images.attach(blob)
-        WatermarkJob.perform_later(filename: metadata['key'], visit_id: visit.id,is_last:is_last,cc_emails:cc_emails)
+
+        WatermarkJob.perform_later(filename: metadata['key'], visit_id: visit.id,is_last:is_last,cc_emails:cc_emails || [])
         Rails.logger.info("Successfully attached #{metadata['filename']} to visit #{visit.id}")
     rescue JSON::ParserError => e
         Rails.logger.error("JSON Parse Error for #{json_string}: #{e.message}")

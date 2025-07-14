@@ -4,6 +4,9 @@ admin_user = User.find_or_create_by(email: "admin@df.com") do |user|
   user.password = ENV['ADMIN_PASSWORD']
   user.password_confirmation = ENV['ADMIN_PASSWORD']
   user.is_admin = true
+  user.office = 'NY'
+  user.title = 'Salesperson'
+  user.phone = '555.555.5555'
 end
 
 puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m" if admin_user&.persisted?
@@ -66,6 +69,9 @@ admin_user = User.find_or_create_by(email: "admin@df.com") do |user|
   user.password = "adminpass123"
   user.password_confirmation = "adminpass123"
   user.is_admin = true
+  user.office = 'NY'
+  user.title = 'Salesperson'
+  user.phone = '555.555.5555'
 end
 puts "\e[35;1m🚨 Admin User Created: #{admin_user.name} (#{admin_user.email}) — is_admin: #{admin_user.is_admin}\e[0m" if admin_user&.persisted?
 

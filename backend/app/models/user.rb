@@ -25,6 +25,14 @@ class User < ApplicationRecord
   validate :client_must_have_salesperson_assignment, if: :client_and_persisted?
   validates :email, presence: true, uniqueness: true
   validates :name, presence: true
+  # Conditional validations for admin users
+  validates :office, presence: true, if: :is_admin?
+  validates :title, presence: true, if: :is_admin?
+  validates :phone, presence: true, if: :is_admin?
+  validates :phone, format: { 
+    with: /\A\d{3}\.\d{3}\.\d{4}\z/, 
+    message: "must be in the format xxx.xxx.xxxx" 
+  }, if: :is_admin?
 
   def send_reset_password_instructions
     token = set_reset_password_token
