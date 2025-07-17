@@ -7,9 +7,7 @@ class Visit < ApplicationRecord
   has_many_attached :images, dependent: :purge_later
   has_one_attached :visit_pdf, dependent: :purge_later
 
-  has_one_attached :video do |attachable|
-    attachable.preview false
-  end
+  has_one_attached :video, dependent: :purge_later
 
   belongs_to :dress, optional: true
   belongs_to :user
