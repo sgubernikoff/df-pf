@@ -94,6 +94,10 @@ export default function Signup() {
             <input name="name" className="sign-up-email-input" />
           </label>
           <label>
+            Title
+            <input name="title" className="sign-up-email-input" />
+          </label>
+          <label>
             Email
             <input name="email" className="sign-up-email-input" />
           </label>
@@ -102,18 +106,14 @@ export default function Signup() {
             <input
               name="phone"
               className="sign-up-email-input"
-              placeholder="Use XXX.XXX.XXXX format..."
+              placeholder="xxx.xxx.xxxx"
             />
-          </label>
-          <label>
-            Title
-            <input name="title" className="sign-up-email-input" />
           </label>
           <div>
             <label style={{ display: "block" }}>Office</label>
             <div
               style={{
-                border: "1px solid black",
+                border: "none",
                 padding: "12px",
                 height: "44px",
                 display: "flex",
