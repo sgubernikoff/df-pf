@@ -92,7 +92,7 @@ class WatermarkJob < ApplicationJob
         watermark = watermark.resize(scale)
         watermark = watermark.embed(40, 60, watermark.width + 60, watermark.height + 80, extend: :background)
       else
-        watermark = watermark.embed(40, 40, watermark.width + 60, watermark.height + 80, extend: :background)
+        watermark = watermark.embed(40, 40, watermark.width + 60, watermark.height + 240, extend: :background)
       end
 
       # Tile the watermark across the original image
