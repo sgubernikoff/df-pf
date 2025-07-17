@@ -26,20 +26,17 @@ export default function ResetPassword() {
 
     setLoading(true);
     try {
-      const res = await fetch(
-        "https://daniellefrankelphotos.com/users/password",
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user: {
-              reset_password_token: token,
-              password,
-              password_confirmation: confirm,
-            },
-          }),
-        }
-      );
+      const res = await fetch("https://df-pf.onrender.com/users/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: {
+            reset_password_token: token,
+            password,
+            password_confirmation: confirm,
+          },
+        }),
+      });
 
       let data;
       const contentType = res.headers.get("content-type");

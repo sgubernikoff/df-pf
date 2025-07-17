@@ -29,7 +29,7 @@ export async function loader({ request }) {
     return redirect("/login");
   }
 
-  const res = await fetch("https://daniellefrankelphotos.com/current_user", {
+  const res = await fetch("https://df-pf.onrender.com/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",

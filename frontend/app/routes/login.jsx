@@ -42,7 +42,7 @@ export default function Login() {
     setResetError("");
     try {
       const response = await fetch(
-        "https://daniellefrankelphotos.com/users/manual_password_reset",
+        "https://df-pf.onrender.com/users/manual_password_reset",
         {
           method: "POST",
           credentials: "include",

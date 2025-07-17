@@ -19,7 +19,7 @@ export async function loader({ request }) {
   }
 
   const res = await fetch(
-    `https://daniellefrankelphotos.com/users?page=${page}&per_page=${perPage}`,
+    `https://df-pf.onrender.com/users?page=${page}&per_page=${perPage}`,
     {
       headers: {
         Authorization: token,

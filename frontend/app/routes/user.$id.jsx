@@ -15,14 +15,11 @@ export async function loader({ params, request }) {
     return redirect("/login");
   }
 
-  const res = await fetch(
-    `https://daniellefrankelphotos.com/users/${params.id}`,
-    {
-      headers: {
-        Authorization: token,
-      },
-    }
-  );
+  const res = await fetch(`https://df-pf.onrender.com/users/${params.id}`, {
+    headers: {
+      Authorization: token,
+    },
+  });
   if (!res.ok) {
     if (isAdmin) return redirect("/users");
     else return redirect("/login");

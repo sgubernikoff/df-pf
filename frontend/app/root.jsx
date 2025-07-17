@@ -19,7 +19,7 @@ import favicon from "./styles/favicon.png";
 
 //   // If the user is logged in (i.e., there's a userId), fetch the user's data
 //   if (userId) {
-//     const res = await fetch(`https://daniellefrankelphotos.com/users/${userId}`);
+//     const res = await fetch(`https://df-pf.onrender.com/users/${userId}`);
 //     const user = await res.json();
 
 //     // Return the user data as part of the loader's response
