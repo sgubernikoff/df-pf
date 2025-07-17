@@ -15,7 +15,8 @@ class NotificationMailer < ApplicationMailer
       floor: nil,
       city: 'Los Angeles',
       state: 'California',
-      zip: '90069'
+      zip: '90069',
+      phone: '323.533.7241'
     }
   }.freeze
 
