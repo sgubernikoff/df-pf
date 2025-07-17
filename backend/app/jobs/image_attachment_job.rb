@@ -1,14 +1,23 @@
 class ImageAttachmentJob < ApplicationJob
     queue_as :default
 
-    def perform(visit_id, image_urls_param,cc_emails:[])
+    def perform(visit_id, image_urls_param, cc_emails:[])
         visit = Visit.find(visit_id)
         image_urls = Array(image_urls_param).reject { |url| url == "undefined" }
         
-        image_urls.each_with_index do |json_string, index|
-            is_last = (index == image_urls.length - 1)
-            attach_image_to_visit(visit, json_string, is_last,cc_emails: cc_emails)
-          end
+        # Sort so videos come last
+        sorted_image_urls = image_urls.sort_by do |json_string|
+            metadata = JSON.parse(json_string)
+            content_type = metadata["content_type"]
+            
+            # Videos get value 1 (sorted last), everything else gets 0 (sorted first)
+            content_type.start_with?("video/") ? 1 : 0
+        end
+        
+        sorted_image_urls.each_with_index do |json_string, index|
+            is_last = (index == sorted_image_urls.length - 1)
+            attach_image_to_visit(visit, json_string, is_last, cc_emails: cc_emails)
+        end
     rescue => e
         Rails.logger.error("ImageAttachmentJob failed for visit #{visit_id}: #{e.message}")
     end
