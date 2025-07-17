@@ -1,7 +1,7 @@
 require Rails.root.join('app/mailers/application_mailer')
 
 class CustomDeviseMailer < ApplicationMailer
-  default from: 'sgubernikoff@gmail.com'
+  default from: 'photos@daniellefrankelstudio.com'
   default template_path: 'devise/mailer' # fallback to Devise views
 
   # Original method for initial user creation
