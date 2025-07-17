@@ -24,7 +24,20 @@ class NotificationMailer < ApplicationMailer
     @user = params[:user]
     @visit = Visit.find(params[:visit_id])
     @url = "localhost:5173/visit/#{@visit.id}"
-    @cc_emails = params[:cc_emails] || []
+    # Fix: Parse cc_emails if it's a string
+    cc_emails_param = params[:cc_emails] || []
+    @cc_emails = case cc_emails_param
+              when String
+                begin
+                  JSON.parse(cc_emails_param)
+                rescue JSON::ParserError
+                  []
+                end
+              when Array
+                cc_emails_param
+              else
+                []
+              end
     @salesperson = @user.salesperson
     
     # Transform office code to formatted address
