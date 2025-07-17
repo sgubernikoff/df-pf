@@ -29,7 +29,7 @@ class NotificationMailer < ApplicationMailer
     
     # Transform office code to formatted address
     @office_address = format_office_address(@salesperson.office)
-    @office_phone = OFFICE_ADDRESSES[@salesperson.office].phone
+    @office_phone = OFFICE_ADDRESSES[@salesperson.office][:phone]
   
     # Attach the logo
     attachments.inline['logo.png'] = File.read(Rails.root.join('app', 'assets', 'images', 'DanielleFrankelMainLogo.jpg'))
