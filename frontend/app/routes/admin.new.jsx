@@ -9,7 +9,7 @@ export async function loader({ request }) {
   const token = decodeURIComponent(cookies.token);
   if (!token.includes("Bearer")) return redirect("/login");
 
-  const res = await fetch("https://df-pf.onrender.com/current_user", {
+  const res = await fetch("http://localhost:3000/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -49,7 +49,7 @@ export async function action({ request }) {
   //     { status: 400 }
   //   );
 
-  const res = await fetch("https://df-pf.onrender.com/users", {
+  const res = await fetch("http://localhost:3000/users", {
     method: "POST",
     headers: {
       Authorization: token,
@@ -114,7 +114,6 @@ export default function Signup() {
             <div
               style={{
                 border: "none",
-                padding: "12px",
                 height: "44px",
                 display: "flex",
                 alignItems: "center",

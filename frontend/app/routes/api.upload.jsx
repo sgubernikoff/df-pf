@@ -13,7 +13,7 @@ export async function action({ request }) {
   }
 
   // Verify user is authenticated
-  const userRes = await fetch("https://df-pf.onrender.com/current_user", {
+  const userRes = await fetch("http://localhost:3000/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export async function action({ request }) {
 
   // Forward the request to your Rails API
   const body = await request.json();
-  const uploadRes = await fetch("https://df-pf.onrender.com/upload", {
+  const uploadRes = await fetch("http://localhost:3000/upload", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
