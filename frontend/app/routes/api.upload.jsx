@@ -13,12 +13,15 @@ export async function action({ request }) {
   }
 
   // Verify user is authenticated
-  const userRes = await fetch("https://df-pf.onrender.com/current_user", {
-    headers: {
-      Authorization: token,
-      "Content-Type": "application/json",
-    },
-  });
+  const userRes = await fetch(
+    "https://daniellefrankelphotos.com/current_user",
+    {
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   if (!userRes.ok) {
     return json({ error: "Unauthorized" }, { status: 401 });
@@ -26,7 +29,7 @@ export async function action({ request }) {
 
   // Forward the request to your Rails API
   const body = await request.json();
-  const uploadRes = await fetch("https://df-pf.onrender.com/upload", {
+  const uploadRes = await fetch("https://daniellefrankelphotos.com/upload", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

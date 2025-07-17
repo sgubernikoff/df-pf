@@ -13,11 +13,14 @@ export async function loader({ params, request }) {
     return redirect("/login");
   }
 
-  const res = await fetch(`https://df-pf.onrender.com/visits/${params.id}`, {
-    headers: {
-      Authorization: token,
-    },
-  });
+  const res = await fetch(
+    `https://daniellefrankelphotos.com/visits/${params.id}`,
+    {
+      headers: {
+        Authorization: token,
+      },
+    }
+  );
 
   if (!res.ok) {
     const json = await res.json().catch(() => ({}));

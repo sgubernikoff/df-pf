@@ -22,7 +22,7 @@ export async function action({ request }) {
   const visitId = formData.get("visitId");
   console.log(visitId);
   const res = await fetch(
-    `https://df-pf.onrender.com/visits/${visitId}/resend_email`,
+    `https://daniellefrankelphotos.com/visits/${visitId}/resend_email`,
     {
       method: "POST",
       headers: {

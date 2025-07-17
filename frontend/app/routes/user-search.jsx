@@ -21,7 +21,7 @@ export async function loader({ request }) {
   const query = url.searchParams.get("query") || "";
 
   const res = await fetch(
-    `https://df-pf.onrender.com/users/search?query=${query}`,
+    `https://daniellefrankelphotos.com/users/search?query=${query}`,
     {
       headers: {
         Authorization: token,
