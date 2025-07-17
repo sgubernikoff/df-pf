@@ -90,7 +90,7 @@ class WatermarkJob < ApplicationJob
         watermark = watermark.rot270
         scale *= 5
         watermark = watermark.resize(scale)
-        watermark = watermark.embed(40, 40, watermark.width + 60, watermark.height + 80, extend: :background)
+        watermark = watermark.embed(60, 80, watermark.width + 80, watermark.height + 160, extend: :background)
       else
         watermark = watermark.embed(40, 40, watermark.width + 60, watermark.height + 80, extend: :background)
       end
