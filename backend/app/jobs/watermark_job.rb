@@ -216,6 +216,16 @@ class WatermarkJob < ApplicationJob
       Rails.logger.info "Successfully watermarked and converted video to: #{output_filename}"
       # The original video is now overwritten; do not delete it.
 
+      # IMPORTANT: To avoid automatic thumbnail generation by ActiveStorage for videos,
+      # ensure that the model using has_one_attached :video disables previews, e.g.:
+      #
+      has_one_attached :video do |attachable|
+        attachable.preview false
+      end
+      #
+      # Also, in views or wherever the video attachment is referenced,
+      # avoid calling `.preview` on the video to prevent background processing.
+
       Rails.logger.info "Attaching new .mp4 blob to ActiveStorage: #{output_filename}"
       # Attach the new .mp4 blob to ActiveStorage if applicable
       # blob = ActiveStorage::Blob.create_and_upload!(
