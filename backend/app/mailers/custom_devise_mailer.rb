@@ -26,7 +26,7 @@ class CustomDeviseMailer < ApplicationMailer
   private
 
   def build_reset_url(token)
-    base_url = Rails.env.production? ? 'https://df-pf.vercel.app' : 'http://localhost:5173'
+    base_url = Rails.env.production? ? 'https://daniellefrankelphotos.com' : 'http://localhost:5173'
     "#{base_url}/reset-password?token=#{token}"
   end
 end
