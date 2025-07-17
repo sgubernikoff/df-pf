@@ -5,18 +5,8 @@ class ImageAttachmentJob < ApplicationJob
         visit = Visit.find(visit_id)
         image_urls = Array(image_urls_param).reject { |url| url == "undefined" }
         
-        # Sort so videos come last
-        sorted_image_urls = image_urls.sort_by do |json_string|
-            metadata = JSON.parse(json_string)
-            content_type = metadata["content_type"]
-            
-            # Videos get value 1 (sorted last), everything else gets 0 (sorted first)
-            content_type.start_with?("video/") ? 1 : 0
-        end
-        
-        sorted_image_urls.each_with_index do |json_string, index|
-            is_last = (index == sorted_image_urls.length - 1)
-            attach_image_to_visit(visit, json_string, is_last, cc_emails: cc_emails)
+        image_urls.each do |json_string|
+            attach_image_to_visit(visit, json_string, image_urls.length, cc_emails: cc_emails)
         end
     rescue => e
         Rails.logger.error("ImageAttachmentJob failed for visit #{visit_id}: #{e.message}")
@@ -24,7 +14,7 @@ class ImageAttachmentJob < ApplicationJob
     
     private
     
-    def attach_image_to_visit(visit, json_string,is_last,cc_emails:[])
+    def attach_image_to_visit(visit, json_string,expected_length,cc_emails:[])
         metadata = JSON.parse(json_string)
 
         blob = ActiveStorage::Blob.create!(
@@ -41,7 +31,7 @@ class ImageAttachmentJob < ApplicationJob
         
         visit.images.attach(blob)
 
-        WatermarkJob.perform_later(filename: metadata['key'], visit_id: visit.id,is_last:is_last,cc_emails:cc_emails || [])
+        WatermarkJob.perform_later(filename: metadata['key'], visit_id: visit.id,expected_length:expected_length,cc_emails:cc_emails || [])
         Rails.logger.info("Successfully attached #{metadata['filename']} to visit #{visit.id}")
     rescue JSON::ParserError => e
         Rails.logger.error("JSON Parse Error for #{json_string}: #{e.message}")
