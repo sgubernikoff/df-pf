@@ -85,7 +85,7 @@ class WatermarkJob < ApplicationJob
       # Add spacing around watermark to prevent overlap
       if content_type.include?('heic')
         watermark = watermark.embed(60, 80, watermark.width + 80, watermark.height + 160, extend: :background)
-      elsif content_type.include?('jpg')
+      elsif content_type.include?('jpeg') || content_type.include?('jpg')
         # For JPEGs, flip watermark vertically and make it 2.5x larger
         watermark = watermark.rot180
         scale *= 2.5
