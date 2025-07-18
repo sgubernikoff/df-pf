@@ -180,12 +180,14 @@ class WatermarkJob < ApplicationJob
       end
       Rails.logger.info "Using watermark file at: #{watermark_path}"
 
-      # More robust FFmpeg command with error handling
+      # FFmpeg command to tile watermark across the full video frame
       ffmpeg_cmd = [
         "ffmpeg",
         "-i", temp_input.path,
         "-i", watermark_path.to_s,
-        "-filter_complex", "[1:v]scale=iw/2.5:-1,format=rgba,colorchannelmixer=aa=1.50,transpose=1[wm];[0:v][wm]overlay=0:0:format=auto,format=yuv420p",
+        "-filter_complex",
+        "[1:v]format=rgba,colorchannelmixer=aa=1.5,transpose=1[wm];" \
+        "[0:v][wm]overlay=shortest=1:x='mod(X,iw)':y='mod(Y,ih)':eval=frame:repeat=1,format=yuv420p",
         "-c:a", "copy",
         "-y",
         temp_output.path
