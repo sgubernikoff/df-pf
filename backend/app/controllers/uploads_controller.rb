@@ -37,7 +37,7 @@ class UploadsController < ApplicationController
         key: unique_filename,
         success_action_status: '201',
         content_type: file_type,
-        content_length_range: 1..(10 * 1024 * 1024)
+        content_length_range: 1..(50 * 1024 * 1024)
       )
 
       {

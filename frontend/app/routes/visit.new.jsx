@@ -81,6 +81,8 @@ export default function NewVisit() {
   // New state for CC emails
   const [ccEmails, setCcEmails] = useState([""]);
 
+  const [error, setError] = useState();
+
   const addCcEmail = () => {
     setCcEmails([...ccEmails, ""]);
   };
@@ -98,6 +100,7 @@ export default function NewVisit() {
   };
 
   async function uploadFileToS3(file, presignedData, index) {
+    setError();
     const formData = new FormData();
 
     // Add all the presigned fields
@@ -140,7 +143,10 @@ export default function NewVisit() {
             url: presignedData.final_url,
           });
         } else {
-          reject(new Error(`Upload failed: ${xhr.status}`));
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(xhr.responseText, "text/xml");
+          const error = xmlDoc.getElementsByTagName("Message")[0]?.textContent;
+          setError(error);
         }
       });
 
@@ -416,6 +422,7 @@ export default function NewVisit() {
           </p>
         )}
         {fetcher.data?.error && <p>❌ {fetcher.data.error}</p>}
+        {error && <p>❌ {error}</p>}
       </fetcher.Form>
     </div>
   );
