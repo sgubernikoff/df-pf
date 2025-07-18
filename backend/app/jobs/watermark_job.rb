@@ -185,10 +185,10 @@ class WatermarkJob < ApplicationJob
         "ffmpeg",
         "-i", temp_input.path,
         "-i", watermark_path.to_s,
-        "-filter_complex", "[1:v]scale=iw/2.5:-1,format=rgba,colorchannelmixer=aa=1.50,transpose=1[wm];[wm]tile=layout=3x3[tiled];[0:v][tiled]scale2ref[video][tiled_scaled];[video][tiled_scaled]overlay=0:0:format=auto,format=yuv420p",
-        "-c:a", "copy",
-        "-y",
-        temp_output.path
+         "-filter_complex", "[1:v]scale=iw/2.5:-1,format=rgba,colorchannelmixer=aa=1.50,transpose=1[wm];[0:v][wm]overlay=0:0[v1];[v1][wm]overlay=W/3:0[v2];[v2][wm]overlay=2*W/3:0[v3];[v3][wm]overlay=0:H/3[v4];[v4][wm]overlay=W/3:H/3[v5];[v5][wm]overlay=2*W/3:H/3[v6];[v6][wm]overlay=0:2*H/3[v7];[v7][wm]overlay=W/3:2*H/3[v8];[v8][wm]overlay=2*W/3:2*H/3,format=yuv420p",
+         "-c:a", "copy",
+         "-y",
+         temp_output.path
         ]
 
       Rails.logger.info "Executing FFmpeg command: #{ffmpeg_cmd.join(' ')}"
