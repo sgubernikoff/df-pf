@@ -182,11 +182,11 @@ class WatermarkJob < ApplicationJob
 
       # More robust FFmpeg command with error handling
       ffmpeg_cmd = [
-        "ffmpeg",
-        "-i", temp_input.path,
-        "-i", watermark_path.to_s,
-         "-filter_complex", "[1:v]scale=iw/2.5:-1,format=rgba,colorchannelmixer=aa=1.50,transpose=1[wm];[0:v][wm]overlay=0:0[v1];[v1][wm]overlay=W/3:0[v2];[v2][wm]overlay=2*W/3:0[v3];[v3][wm]overlay=0:H/3[v4];[v4][wm]overlay=W/3:H/3[v5];[v5][wm]overlay=2*W/3:H/3[v6];[v6][wm]overlay=0:2*H/3[v7];[v7][wm]overlay=W/3:2*H/3[v8];[v8][wm]overlay=2*W/3:2*H/3,format=yuv420p",
-         "-c:a", "copy",
+         "ffmpeg",
+         "-i", temp_input.path,
+         "-i", watermark_path.to_s,
+         "-filter_complex", "[1:v]scale=iw/2.5:-1,format=rgba,colorchannelmixer=aa=1.50,transpose=1,split=9[wm1][wm2][wm3][wm4][wm5][wm6][wm7][wm8][wm9];[0:v][wm1]overlay=0:0[v1];[v1][wm2]overlay=W/3:0[v2];[v2][wm3]overlay=2*W/3:0[v3];[v3][wm4]overlay=0:H/3[v4];[v4][wm5]overlay=W/3:H/3[v5];[v5][wm6]overlay=2*W/3:H/3[v6];[v6][wm7]overlay=0:2*H/3[v7];[v7][wm8]overlay=W/3:2*H/3[v8];[v8][wm9]overlay=2*W/3:2*H/3,format=yuv420p",
+          "-c:a", "copy",
          "-y",
          temp_output.path
         ]
