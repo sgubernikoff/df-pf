@@ -19,7 +19,7 @@ import favicon from "./styles/favicon.png";
 
 //   // If the user is logged in (i.e., there's a userId), fetch the user's data
 //   if (userId) {
-//     const res = await fetch(`https://df-pf.onrender.com/users/${userId}`);
+//     const res = await fetch(`http://localhost:3000/users/${userId}`);
 //     const user = await res.json();
 
 //     // Return the user data as part of the loader's response
@@ -54,6 +54,10 @@ export function Layout({ children }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+          property="og:image"
+          content="http://www.daniellefrankelstudio.com/cdn/shop/files/DF_LOOK15_MAEVE4_af0df745-7c84-4dfa-9857-f7cde1d5a535.jpg?v=1712079302"
+        />
         <Meta />
         <Links />
       </head>
