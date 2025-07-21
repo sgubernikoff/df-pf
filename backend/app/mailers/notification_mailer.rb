@@ -50,7 +50,7 @@ class NotificationMailer < ApplicationMailer
     mail(
       to: @user.email,
       cc: @cc_emails,
-      subject: "Your PDF for #{@visit.dress.name || 'Danielle Frankel'} is Ready"
+      subject: "Your Danielle Frankel Consultation Photos"
     )
   end
 
