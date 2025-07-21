@@ -46,7 +46,7 @@ export async function action({ request }) {
       console.error("⚠️ Invalid JSON in visit[selected_dress]", e);
     }
   }
-  if (!parsedDress.name)
+  if (!parsedDress.title)
     return json(
       {
         error: "Failed to create visit: Please select a dress.",
