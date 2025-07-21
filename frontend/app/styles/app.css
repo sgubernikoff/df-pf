@@ -500,6 +500,7 @@ textarea {
   }
   .mobile-menu {
     position: fixed;
+    z-index: 10;
     top: 67px;
     bottom: 0;
     left: 0;
