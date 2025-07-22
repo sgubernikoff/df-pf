@@ -108,7 +108,7 @@ p[style="color: red"] {
 }
 
 .header-left {
-  width: 300px;
+  width: 350px;
 }
 
 .logo {
@@ -125,7 +125,7 @@ p[style="color: red"] {
   justify-content: flex-end;
   align-items: center;
   gap: 20px;
-  width: 300px;
+  width: 350px;
 }
 
 .auth > form {
