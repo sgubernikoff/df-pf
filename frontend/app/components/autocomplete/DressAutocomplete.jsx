@@ -8,8 +8,6 @@ export default function DressAutocomplete({
 }) {
   const [dressQuery, setDressQuery] = useState("");
 
-  console.log(shopifyData);
-
   const filtered =
     dressQuery.length > 0
       ? shopifyData.filter((d) =>
