@@ -8,7 +8,7 @@ export default function DressAutocomplete({
 }) {
   const [dressQuery, setDressQuery] = useState("");
 
-  console.log(dressQuery);
+  console.log(shopifyData);
 
   const filtered =
     dressQuery.length > 0
@@ -16,8 +16,6 @@ export default function DressAutocomplete({
           d.title.toLowerCase().includes(dressQuery.toLowerCase())
         )
       : [];
-
-  console.log(filtered);
 
   return (
     <fieldset>
