@@ -11,7 +11,7 @@ export async function fetchAllProductsFromCollection(handle) {
     const query = `
   query getProductsFromCollection($handle: String!, $cursor: String) @inContext(country: US, language: EN) {
     collection(handle: $handle) {
-      products(first: 500, after: $cursor) {
+      products(first: 250, after: $cursor) {
         edges {
           cursor
           node {
