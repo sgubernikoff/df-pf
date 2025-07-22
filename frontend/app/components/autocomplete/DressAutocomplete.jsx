@@ -17,6 +17,8 @@ export default function DressAutocomplete({
         )
       : [];
 
+  console.log(filtered);
+
   return (
     <fieldset>
       <legend>Select A Dress</legend>
