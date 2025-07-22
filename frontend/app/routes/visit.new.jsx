@@ -46,6 +46,21 @@ export async function action({ request }) {
       console.error("⚠️ Invalid JSON in visit[selected_dress]", e);
     }
   }
+  if (!parsedDress.title)
+    return json(
+      {
+        error: "Failed to create visit: Please select a dress.",
+      },
+      { status: 400 }
+    );
+  if (parsedDress.price === "$0" && !formData.get("price-override"))
+    return json(
+      {
+        error:
+          "Failed to create visit: Missing dress price from Shopify data. Please provide Dress Price Override.",
+      },
+      { status: 400 }
+    );
   if (formData.get("price-override")) {
     parsedDress.price = `$${formatNumberInput(formData.get("price-override"))}`;
   }
