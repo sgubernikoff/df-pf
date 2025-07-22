@@ -49,7 +49,7 @@ export default function Header() {
                 className="visits-link"
                 style={{ color: "black", textDecoration: "none" }}
               >
-                Users
+                Clients
               </NavLink>
             </>
           )}
@@ -91,7 +91,7 @@ function MobileMenu({ open }) {
         className="visits-link"
         style={{ color: "black", textDecoration: "none" }}
       >
-        Users
+        Clients
       </NavLink>
       <NavLink
         to="/admin/new"
