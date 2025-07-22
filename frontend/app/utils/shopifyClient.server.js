@@ -60,6 +60,10 @@ export async function fetchAllProductsFromCollection(handle) {
     }
 
     const edges = json.data.collection.products.edges;
+    console.log(
+      "Fetched products batch:",
+      edges.map((edge) => edge.node.title)
+    );
     products.push(
       ...edges.map((edge) => {
         const product = edge.node;
