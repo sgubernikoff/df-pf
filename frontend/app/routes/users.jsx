@@ -130,7 +130,7 @@ export default function AdminUsersPage() {
           textAlign: "center",
         }}
       >
-        Users
+        Clients
       </p>
 
       {/* Search input */}
