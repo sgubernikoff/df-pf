@@ -27,6 +27,7 @@
       }
       .logo {
         width: 50%;
+        max-width: 200px;
         height: auto;
         display: block;
         margin: 0;
@@ -54,11 +55,11 @@
     
     <p>I look forward to assisting you further through this special experience!</p>
     
-    <div class="signature">
-      <p>My best,<br>
+    <p>My best,<br>
       <%= @salesperson.name&.split(' ')&.first || "" %><br>
-      --</p>
-      
+    </p>
+
+    <div class="signature">
       <div class="brand">
         <%= image_tag attachments['logo.png'].url, alt: "Danielle Frankel", class: "logo"%>
       </div>
