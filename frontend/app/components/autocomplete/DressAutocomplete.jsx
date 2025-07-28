@@ -5,6 +5,7 @@ export default function DressAutocomplete({
   shopifyData,
   selectedDress,
   setSelectedDress,
+  labels,
 }) {
   const [dressQuery, setDressQuery] = useState("");
 
@@ -19,13 +20,13 @@ export default function DressAutocomplete({
     <fieldset>
       <legend>Select A Dress</legend>
       <AutocompleteInput
-        label="Select a dress:"
+        label={labels?.label || "Select a dress:"}
         value={dressQuery}
         onChange={(val) => {
           setDressQuery(val);
           setSelectedDress(null);
         }}
-        placeholder="Start typing..."
+        placeholder={labels?.placeholder || "Start typing..."}
         results={!selectedDress ? filtered : []}
         onSelect={(dress) => {
           setSelectedDress(dress);

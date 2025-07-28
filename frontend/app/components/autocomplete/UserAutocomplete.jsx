@@ -6,6 +6,7 @@ export default function UserAutocomplete({
   setUserQuery,
   selectedUser,
   setSelectedUser,
+  labels,
 }) {
   const [userResults, setUserResults] = useState([]);
 
@@ -30,13 +31,13 @@ export default function UserAutocomplete({
   return (
     <>
       <AutocompleteInput
-        label="Search for Client:"
+        label={labels?.label || "Search for Client:"}
         value={userQuery}
         onChange={(val) => {
           setUserQuery(val);
           setSelectedUser(null);
         }}
-        placeholder="Start typing a name..."
+        placeholder={labels?.placeholder || "Start typing a name..."}
         results={!selectedUser ? userResults : []}
         onSelect={(user) => {
           setSelectedUser(user);

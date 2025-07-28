@@ -1,4 +1,8 @@
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import {
+  useFetcher,
+  useLoaderData,
+  useRouteLoaderData,
+} from "@remix-run/react";
 import { useRef, useState } from "react";
 import { json, redirect } from "@remix-run/node";
 import { fetchAllProductsFromCollection } from "../utils/shopifyClient.server";
@@ -81,6 +85,7 @@ export async function action({ request }) {
 
 export default function NewVisit() {
   const { shopifyData } = useLoaderData();
+  const { new_visit_form } = useRouteLoaderData("root");
   const fetcher = useFetcher();
   const formRef = useRef();
   const [userQuery, setUserQuery] = useState("");
@@ -254,34 +259,40 @@ export default function NewVisit() {
         encType="multipart/form-data"
         onSubmit={handleUploadAndSubmit}
       >
-        <h2>New Visit</h2>
+        <h2>{new_visit_form?.form_title || "New Visit"}</h2>
         <button
           type="button"
           onClick={() => setShowManualEntry(!showManualEntry)}
         >
-          {showManualEntry ? "Search For Client" : "Create New Client"}
+          {showManualEntry
+            ? new_visit_form?.client_toggle_button_labels?.existing_client ||
+              "Search For Client"
+            : new_visit_form?.client_toggle_button_labels?.new_client ||
+              "Create New Client"}
         </button>
 
         {showManualEntry ? (
           <>
             <label>
-              Client Name:
+              {new_visit_form?.client_name?.label || "Client Name:"}
               <input
                 type="text"
                 name="visit[customer_name]"
                 value={selectedUser?.name || userQuery}
                 onChange={(e) => setUserQuery(e.target.value)}
                 required
+                placeholder={new_visit_form?.client_name?.placeholder || ""}
               />
             </label>
             <label>
-              Client Email:
+              {new_visit_form?.client_email?.label || "Client Email:"}
               <input
                 type="email"
                 name="visit[customer_email]"
                 value={selectedUser?.email || email}
                 readOnly={selectedUser}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder={new_visit_form?.client_email?.placeholder || ""}
               />
             </label>
           </>
@@ -291,17 +302,19 @@ export default function NewVisit() {
             setUserQuery={setUserQuery}
             selectedUser={selectedUser}
             setSelectedUser={setSelectedUser}
+            labels={new_visit_form?.client_searchbar}
           />
         )}
 
         <label>
-          Notes:
+          {new_visit_form?.notes?.label || "Notes:"}
           <textarea
             name="visit[notes]"
             style={{
               borderRadius: 0,
               border: "1px solid black",
             }}
+            placeholder={new_visit_form?.notes?.placeholder || ""}
           />
         </label>
 
@@ -309,14 +322,19 @@ export default function NewVisit() {
           shopifyData={shopifyData}
           selectedDress={selectedDress}
           setSelectedDress={setSelectedDress}
+          labels={new_visit_form?.dress}
         />
 
         <label>
-          Dress Price Override (OPTIONAL):
+          {new_visit_form?.dress_price_override?.label ||
+            "Dress Price Override (OPTIONAL):"}
           <input
             name="price-override"
             type="number"
-            placeholder="Optional — uses Shopify price if left blank"
+            placeholder={
+              new_visit_form?.dress_price_override?.placeholder ||
+              "Optional — uses Shopify price if left blank"
+            }
             step="any"
             style={{ borderRadius: "0", border: "1px solid black" }}
           />
@@ -325,7 +343,7 @@ export default function NewVisit() {
         {/* CC Emails Section */}
         <div style={{ marginBottom: "1rem" }}>
           <label style={{ display: "block", marginBottom: "0.5rem" }}>
-            Extra Emails (Optional):
+            {new_visit_form?.extra_emails?.label || "Extra Emails (Optional):"}
           </label>
           {ccEmails.map((email, index) => (
             <div
@@ -341,7 +359,10 @@ export default function NewVisit() {
                 type="email"
                 value={email}
                 onChange={(e) => updateCcEmail(index, e.target.value)}
-                placeholder="Enter email address"
+                placeholder={
+                  new_visit_form?.extra_emails?.placeholder ||
+                  "Enter email address"
+                }
                 style={{
                   flex: 1,
                   padding: "0.5rem",
@@ -377,12 +398,12 @@ export default function NewVisit() {
               fontSize: "0.9em",
             }}
           >
-            + Add Extra Email
+            {new_visit_form?.extra_emails_button?.label || "+ Add Extra Email"}
           </button>
         </div>
 
         <label>
-          Upload Images:
+          {new_visit_form?.file_upload?.label || "Upload Images:"}
           <input
             style={{ padding: "0", marginTop: "1rem", marginBottom: ".5rem" }}
             type="file"
