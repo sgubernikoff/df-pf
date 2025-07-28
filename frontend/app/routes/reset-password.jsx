@@ -26,7 +26,7 @@ export default function ResetPassword() {
 
     setLoading(true);
     try {
-      const res = await fetch("https://df-pf.onrender.com/users/password", {
+      const res = await fetch("http://localhost:3000/users/password", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

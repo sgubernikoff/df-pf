@@ -448,7 +448,9 @@ export default function NewVisit() {
         )}
 
         <button type="submit" disabled={uploading}>
-          {uploading ? "Uploading..." : "Submit Visit"}
+          {uploading
+            ? "Uploading..."
+            : new_visit_form?.submit_button?.label || "Submit Visit"}
         </button>
 
         {fetcher.data?.success && (
