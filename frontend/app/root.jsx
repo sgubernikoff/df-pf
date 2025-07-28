@@ -7,28 +7,20 @@ import {
 } from "@remix-run/react";
 
 import Header from "./components/Header";
-// import { json } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import { useLoaderData, useLocation } from "@remix-run/react";
 import { AuthProvider } from "./context/auth";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import favicon from "./styles/favicon.png";
+import { client } from "./sanity/SanityClient";
 
-// Loader function to get user data based on session
-// export async function loader({ request }) {
-//   const userId = await getUserId(request);
-
-//   // If the user is logged in (i.e., there's a userId), fetch the user's data
-//   if (userId) {
-//     const res = await fetch(`https://df-pf.onrender.com/users/${userId}`);
-//     const user = await res.json();
-
-//     // Return the user data as part of the loader's response
-//     return json({ user });
-//   }
-
-//   // If there's no userId, return null for the user data
-//   return json({ user: null });
-// }
+export async function loader({}) {
+  const settings = await client
+    .fetch(`*[_type == "settings"][0]`)
+    .then((r) => r);
+  console.log(settings);
+  return json(settings);
+}
 
 // Links function to preconnect to external resources and load styles
 export function links() {
@@ -78,9 +70,11 @@ export default function App() {
     location.pathname.startsWith(path)
   );
 
+  const { header } = useLoaderData();
+
   return (
     <AuthProvider>
-      <Header />
+      <Header labels={header} />
       <main>
         {isPublic ? (
           <Outlet />

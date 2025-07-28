@@ -7,7 +7,7 @@ import { AuthContext } from "../context/auth";
 import { NavLink, useLocation } from "@remix-run/react";
 import { useEffect } from "react";
 
-export default function Header() {
+export default function Header({ labels }) {
   const { user, logout } = useContext(AuthContext);
   const [open, setIsOpen] = useState(false);
   function toggleIsOpen() {
@@ -35,21 +35,21 @@ export default function Header() {
                 className="visits-link"
                 style={{ color: "black", textDecoration: "none" }}
               >
-                New Salesperson
+                {labels?.new_salesperson || "New Salesperson"}
               </NavLink>
               <NavLink
                 to="/visit/new"
                 className="visits-link"
                 style={{ color: "black", textDecoration: "none" }}
               >
-                New Visit
+                {labels?.new_visit || "New Visit"}
               </NavLink>
               <NavLink
                 to="/users"
                 className="visits-link"
                 style={{ color: "black", textDecoration: "none" }}
               >
-                Clients
+                {labels?.clients || "Clients"}
               </NavLink>
             </>
           )}
@@ -60,23 +60,23 @@ export default function Header() {
               style={{ border: "none", padding: "0" }}
               onClick={logout}
             >
-              Log Out
+              {labels?.log_out || "Log Out"}
             </button>
           ) : (
             <a href="/login">
               <button className="login-btn" style={{ border: "none" }}>
-                Log In
+                {labels?.log_in || "Log In"}
               </button>
             </a>
           )}
         </div>
       </header>
-      <MobileMenu open={open} />
+      <MobileMenu open={open} labels={labels} />
     </>
   );
 }
 
-function MobileMenu({ open }) {
+function MobileMenu({ open, labels }) {
   return (
     <div className={`mobile-menu ${open ? "is-open" : ""}`}>
       <NavLink
@@ -84,21 +84,21 @@ function MobileMenu({ open }) {
         className="visits-link"
         style={{ color: "black", textDecoration: "none" }}
       >
-        New Visit
+        {labels?.new_visit || "New Visit"}
       </NavLink>
       <NavLink
         to="/users"
         className="visits-link"
         style={{ color: "black", textDecoration: "none" }}
       >
-        Clients
+        {labels?.clients || "Clients"}
       </NavLink>
       <NavLink
         to="/admin/new"
         className="visits-link"
         style={{ color: "black", textDecoration: "none" }}
       >
-        New Salesperson
+        {labels?.new_salesperson || "New Salesperson"}
       </NavLink>
     </div>
   );
