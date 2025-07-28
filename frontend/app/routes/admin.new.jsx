@@ -82,10 +82,8 @@ export async function action({ request }) {
 
 export default function Signup() {
   const data = useActionData();
-  console.log(data);
 
   const { new_admin_user_form } = useRouteLoaderData("root");
-  console.log(new_admin_user_form);
 
   return (
     <div className="form-create-page">
