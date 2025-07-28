@@ -1,4 +1,4 @@
-import { Form, useActionData } from "@remix-run/react";
+import { Form, useActionData, useRouteLoaderData } from "@remix-run/react";
 import { json, redirect } from "@remix-run/node";
 
 export async function loader({ request }) {
@@ -9,7 +9,7 @@ export async function loader({ request }) {
   const token = decodeURIComponent(cookies.token);
   if (!token.includes("Bearer")) return redirect("/login");
 
-  const res = await fetch("https://df-pf.onrender.com/current_user", {
+  const res = await fetch("http://localhost:3000/current_user", {
     headers: {
       Authorization: token,
       "Content-Type": "application/json",
@@ -84,33 +84,52 @@ export default function Signup() {
   const data = useActionData();
   console.log(data);
 
+  const { new_admin_user_form } = useRouteLoaderData("root");
+  console.log(new_admin_user_form);
+
   return (
     <div className="form-create-page">
       <div className="content">
-        <h1>New Salesperson</h1>
+        <h1>{new_admin_user_form?.form_title || "New Salesperson"}</h1>
         <Form method="post">
           <label>
-            Name
-            <input name="name" className="sign-up-email-input" />
+            {new_admin_user_form?.name?.label || "Name"}
+            <input
+              name="name"
+              className="sign-up-email-input"
+              placeholder={new_admin_user_form?.name?.placeholder || ""}
+            />
           </label>
           <label>
-            Title
-            <input name="title" className="sign-up-email-input" />
+            {new_admin_user_form?.title?.label || "Title"}
+            <input
+              name="title"
+              className="sign-up-email-input"
+              placeholder={new_admin_user_form?.title?.placeholder || ""}
+            />
           </label>
           <label>
-            Email
-            <input name="email" className="sign-up-email-input" />
+            {new_admin_user_form?.email?.label || "Email"}
+            <input
+              name="email"
+              className="sign-up-email-input"
+              placeholder={new_admin_user_form?.email?.placeholder || ""}
+            />
           </label>
           <label>
-            Phone
+            {new_admin_user_form?.phone?.label || "Phone"}
             <input
               name="phone"
               className="sign-up-email-input"
-              placeholder="xxx.xxx.xxxx"
+              placeholder={
+                new_admin_user_form?.phone?.placeholder || "xxx.xxx.xxxx"
+              }
             />
           </label>
           <div>
-            <label style={{ display: "block" }}>Office</label>
+            <label style={{ display: "block" }}>
+              {new_admin_user_form?.office?.label || "Office"}
+            </label>
             <div
               style={{
                 border: "none",
@@ -156,14 +175,27 @@ export default function Signup() {
             </div>
           </div>
           <label>
-            Password
-            <input name="password" type="password" />
+            {new_admin_user_form?.password?.label || "Password"}
+            <input
+              name="password"
+              type="password"
+              placeholder={new_admin_user_form?.password?.placeholder || ""}
+            />
           </label>
           <label>
-            Password Confirmation
-            <input name="password_confirmation" type="password" />
+            {new_admin_user_form?.password_confirmation?.label ||
+              "Password Confirmation"}
+            <input
+              name="password_confirmation"
+              type="password"
+              placeholder={
+                new_admin_user_form?.password_confirmation?.placeholder || ""
+              }
+            />
           </label>
-          <button type="submit">SIGN UP</button>
+          <button type="submit">
+            {new_admin_user_form?.submit_button?.label || "SIGN UP"}
+          </button>
           {data?.errors?.name && (
             <p style={{ color: "red" }}>{`Name ${data.errors.name[0]}`}</p>
           )}
