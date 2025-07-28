@@ -15,7 +15,7 @@ export async function loader({ params, request }) {
     return redirect("/login");
   }
 
-  const res = await fetch(`http://localhost:3000/users/${params.id}`, {
+  const res = await fetch(`https://df-pf.onrender.com/users/${params.id}`, {
     headers: {
       Authorization: token,
     },
